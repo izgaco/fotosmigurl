@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Imagen</title>
+    <style>
+        /* Hacemos que la imagen ocupe toda la pantalla y esté centrada */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000; /* Fondo negro */
+        }
+        img {
+            max-width: 100%;  /* La imagen nunca sobresaldrá del ancho de la pantalla */
+            max-height: 100%; /* La imagen nunca sobresaldrá del alto de la pantalla */
+        }
+    </style>
+</head>
+<body>
+    <!-- Cambia "foto.jpg" por el nombre de tu imagen si es diferente -->
+    <img src="fotomigurl.jpeg" alt="Imagen">
+</body>
+</html>
