@@ -6,12 +6,10 @@
 <title>Juego del Impostor</title>
 
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: system-ui, sans-serif;
     background: linear-gradient(160deg, #111, #333);
     color: #fff;
     margin: 0;
@@ -26,15 +24,8 @@ body {
     text-align: center;
 }
 
-h1 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-}
-
-h2 {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-}
+h1 { font-size: 2rem; margin-bottom: 20px; }
+h2 { font-size: 1.5rem; margin-bottom: 20px; }
 
 input {
     width: 100%;
@@ -58,29 +49,16 @@ button {
     color: white;
 }
 
-button:active {
-    transform: scale(0.98);
-}
-
-.hidden {
-    display: none;
-}
+.hidden { display: none; }
 
 #roleDisplay {
     margin-top: 20px;
     padding: 25px;
     border-radius: 16px;
-    font-size: 1.4rem;
-    line-height: 1.5;
 }
 
-.citizen {
-    background-color: #1b5e20;
-}
-
-.impostor {
-    background-color: #b71c1c;
-}
+.citizen { background-color: #1b5e20; }
+.impostor { background-color: #b71c1c; }
 </style>
 </head>
 
@@ -90,17 +68,14 @@ button:active {
 
 <h1>🕵️ Juego del Impostor</h1>
 
-<!-- CONFIGURACIÓN -->
 <div id="setup">
-    <input type="number" id="numPlayers" min="2" placeholder="Número de jugadores">
-    <input type="number" id="numImpostors" min="1" placeholder="Número de impostores">
+    <input id="numPlayers" type="number" min="2" placeholder="Número de jugadores">
+    <input id="numImpostors" type="number" min="1" placeholder="Número de impostores">
     <button id="setPlayersBtn">Siguiente</button>
 </div>
 
-<!-- NOMBRES -->
 <div id="playerNames" class="hidden"></div>
 
-<!-- REVELAR ROLES -->
 <div id="roleReveal" class="hidden">
     <h2 id="currentPlayer"></h2>
     <button id="revealBtn">Revelar rol</button>
@@ -113,26 +88,107 @@ button:active {
 <script>
 let players = [];
 let impostors = [];
-let currentPlayerIndex = 0;
+let currentPlayer = 0;
 let numImpostors = 1;
 
-const secretWords = [
-    "gato", "playa", "avión", "pizza", "montaña",
-    "película", "verano", "bosque", "fiesta", "café"
-];
+const words = ["gato","playa","avión","pizza","bosque","verano"];
+const secretWord = words[Math.floor(Math.random()*words.length)];
 
-const secretWord = secretWords[Math.floor(Math.random() * secretWords.length)];
-
-const setupDiv = document.getElementById("setup");
-const playerNamesDiv = document.getElementById("playerNames");
-const roleRevealDiv = document.getElementById("roleReveal");
+const setup = document.getElementById("setup");
+const namesDiv = document.getElementById("playerNames");
+const revealDiv = document.getElementById("roleReveal");
 const currentPlayerH2 = document.getElementById("currentPlayer");
 const revealBtn = document.getElementById("revealBtn");
 const roleDisplay = document.getElementById("roleDisplay");
 const nextBtn = document.getElementById("nextBtn");
 
-/* BOTÓN SIGUIENTE (CONFIGURACIÓN) */
+/* CONFIGURACIÓN */
 document.getElementById("setPlayersBtn").onclick = () => {
-    const num = Number(document.getElementById("numPlayers").value);
-    const impostorsInput = document.getElementById("numImpostors");
-    numImpostors = Num
+    const n = Number(numPlayers.value);
+    numImpostors = Number(numImpostorsInput = document.getElementById("numImpostors").value);
+
+    if (n < 2 || numImpostors < 1 || numImpostors >= n) {
+        alert("Datos incorrectos");
+        return;
+    }
+
+    setup.classList.add("hidden");
+    createNameInputs(n);
+};
+
+/* NOMBRES */
+function createNameInputs(n) {
+    namesDiv.innerHTML = "<h2>Nombres</h2>";
+    for (let i = 0; i < n; i++) {
+        namesDiv.innerHTML += `<input id="p${i}" placeholder="Jugador ${i+1}">`;
+    }
+    namesDiv.innerHTML += `<button id="startBtn">Comenzar</button>`;
+    namesDiv.classList.remove("hidden");
+
+    document.getElementById("startBtn").onclick = () => {
+        players = [];
+        for (let i = 0; i < n; i++) {
+            const name = document.getElementById(`p${i}`).value.trim();
+            if (!name) return alert("Faltan nombres");
+            players.push(name);
+        }
+        assignImpostors();
+        namesDiv.classList.add("hidden");
+        showTurn();
+    };
+}
+
+/* IMPOSTORES */
+function assignImpostors() {
+    impostors = [];
+    while (impostors.length < numImpostors) {
+        const r = Math.floor(Math.random() * players.length);
+        if (!impostors.includes(r)) impostors.push(r);
+    }
+}
+
+/* TURNO */
+function showTurn() {
+    if (currentPlayer >= players.length) {
+        revealDiv.innerHTML = "<h2>✅ Roles repartidos</h2>";
+        return;
+    }
+
+    revealDiv.classList.remove("hidden");
+    currentPlayerH2.textContent = players[currentPlayer];
+    roleDisplay.classList.add("hidden");
+    roleDisplay.classList.remove("citizen","impostor");
+    nextBtn.classList.add("hidden");
+    revealBtn.classList.remove("hidden");
+}
+
+/* REVELAR */
+revealBtn.onclick = () => {
+    revealBtn.classList.add("hidden");
+    roleDisplay.classList.remove("hidden");
+    nextBtn.classList.remove("hidden");
+
+    roleDisplay.classList.remove("citizen","impostor");
+
+    if (impostors.includes(currentPlayer)) {
+        roleDisplay.classList.add("impostor");
+        roleDisplay.innerHTML = "<h2>IMPOSTOR</h2>";
+    } else {
+        roleDisplay.classList.add("citizen");
+        roleDisplay.innerHTML = `
+            <h2>CIUDADANO</h2>
+            <p>Palabra secreta</p>
+            <h2>${secretWord}</h2>
+        `;
+    }
+};
+
+/* SIGUIENTE */
+nextBtn.onclick = () => {
+    currentPlayer++;
+    showTurn();
+};
+</script>
+
+</body>
+</html>
