@@ -1,28 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mi Imagen</title>
+    <title>Inicio</title>
     <style>
-        /* Hacemos que la imagen ocupe toda la pantalla y esté centrada */
-        body, html {
+        body {
             margin: 0;
-            padding: 0;
-            height: 100%;
+            height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: #000; /* Fondo negro */
+            background: #111;
+            font-family: Arial, sans-serif;
         }
-        img {
-            max-width: 100%;  /* La imagen nunca sobresaldrá del ancho de la pantalla */
-            max-height: 100%; /* La imagen nunca sobresaldrá del alto de la pantalla */
+
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .boton {
+            width: 220px;
+            padding: 15px;
+            margin: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background: #1e90ff;
+            color: white;
+        }
+
+        .boton:hover {
+            background: #187bcd;
         }
     </style>
 </head>
 <body>
-    <!-- Cambia "foto.jpg" por el nombre de tu imagen si es diferente -->
-    <img src="fotomigurl.jpg" alt="Imagen">
+
+    <h1>¿Qué quieres hacer?</h1>
+
+    <button class="boton" onclick="location.href='imagen.html'">
+        Mostrar imagen
+    </button>
+
+    <button class="boton" onclick="location.href='juego.html'">
+        Juego
+    </button>
+
 </body>
 </html>
-
