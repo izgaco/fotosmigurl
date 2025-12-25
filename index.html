@@ -10,8 +10,8 @@
 
 body {
     font-family: system-ui, sans-serif;
-    background: linear-gradient(160deg, #111, #333);
-    color: #fff;
+    background: #cccccc; /* gris uniforme */
+    color: #000;
     margin: 0;
     padding: 20px;
     display: flex;
@@ -57,8 +57,8 @@ button {
     border-radius: 16px;
 }
 
-.citizen { background-color: #1b5e20; }
-.impostor { background-color: #b71c1c; }
+.citizen { background-color: #1b5e20; color: white; }
+.impostor { background-color: #b71c1c; color: white; }
 </style>
 </head>
 
@@ -86,12 +86,9 @@ button {
 </div>
 
 <script>
-let players = [];
-let impostors = [];
-let currentPlayer = 0;
-let numImpostors = 1;
-
-const words = ["gato","perro","caballo","elefante","león","tigre","oso","lobo","zorro","conejo",
+/* LISTA DE 250 SUSTANTIVOS */
+const words = [
+"gato","perro","caballo","elefante","león","tigre","oso","lobo","zorro","conejo",
 "vaca","oveja","cerdo","gallina","pato","águila","paloma","pez","tiburón","ballena",
 "playa","montaña","bosque","desierto","río","lago","mar","isla","valle","cueva",
 "avión","tren","barco","coche","bicicleta","moto","camión","metro","helicóptero","tranvía",
@@ -113,8 +110,14 @@ const words = ["gato","perro","caballo","elefante","león","tigre","oso","lobo",
 "tractor","granja","establo","huerto","espantapájaros","molino","campo","cosecha","sembrado","granero",
 "avellana","manzana","pera","plátano","naranja","limón","fresa","melón","sandía","cereza",
 "zapato","bota","sandalia","zapatilla","cordón","calcetín","suela","tacón","plantilla","hebilla",
-"cámara","objetivo","trípode","flash","batería","memoria","carrete","visor","pantalla","botón"];
-const secretWord = words[Math.floor(Math.random()*words.length)];
+"cámara","objetivo","trípode","flash","batería","memoria","carrete","visor","pantalla","botón"
+];
+
+let secretWord = words[Math.floor(Math.random() * words.length)];
+let players = [];
+let impostors = [];
+let currentPlayer = 0;
+let numImpostors = 1;
 
 const setup = document.getElementById("setup");
 const namesDiv = document.getElementById("playerNames");
@@ -123,11 +126,12 @@ const currentPlayerH2 = document.getElementById("currentPlayer");
 const revealBtn = document.getElementById("revealBtn");
 const roleDisplay = document.getElementById("roleDisplay");
 const nextBtn = document.getElementById("nextBtn");
+const numPlayers = document.getElementById("numPlayers");
 
 /* CONFIGURACIÓN */
 document.getElementById("setPlayersBtn").onclick = () => {
     const n = Number(numPlayers.value);
-    numImpostors = Number(numImpostorsInput = document.getElementById("numImpostors").value);
+    numImpostors = Number(document.getElementById("numImpostors").value);
 
     if (n < 2 || numImpostors < 1 || numImpostors >= n) {
         alert("Datos incorrectos");
@@ -171,17 +175,48 @@ function assignImpostors() {
 
 /* TURNO */
 function showTurn() {
-    if (currentPlayer >= players.length) {
-        revealDiv.innerHTML = "<h2>✅ Roles repartidos</h2>";
-        return;
-    }
-
     revealDiv.classList.remove("hidden");
-    currentPlayerH2.textContent = players[currentPlayer];
     roleDisplay.classList.add("hidden");
     roleDisplay.classList.remove("citizen","impostor");
     nextBtn.classList.add("hidden");
     revealBtn.classList.remove("hidden");
+
+    if (currentPlayer >= players.length) {
+        currentPlayerH2.textContent = "";
+        revealBtn.classList.add("hidden");
+        nextBtn.classList.add("hidden");
+        roleDisplay.classList.add("hidden");
+
+        // Mensaje final
+        const finalMsg = document.createElement("h2");
+        finalMsg.textContent = "✅ Roles repartidos";
+        revealDiv.innerHTML = "";
+        revealDiv.appendChild(finalMsg);
+
+        // Botón Nueva partida
+        const newGameBtn = document.createElement("button");
+        newGameBtn.textContent = "Nueva partida";
+        newGameBtn.style.width = "100%";
+        newGameBtn.style.padding = "16px";
+        newGameBtn.style.margin = "12px 0";
+        newGameBtn.style.fontSize = "1.2rem";
+        newGameBtn.style.fontWeight = "bold";
+        newGameBtn.style.borderRadius = "14px";
+        newGameBtn.style.border = "none";
+        newGameBtn.style.cursor = "pointer";
+        newGameBtn.style.backgroundColor = "#1e90ff";
+        newGameBtn.style.color = "white";
+
+        newGameBtn.onclick = () => { 
+            secretWord = words[Math.floor(Math.random() * words.length)]; // palabra nueva
+            location.reload(); 
+        };
+
+        revealDiv.appendChild(newGameBtn);
+        return;
+    }
+
+    currentPlayerH2.textContent = players[currentPlayer];
 }
 
 /* REVELAR */
@@ -190,8 +225,6 @@ revealBtn.onclick = () => {
     roleDisplay.classList.remove("hidden");
     nextBtn.classList.remove("hidden");
 
-    roleDisplay.classList.remove("citizen","impostor");
-
     if (impostors.includes(currentPlayer)) {
         roleDisplay.classList.add("impostor");
         roleDisplay.innerHTML = "<h2>IMPOSTOR</h2>";
@@ -199,7 +232,7 @@ revealBtn.onclick = () => {
         roleDisplay.classList.add("citizen");
         roleDisplay.innerHTML = `
             <h2>CIUDADANO</h2>
-            <p>Palabra secreta</p>
+            <p>Palabra secreta:</p>
             <h2>${secretWord}</h2>
         `;
     }
