@@ -10,8 +10,8 @@
 
 body {
     font-family: system-ui, sans-serif;
-    background: linear-gradient(160deg, #111, #333);
-    color: #fff;
+    background: #cccccc; /* gris uniforme */
+    color: #000;          /* texto negro para contraste */
     margin: 0;
     padding: 20px;
     display: flex;
@@ -172,9 +172,17 @@ function assignImpostors() {
 /* TURNO */
 function showTurn() {
     if (currentPlayer >= players.length) {
-        revealDiv.innerHTML = "<h2>✅ Roles repartidos</h2>";
-        return;
-    }
+    revealDiv.innerHTML = `
+        <h2>✅ Roles repartidos</h2>
+        <button id="newGameBtn">Nueva partida</button>
+    `;
+
+    document.getElementById("newGameBtn").onclick = () => {
+        location.reload(); // recarga la página para reiniciar todo
+    };
+    return;
+}
+
 
     revealDiv.classList.remove("hidden");
     currentPlayerH2.textContent = players[currentPlayer];
