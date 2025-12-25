@@ -150,9 +150,9 @@ function createPlayerInputs(num) {
         playerNamesDiv.innerHTML += `<input type="text" placeholder="Jugador ${i + 1}" id="player${i}">`;
     }
     playerNamesDiv.innerHTML += `
-        <input type="number" id="numImpostors" min="1" max="${num - 1}" placeholder="Número de impostores">
         <button id="startGameBtn">Comenzar</button>
     `;
+
     playerNamesDiv.classList.remove("hidden");
 
     document.getElementById("startGameBtn").onclick = () => {
