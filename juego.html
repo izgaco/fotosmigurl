@@ -81,12 +81,6 @@ button:active {
 .impostor {
     background-color: #b71c1c;
 }
-
-.footer {
-    margin-top: 30px;
-    font-size: 0.9rem;
-    opacity: 0.7;
-}
 </style>
 </head>
 
@@ -149,16 +143,12 @@ document.getElementById("setPlayersBtn").onclick = () => {
     createPlayerInputs(num);
 };
 
-
 function createPlayerInputs(num) {
     playerNamesDiv.innerHTML = `<h2>Nombres de jugadores</h2>`;
     for (let i = 0; i < num; i++) {
         playerNamesDiv.innerHTML += `<input type="text" placeholder="Jugador ${i + 1}" id="player${i}">`;
     }
-    playerNamesDiv.innerHTML += `
-        <button id="startGameBtn">Comenzar</button>
-    `;
-
+    playerNamesDiv.innerHTML += `<button id="startGameBtn">Comenzar</button>`;
     playerNamesDiv.classList.remove("hidden");
 
     document.getElementById("startGameBtn").onclick = () => {
@@ -168,53 +158,7 @@ function createPlayerInputs(num) {
             if (!name) return alert("Todos los jugadores deben tener nombre");
             players.push(name);
         }
-        numImpostors = parseInt(document.getElementById("numImpostors").value);
-        if (!numImpostors || numImpostors >= players.length)
-            return alert("Número de impostores no válido");
-
         assignImpostors();
         playerNamesDiv.classList.add("hidden");
         startTurn();
     };
-}
-
-function assignImpostors() {
-    impostors = [];
-    while (impostors.length < numImpostors) {
-        const rand = Math.floor(Math.random() * players.length);
-        if (!impostors.includes(rand)) impostors.push(rand);
-    }
-}
-
-function startTurn() {
-    if (currentPlayerIndex >= players.length) {
-        roleRevealDiv.innerHTML = "<h2>✅ Todos los roles repartidos<br>¡Comienza el juego!</h2>";
-        return;
-    }
-    roleRevealDiv.classList.remove("hidden");
-    roleDisplay.classList.add("hidden");
-    nextBtn.classList.add("hidden");
-    currentPlayerH2.textContent = players[currentPlayerIndex];
-}
-
-revealBtn.onclick = () => {
-    roleDisplay.classList.remove("hidden");
-    nextBtn.classList.remove("hidden");
-
-    if (impostors.includes(currentPlayerIndex)) {
-        roleDisplay.textContent = "IMPOSTOR";
-        roleDisplay.className = "impostor";
-    } else {
-        roleDisplay.textContent = `CIUDADANO\n\nPalabra secreta:\n${secretWord}`;
-        roleDisplay.className = "citizen";
-    }
-};
-
-nextBtn.onclick = () => {
-    currentPlayerIndex++;
-    startTurn();
-};
-</script>
-
-</body>
-</html>
