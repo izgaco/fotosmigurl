@@ -131,34 +131,8 @@ const revealBtn = document.getElementById("revealBtn");
 const roleDisplay = document.getElementById("roleDisplay");
 const nextBtn = document.getElementById("nextBtn");
 
+/* BOTÓN SIGUIENTE (CONFIGURACIÓN) */
 document.getElementById("setPlayersBtn").onclick = () => {
-    const num = parseInt(document.getElementById("numPlayers").value);
-    numImpostors = parseInt(document.getElementById("numImpostors").value);
-
-    if (!num || num < 2) return alert("Introduce al menos 2 jugadores");
-    if (!numImpostors || numImpostors < 1 || numImpostors >= num)
-        return alert("Número de impostores no válido");
-
-    setupDiv.classList.add("hidden");
-    createPlayerInputs(num);
-};
-
-function createPlayerInputs(num) {
-    playerNamesDiv.innerHTML = `<h2>Nombres de jugadores</h2>`;
-    for (let i = 0; i < num; i++) {
-        playerNamesDiv.innerHTML += `<input type="text" placeholder="Jugador ${i + 1}" id="player${i}">`;
-    }
-    playerNamesDiv.innerHTML += `<button id="startGameBtn">Comenzar</button>`;
-    playerNamesDiv.classList.remove("hidden");
-
-    document.getElementById("startGameBtn").onclick = () => {
-        players = [];
-        for (let i = 0; i < num; i++) {
-            const name = document.getElementById(`player${i}`).value.trim();
-            if (!name) return alert("Todos los jugadores deben tener nombre");
-            players.push(name);
-        }
-        assignImpostors();
-        playerNamesDiv.classList.add("hidden");
-        startTurn();
-    };
+    const num = Number(document.getElementById("numPlayers").value);
+    const impostorsInput = document.getElementById("numImpostors");
+    numImpostors = Num
