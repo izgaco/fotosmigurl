@@ -139,10 +139,16 @@ const nextBtn = document.getElementById("nextBtn");
 
 document.getElementById("setPlayersBtn").onclick = () => {
     const num = parseInt(document.getElementById("numPlayers").value);
+    numImpostors = parseInt(document.getElementById("numImpostors").value);
+
     if (!num || num < 2) return alert("Introduce al menos 2 jugadores");
+    if (!numImpostors || numImpostors < 1 || numImpostors >= num)
+        return alert("Número de impostores no válido");
+
     setupDiv.classList.add("hidden");
     createPlayerInputs(num);
 };
+
 
 function createPlayerInputs(num) {
     playerNamesDiv.innerHTML = `<h2>Nombres de jugadores</h2>`;
