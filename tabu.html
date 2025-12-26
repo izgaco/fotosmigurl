@@ -101,4 +101,96 @@
       <div id="forbidden"></div>
     </div>
 
-    <button class="green" onclick="respuesta('ok')">✅ Acierto</button
+    <button class="green" onclick="respuesta('ok')">✅ Acierto</button>
+    <button class="gray" onclick="respuesta('pass')">⏭️ Pasar</button>
+    <button class="red" onclick="respuesta('fail')">❌ Fallo</button>
+  </div>
+
+  <!-- PANTALLA RESUMEN -->
+  <div id="screen-summary" class="screen">
+    <h1>Fin de la ronda</h1>
+    <p id="summaryText"></p>
+    <button class="gray" onclick="siguienteEquipo()">Siguiente equipo</button>
+  </div>
+
+  <script>
+    const cards = [
+      { word: "Cruasán", forbidden: ["Medialuna", "Dulce", "Masa", "Francés", "Desayuno"] },
+      { word: "Playa", forbidden: ["Arena", "Mar", "Sol", "Sombrilla", "Vacaciones"] },
+      { word: "Teléfono", forbidden: ["Llamar", "Móvil", "Pantalla", "App", "Número"] },
+      { word: "Avión", forbidden: ["Volar", "Piloto", "Aeropuerto", "Alas", "Viaje"] },
+      { word: "Coche", forbidden: ["Motor", "Conducir", "Ruedas", "Gasolina", "Carretera"] }
+    ];
+
+    const game = {
+      teamRed: "Equipo rojo",
+      teamBlue: "Equipo azul",
+      currentTeam: Math.random() < 0.5 ? 'red' : 'blue',
+      time: 60,
+      timer: null,
+      remaining: 0,
+      usedCards: [],
+      results: { ok: 0, pass: 0, fail: 0 }
+    };
+
+    document.getElementById('startingTeam').textContent =
+      game.currentTeam === 'red' ? game.teamRed : game.teamBlue;
+
+    function comenzarRonda() {
+      game.remaining = game.time;
+      game.results = { ok: 0, pass: 0, fail: 0 };
+      mostrarCarta();
+      document.getElementById('timer').textContent = game.remaining;
+      mostrar('screen-round');
+
+      game.timer = setInterval(() => {
+        game.remaining--;
+        document.getElementById('timer').textContent = game.remaining;
+        if (game.remaining <= 0) {
+          clearInterval(game.timer);
+          finRonda();
+        }
+      }, 1000);
+    }
+
+    function mostrarCarta() {
+      const card = cards[Math.floor(Math.random() * cards.length)];
+      document.getElementById('word').textContent = card.word;
+      const forb = document.getElementById('forbidden');
+      forb.innerHTML = "";
+      card.forbidden.forEach(w => {
+        const div = document.createElement('div');
+        div.className = 'forbidden';
+        div.textContent = w;
+        forb.appendChild(div);
+      });
+    }
+
+    function respuesta(tipo) {
+      game.results[tipo]++;
+      mostrarCarta();
+    }
+
+    function finRonda() {
+      mostrar('screen-summary');
+      document.getElementById('summaryText').innerHTML =
+        `Aciertos: ${game.results.ok}<br>
+         Pasadas: ${game.results.pass}<br>
+         Fallos: ${game.results.fail}`;
+    }
+
+    function siguienteEquipo() {
+      game.currentTeam = game.currentTeam === 'red' ? 'blue' : 'red';
+      document.getElementById('startingTeam').textContent =
+        game.currentTeam === 'red' ? game.teamRed : game.teamBlue;
+      mostrar('screen-start');
+    }
+
+    function mostrar(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+  </script>
+
+</body>
+</html>
