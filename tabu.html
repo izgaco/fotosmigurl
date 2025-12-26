@@ -3,213 +3,212 @@
 <head>
   <meta charset="UTF-8">
   <title>Tabú</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
     body {
       margin: 0;
-      padding: 0;
+      font-family: Arial, sans-serif;
       background: #e0e0e0;
-      font-family: Arial, Helvetica, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      text-align: center;
     }
 
     .screen {
       display: none;
-      background: #ffffff;
-      width: 100%;
-      max-width: 420px;
       padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      text-align: center;
     }
 
     .screen.active {
       display: block;
     }
 
-    h1 { margin-bottom: 15px; }
+    input {
+      padding: 8px;
+      margin: 5px;
+      font-size: 16px;
+    }
 
     button {
-      width: 100%;
-      padding: 16px;
-      margin: 10px 0;
+      padding: 10px 20px;
       font-size: 18px;
-      font-weight: bold;
-      border: none;
-      border-radius: 12px;
+      margin: 10px;
       cursor: pointer;
     }
 
-    .red { background: #c62828; color: white; }
-    .blue { background: #1565c0; color: white; }
-    .gray { background: #9e9e9e; color: white; }
-    .green { background: #2e7d32; color: white; }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      font-size: 18px;
-      margin: 8px 0;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-    }
-
-    .timer {
-      font-size: 36px;
-      font-weight: bold;
-      margin-bottom: 15px;
-    }
-
+    /* JUEGO */
     .card {
-      background: #f5f5f5;
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px auto;
+      width: 80%;
+      max-width: 400px;
     }
 
-    .word {
-      font-size: 28px;
-      font-weight: bold;
+    .card h2 {
+      font-size: 32px;
       margin-bottom: 10px;
     }
 
-    .forbidden {
-      color: #c62828;
+    .card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .card li {
+      color: red;
       font-size: 18px;
     }
 
-    .team-name {
-      font-size: 26px;
-      font-weight: bold;
-      margin: 20px 0;
+    .timer {
+      font-size: 24px;
+      margin: 10px;
+    }
+
+    .game-buttons button {
+      font-size: 18px;
+      margin: 10px;
+      padding: 10px 20px;
     }
   </style>
 </head>
 <body>
 
-<!-- MENÚ -->
-<div id="menu" class="screen active">
-  <h1>🟥 Tabú</h1>
-  <button class="red" onclick="mostrar('config')">Modo por equipos</button>
-  <button class="gray" onclick="mostrar('build')">Modo uno contra todos</button>
-  <p style="font-size:14px;color:#555">En construcción</p>
-</div>
+<!-- PANTALLA CONFIGURACIÓN -->
+<div id="screen-config" class="screen active">
+  <h1>Configuración Tabú</h1>
 
-<!-- CONFIGURACIÓN -->
-<div id="config" class="screen">
-  <h1>⚙️ Configuración</h1>
-  <input id="teamRed" placeholder="Equipo rojo">
-  <input id="teamBlue" placeholder="Equipo azul">
-  <input id="time" type="number" value="60" min="10">
-  <input id="rounds" type="number" value="2" min="1">
-  <button class="red" onclick="iniciarJuego()">Empezar</button>
-  <button class="gray" onclick="mostrar('menu')">Volver</button>
-</div>
-
-<!-- EQUIPO INICIAL -->
-<div id="start" class="screen">
-  <h1>Empieza el equipo</h1>
-  <div id="startingTeam" class="team-name"></div>
-  <button class="gray" onclick="comenzarRonda()">Listo</button>
-</div>
-
-<!-- RONDA -->
-<div id="round" class="screen">
-  <div id="timer" class="timer"></div>
-
-  <div class="card">
-    <div id="word" class="word"></div>
-    <div id="forbidden"></div>
+  <div>
+    <input id="teamRedName" placeholder="Equipo rojo" />
+    <input id="teamBlueName" placeholder="Equipo azul" />
   </div>
 
-  <button class="green" onclick="respuesta('ok')">✅ Acierto</button>
-  <button class="gray" onclick="respuesta('pass')">⏭️ Pasar</button>
-  <button class="red" onclick="respuesta('fail')">❌ Fallo</button>
+  <div>
+    <input id="roundTime" type="number" placeholder="Tiempo por ronda (seg)" />
+    <input id="numRounds" type="number" placeholder="Número de rondas" />
+  </div>
+
+  <button onclick="empezarJuego()">Empezar juego</button>
 </div>
 
-<!-- RESUMEN -->
-<div id="summary" class="screen">
-  <h1>Fin de ronda</h1>
-  <p id="summaryText"></p>
-  <button class="gray" onclick="cambiarEquipo()">Siguiente equipo</button>
+<!-- PANTALLA INICIO TURNO -->
+<div id="screen-start" class="screen">
+  <h1 id="startText">Empieza el equipo</h1>
+  <button onclick="iniciarTurno()">¡Empezar!</button>
 </div>
 
-<!-- EN CONSTRUCCIÓN -->
-<div id="build" class="screen">
-  <h1>🚧 En construcción</h1>
-  <button class="red" onclick="mostrar('menu')">Volver</button>
+<!-- PANTALLA JUEGO -->
+<div id="screen-game" class="screen">
+  <h1 id="turnTitle">Turno del equipo</h1>
+
+  <div class="timer">
+    ⏱️ <span id="timeLeft">60</span> s
+  </div>
+
+  <div class="card">
+    <h2 id="mainWord">PALABRA</h2>
+    <ul id="forbiddenWords"></ul>
+  </div>
+
+  <div class="game-buttons">
+    <button onclick="acierto()">✅ Acierto</button>
+    <button onclick="tabu()">❌ Tabú</button>
+  </div>
 </div>
 
 <script>
-const cards = [
-  { word: "Cruasán", forbidden: ["Medialuna","Dulce","Masa","Francés","Desayuno"] },
-  { word: "Playa", forbidden: ["Arena","Mar","Sol","Vacaciones","Sombrilla"] },
-  { word: "Teléfono", forbidden: ["Móvil","Llamar","Pantalla","App","Número"] }
+/* UTILIDAD */
+function mostrarPantalla(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* DATOS DEL JUEGO */
+const palabras = [
+  { palabra: "PLAYA", prohibidas: ["arena", "mar", "verano", "sol", "vacaciones"] },
+  { palabra: "COCHE", prohibidas: ["ruedas", "motor", "conducir", "carretera", "gasolina"] },
+  { palabra: "PERRO", prohibidas: ["animal", "ladrar", "mascota", "cola", "gato"] }
 ];
 
-const game = {};
+let palabraActual = null;
+let tiempoRestante = 0;
+let temporizador = null;
+let equipoActual = "rojo";
 
-function mostrar(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+/* CONFIGURACIÓN */
+function empezarJuego() {
+  const teamRed = document.getElementById("teamRedName").value || "Equipo rojo";
+  const teamBlue = document.getElementById("teamBlueName").value || "Equipo azul";
+  const tiempo = parseInt(document.getElementById("roundTime").value) || 60;
+  const rondas = parseInt(document.getElementById("numRounds").value) || 2;
+
+  window.gameState = {
+    equipos: {
+      rojo: { nombre: teamRed, puntos: 0 },
+      azul: { nombre: teamBlue, puntos: 0 }
+    },
+    tiempoPorRonda: tiempo,
+    rondasTotales: rondas,
+    rondaActual: 1
+  };
+
+  equipoActual = "rojo";
+  document.getElementById("startText").textContent =
+    "Empieza el equipo " + window.gameState.equipos[equipoActual].nombre;
+
+  mostrarPantalla("screen-start");
 }
 
-function iniciarJuego() {
-  game.teamRed = teamRed.value || "Equipo rojo";
-  game.teamBlue = teamBlue.value || "Equipo azul";
-  game.time = parseInt(time.value);
-  game.currentTeam = Math.random() < 0.5 ? 'red' : 'blue';
-  document.getElementById('startingTeam').textContent =
-    game.currentTeam === 'red' ? game.teamRed : game.teamBlue;
-  mostrar('start');
+/* INICIO TURNO */
+function iniciarTurno() {
+  mostrarPantalla("screen-game");
+
+  document.getElementById("turnTitle").textContent =
+    "Turno del equipo " + window.gameState.equipos[equipoActual].nombre;
+
+  nuevaPalabra();
+  iniciarTemporizador();
 }
 
-function comenzarRonda() {
-  game.remaining = game.time;
-  game.results = { ok:0, pass:0, fail:0 };
-  mostrarCarta();
-  timer.textContent = game.remaining;
-  mostrar('round');
+/* PALABRAS */
+function nuevaPalabra() {
+  palabraActual = palabras[Math.floor(Math.random() * palabras.length)];
 
-  game.interval = setInterval(() => {
-    game.remaining--;
-    timer.textContent = game.remaining;
-    if (game.remaining <= 0) {
-      clearInterval(game.interval);
-      finRonda();
+  document.getElementById("mainWord").textContent = palabraActual.palabra;
+
+  const ul = document.getElementById("forbiddenWords");
+  ul.innerHTML = "";
+
+  palabraActual.prohibidas.forEach(p => {
+    const li = document.createElement("li");
+    li.textContent = p;
+    ul.appendChild(li);
+  });
+}
+
+/* TEMPORIZADOR */
+function iniciarTemporizador() {
+  clearInterval(temporizador);
+  tiempoRestante = window.gameState.tiempoPorRonda;
+  document.getElementById("timeLeft").textContent = tiempoRestante;
+
+  temporizador = setInterval(() => {
+    tiempoRestante--;
+    document.getElementById("timeLeft").textContent = tiempoRestante;
+
+    if (tiempoRestante <= 0) {
+      clearInterval(temporizador);
+      alert("⏰ Fin del turno");
     }
   }, 1000);
 }
 
-function mostrarCarta() {
-  const c = cards[Math.floor(Math.random()*cards.length)];
-  word.textContent = c.word;
-  forbidden.innerHTML = c.forbidden.map(f => `<div class="forbidden">${f}</div>`).join("");
+/* BOTONES */
+function acierto() {
+  window.gameState.equipos[equipoActual].puntos++;
+  nuevaPalabra();
 }
 
-function respuesta(t) {
-  game.results[t]++;
-  mostrarCarta();
-}
-
-function finRonda() {
-  summaryText.innerHTML =
-    `Aciertos: ${game.results.ok}<br>
-     Pasadas: ${game.results.pass}<br>
-     Fallos: ${game.results.fail}`;
-  mostrar('summary');
-}
-
-function cambiarEquipo() {
-  game.currentTeam = game.currentTeam === 'red' ? 'blue' : 'red';
-  startingTeam.textContent =
-    game.currentTeam === 'red' ? game.teamRed : game.teamBlue;
-  mostrar('start');
+function tabu() {
+  nuevaPalabra();
 }
 </script>
 
