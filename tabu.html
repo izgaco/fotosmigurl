@@ -32,12 +32,12 @@
       display: block;
     }
 
-    h1 { margin-bottom: 15px; }
+    h1 { margin-bottom: 10px; }
 
     button {
       width: 100%;
-      padding: 16px;
-      margin: 10px 0;
+      padding: 14px;
+      margin: 8px 0;
       font-size: 18px;
       font-weight: bold;
       border: none;
@@ -62,14 +62,19 @@
     .timer {
       font-size: 36px;
       font-weight: bold;
-      margin-bottom: 15px;
+      margin: 10px 0;
+    }
+
+    .info {
+      font-size: 16px;
+      margin-bottom: 10px;
     }
 
     .card {
       background: #f5f5f5;
       border-radius: 12px;
       padding: 15px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     .word {
@@ -86,7 +91,12 @@
     .team-name {
       font-size: 26px;
       font-weight: bold;
-      margin: 20px 0;
+      margin: 15px 0;
+    }
+
+    .score {
+      font-size: 18px;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -106,20 +116,22 @@
   <input id="teamRed" placeholder="Equipo rojo">
   <input id="teamBlue" placeholder="Equipo azul">
   <input id="time" type="number" value="60" min="10">
-  <input id="rounds" type="number" value="2" min="1">
+  <input id="rounds" type="number" value="4" min="1">
   <button class="red" onclick="iniciarJuego()">Empezar</button>
   <button class="gray" onclick="mostrar('menu')">Volver</button>
 </div>
 
 <!-- EQUIPO INICIAL -->
 <div id="start" class="screen">
-  <h1>Empieza el equipo</h1>
+  <h1>Empieza</h1>
   <div id="startingTeam" class="team-name"></div>
+  <div class="info" id="roundInfo"></div>
   <button class="gray" onclick="comenzarRonda()">Listo</button>
 </div>
 
 <!-- RONDA -->
 <div id="round" class="screen">
+  <div class="info" id="gameInfo"></div>
   <div id="timer" class="timer"></div>
 
   <div class="card">
@@ -136,7 +148,16 @@
 <div id="summary" class="screen">
   <h1>Fin de ronda</h1>
   <p id="summaryText"></p>
-  <button class="gray" onclick="cambiarEquipo()">Siguiente equipo</button>
+  <div class="score" id="scoreBoard"></div>
+  <button class="gray" onclick="siguienteTurno()">Continuar</button>
+</div>
+
+<!-- FINAL -->
+<div id="end" class="screen">
+  <h1>🏆 Fin de la partida</h1>
+  <div id="winner" class="team-name"></div>
+  <div class="score" id="finalScore"></div>
+  <button class="red" onclick="mostrar('menu')">Volver al menú</button>
 </div>
 
 <!-- EN CONSTRUCCIÓN -->
@@ -152,6 +173,7 @@ const cards = [
   { word: "Teléfono", forbidden: ["Móvil","Llamar","Pantalla","App","Número"] }
 ];
 
+let deck = [];
 const game = {};
 
 function mostrar(id) {
@@ -162,17 +184,33 @@ function mostrar(id) {
 function iniciarJuego() {
   game.teamRed = teamRed.value || "Equipo rojo";
   game.teamBlue = teamBlue.value || "Equipo azul";
-  game.time = parseInt(time.value);
+  game.time = Math.max(10, parseInt(time.value));
+  game.roundsTotal = parseInt(rounds.value);
+  game.roundCurrent = 1;
   game.currentTeam = Math.random() < 0.5 ? 'red' : 'blue';
-  document.getElementById('startingTeam').textContent =
-    game.currentTeam === 'red' ? game.teamRed : game.teamBlue;
+  game.score = { red: 0, blue: 0 };
+  prepararBaraja();
+  actualizarPantallaInicio();
   mostrar('start');
 }
 
+function prepararBaraja() {
+  deck = [...cards].sort(() => Math.random() - 0.5);
+}
+
+function actualizarPantallaInicio() {
+  startingTeam.textContent =
+    game.currentTeam === 'red' ? game.teamRed : game.teamBlue;
+  roundInfo.textContent =
+    `Ronda ${game.roundCurrent} de ${game.roundsTotal}`;
+}
+
 function comenzarRonda() {
+  clearInterval(game.interval);
   game.remaining = game.time;
   game.results = { ok:0, pass:0, fail:0 };
   mostrarCarta();
+  actualizarInfoJuego();
   timer.textContent = game.remaining;
   mostrar('round');
 
@@ -186,8 +224,14 @@ function comenzarRonda() {
   }, 1000);
 }
 
+function actualizarInfoJuego() {
+  const teamName = game.currentTeam === 'red' ? game.teamRed : game.teamBlue;
+  gameInfo.textContent = `${teamName} · Ronda ${game.roundCurrent}`;
+}
+
 function mostrarCarta() {
-  const c = cards[Math.floor(Math.random()*cards.length)];
+  if (deck.length === 0) prepararBaraja();
+  const c = deck.pop();
   word.textContent = c.word;
   forbidden.innerHTML = c.forbidden.map(f => `<div class="forbidden">${f}</div>`).join("");
 }
@@ -198,18 +242,40 @@ function respuesta(t) {
 }
 
 function finRonda() {
+  game.score[game.currentTeam] += game.results.ok;
   summaryText.innerHTML =
     `Aciertos: ${game.results.ok}<br>
      Pasadas: ${game.results.pass}<br>
      Fallos: ${game.results.fail}`;
+  scoreBoard.innerHTML =
+    `${game.teamRed}: ${game.score.red} puntos<br>
+     ${game.teamBlue}: ${game.score.blue} puntos`;
   mostrar('summary');
 }
 
-function cambiarEquipo() {
+function siguienteTurno() {
+  if (game.currentTeam === 'blue') game.roundCurrent++;
   game.currentTeam = game.currentTeam === 'red' ? 'blue' : 'red';
-  startingTeam.textContent =
-    game.currentTeam === 'red' ? game.teamRed : game.teamBlue;
-  mostrar('start');
+
+  if (game.roundCurrent > game.roundsTotal) {
+    mostrarFinal();
+  } else {
+    actualizarPantallaInicio();
+    mostrar('start');
+  }
+}
+
+function mostrarFinal() {
+  let texto;
+  if (game.score.red > game.score.blue) texto = `🏆 Gana ${game.teamRed}`;
+  else if (game.score.blue > game.score.red) texto = `🏆 Gana ${game.teamBlue}`;
+  else texto = "🤝 Empate";
+
+  winner.textContent = texto;
+  finalScore.innerHTML =
+    `${game.teamRed}: ${game.score.red} puntos<br>
+     ${game.teamBlue}: ${game.score.blue} puntos`;
+  mostrar('end');
 }
 </script>
 
