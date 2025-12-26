@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Juegos</title>
+  <title>Migurl Juegos</title>
 
   <style>
     body {
@@ -14,7 +14,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
     }
 
     .container {
@@ -23,15 +23,17 @@
       padding: 20px;
       box-sizing: border-box;
       text-align: center;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
     h1 {
-      margin-bottom: 30px;
-      font-size: 28px;
+      font-size: 32px;
+      margin-bottom: 25px;
     }
 
     .btn {
-      display: block;
       width: 100%;
       padding: 18px;
       margin: 15px 0;
@@ -42,13 +44,13 @@
       cursor: pointer;
     }
 
-    .btn-impostor {
-      background: #1976d2;
+    .btn-red {
+      background: #c62828;
       color: white;
     }
 
-    .btn-tabu {
-      background: #c62828;
+    .btn-gray {
+      background: #9e9e9e;
       color: white;
     }
 
@@ -60,26 +62,16 @@
 <body>
 
   <div class="container">
-    <h1>🎮 Elige un juego</h1>
+    <h1>🎮 Migurl Juegos</h1>
 
-    <button class="btn btn-impostor" onclick="irImpostor()">
-      🕵️‍♂️ Impostor
+    <button class="btn btn-red" onclick="window.location.href='impostor.html'">
+      Impostor
     </button>
 
-    <button class="btn btn-tabu" onclick="irTabu()">
-      🟥 Tabú
+    <button class="btn btn-gray" onclick="window.location.href='tabu.html'">
+      Tabú
     </button>
   </div>
 
-  <script>
-    function irImpostor() {
-      window.location.href = "./impostor.html";
-    }
-  
-    function irTabu() {
-      window.location.href = "./tabu.html";
-    }
-  </script>
-
-
-
+</body>
+</html>
