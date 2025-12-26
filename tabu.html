@@ -104,9 +104,31 @@
     }
 
     function irModoEquipos() {
-      // siguiente paso
-      alert("Aquí irá la configuración del modo por equipos");
-    }
+  mostrarPantalla('screen-config');
+}
+
+function empezarJuego() {
+  // Guardamos los valores o usamos los defaults
+  const teamRed = document.getElementById('teamRedName').value || "Equipo rojo";
+  const teamBlue = document.getElementById('teamBlueName').value || "Equipo azul";
+  const tiempo = parseInt(document.getElementById('roundTime').value) || 60;
+  const rondas = parseInt(document.getElementById('numRounds').value) || 2;
+
+  // Guardamos en el estado del juego
+  window.gameState = {
+    equipos: { rojo: { nombre: teamRed, puntos: 0 }, azul: { nombre: teamBlue, puntos: 0 } },
+    tiempoPorRonda: tiempo,
+    rondasTotales: rondas,
+    rondaActual: 1
+  };
+
+  // Para test, mostramos los datos guardados
+  console.log(window.gameState);
+
+  // Aquí irá el siguiente paso (equipo inicial)
+  alert(`¡Juego listo! Equipo rojo: ${teamRed}, Equipo azul: ${teamBlue}, Tiempo: ${tiempo}s, Rondas: ${rondas}`);
+}
+
 
     function irEnConstruccion() {
       mostrarPantalla('screen-construction');
