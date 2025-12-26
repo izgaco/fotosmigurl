@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juego del Impostor</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    font-family: system-ui, sans-serif;
+    background: #cccccc; /* gris uniforme */
+    color: #000;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+}
+
+h1 { font-size: 2rem; margin-bottom: 20px; }
+h2 { font-size: 1.5rem; margin-bottom: 20px; }
+
+input {
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0;
+    font-size: 1.1rem;
+    border-radius: 10px;
+    border: none;
+}
+
+button {
+    width: 100%;
+    padding: 16px;
+    margin: 12px 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    background-color: #1e90ff;
+    color: white;
+}
+
+.hidden { display: none; }
+
+#roleDisplay {
+    margin-top: 20px;
+    padding: 25px;
+    border-radius: 16px;
+}
+
+.citizen { background-color: #1b5e20; color: white; }
+.impostor { background-color: #b71c1c; color: white; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🕵️ Juego del Impostor</h1>
+
+<div id="setup">
+    <input id="numPlayers" type="number" min="2" placeholder="Número de jugadores">
+    <input id="numImpostors" type="number" min="1" placeholder="Número de impostores">
+    <button id="setPlayersBtn">Siguiente</button>
+</div>
+
+<div id="playerNames" class="hidden"></div>
+
+<div id="roleReveal" class="hidden">
+    <h2 id="currentPlayer"></h2>
+    <button id="revealBtn">Revelar rol</button>
+    <div id="roleDisplay" class="hidden"></div>
+    <button id="nextBtn" class="hidden">Siguiente jugador</button>
+</div>
+
+</div>
+
+<script>
+/* LISTA DE 250 SUSTANTIVOS */
+const words = [
+"gato","perro","caballo","elefante","león","tigre","oso","lobo","zorro","conejo",
+"vaca","oveja","cerdo","gallina","pato","águila","paloma","pez","tiburón","ballena",
+"playa","montaña","bosque","desierto","río","lago","mar","isla","valle","cueva",
+"avión","tren","barco","coche","bicicleta","moto","camión","metro","helicóptero","tranvía",
+"pizza","hamburguesa","paella","pasta","arroz","sopa","ensalada","tortilla","pan","pastel",
+"balón","raqueta","bicicleta","patines","tabla","casco","guantes","red","portería","canasta",
+"película","libro","cuadro","escultura","fotografía","cartel","revista","periódico","cómic","novela",
+"ordenador","móvil","tablet","teclado","ratón","pantalla","altavoz","cámara","impresora","router",
+"casa","edificio","castillo","palacio","iglesia","escuela","hospital","biblioteca","museo","teatro",
+"ciudad","pueblo","barrio","plaza","calle","avenida","parque","puente","carretera","túnel",
+"profesor","médico","ingeniero","arquitecto","abogado","policía","bombero","científico","artista","cocinero",
+"reloj","anillo","collar","pulsera","pendiente","sombrero","camiseta","pantalón","zapatos","chaqueta",
+"árbol","flor","planta","hoja","raíz","semilla","fruta","césped","jardín","huerto",
+"sol","luna","estrella","planeta","cohete","satélite","telescopio","astronauta","nave","cometa",
+"mesa","silla","sofá","cama","armario","espejo","lámpara","alfombra","puerta","ventana",
+"cuchara","tenedor","cuchillo","plato","vaso","taza","sartén","olla","horno","nevera",
+"maleta","mochila","bolso","cartera","llave","candado","mapa","brújula","linterna","tienda",
+"pelota","dados","cartas","tablero","rompecabezas","fichas","reloj","cronómetro","trofeo","medalla",
+"barco","puerto","faro","ancla","vela","remo","chaleco","boya","red","timón",
+"tractor","granja","establo","huerto","espantapájaros","molino","campo","cosecha","sembrado","granero",
+"avellana","manzana","pera","plátano","naranja","limón","fresa","melón","sandía","cereza",
+"zapato","bota","sandalia","zapatilla","cordón","calcetín","suela","tacón","plantilla","hebilla",
+"cámara","objetivo","trípode","flash","batería","memoria","carrete","visor","pantalla","botón"
+];
+
+let secretWord = words[Math.floor(Math.random() * words.length)];
+let players = [];
+let impostors = [];
+let currentPlayer = 0;
+let numImpostors = 1;
+
+const setup = document.getElementById("setup");
+const namesDiv = document.getElementById("playerNames");
+const revealDiv = document.getElementById("roleReveal");
+const currentPlayerH2 = document.getElementById("currentPlayer");
+const revealBtn = document.getElementById("revealBtn");
+const roleDisplay = document.getElementById("roleDisplay");
+const nextBtn = document.getElementById("nextBtn");
+const numPlayers = document.getElementById("numPlayers");
+
+/* CONFIGURACIÓN */
+document.getElementById("setPlayersBtn").onclick = () => {
+    const n = Number(numPlayers.value);
+    numImpostors = Number(document.getElementById("numImpostors").value);
+
+    if (n < 2 || numImpostors < 1 || numImpostors >= n) {
+        alert("Datos incorrectos");
+        return;
+    }
+
+    setup.classList.add("hidden");
+    createNameInputs(n);
+};
+
+/* NOMBRES */
+function createNameInputs(n) {
+    namesDiv.innerHTML = "<h2>Nombres</h2>";
+    for (let i = 0; i < n; i++) {
+        namesDiv.innerHTML += `<input id="p${i}" placeholder="Jugador ${i+1}">`;
+    }
+    namesDiv.innerHTML += `<button id="startBtn">Comenzar</button>`;
+    namesDiv.classList.remove("hidden");
+
+    document.getElementById("startBtn").onclick = () => {
+        players = [];
+        for (let i = 0; i < n; i++) {
+            const name = document.getElementById(`p${i}`).value.trim();
+            if (!name) return alert("Faltan nombres");
+            players.push(name);
+        }
+        assignImpostors();
+        namesDiv.classList.add("hidden");
+        showTurn();
+    };
+}
+
+/* IMPOSTORES */
+function assignImpostors() {
+    impostors = [];
+    while (impostors.length < numImpostors) {
+        const r = Math.floor(Math.random() * players.length);
+        if (!impostors.includes(r)) impostors.push(r);
+    }
+}
+
+/* TURNO */
+function showTurn() {
+    revealDiv.classList.remove("hidden");
+    roleDisplay.classList.add("hidden");
+    roleDisplay.classList.remove("citizen","impostor");
+    nextBtn.classList.add("hidden");
+    revealBtn.classList.remove("hidden");
+
+    if (currentPlayer >= players.length) {
+        currentPlayerH2.textContent = "";
+        revealBtn.classList.add("hidden");
+        nextBtn.classList.add("hidden");
+        roleDisplay.classList.add("hidden");
+
+        // Mensaje final
+        const finalMsg = document.createElement("h2");
+        finalMsg.textContent = "✅ Roles repartidos";
+        revealDiv.innerHTML = "";
+        revealDiv.appendChild(finalMsg);
+
+        // Botón Nueva partida
+        const newGameBtn = document.createElement("button");
+        newGameBtn.textContent = "Nueva partida";
+        newGameBtn.style.width = "100%";
+        newGameBtn.style.padding = "16px";
+        newGameBtn.style.margin = "12px 0";
+        newGameBtn.style.fontSize = "1.2rem";
+        newGameBtn.style.fontWeight = "bold";
+        newGameBtn.style.borderRadius = "14px";
+        newGameBtn.style.border = "none";
+        newGameBtn.style.cursor = "pointer";
+        newGameBtn.style.backgroundColor = "#1e90ff";
+        newGameBtn.style.color = "white";
+
+        newGameBtn.onclick = () => { 
+            secretWord = words[Math.floor(Math.random() * words.length)]; // palabra nueva
+            location.reload(); 
+        };
+
+        revealDiv.appendChild(newGameBtn);
+        return;
+    }
+
+    currentPlayerH2.textContent = players[currentPlayer];
+}
+
+/* REVELAR */
+revealBtn.onclick = () => {
+    revealBtn.classList.add("hidden");
+    roleDisplay.classList.remove("hidden");
+    nextBtn.classList.remove("hidden");
+
+    if (impostors.includes(currentPlayer)) {
+        roleDisplay.classList.add("impostor");
+        roleDisplay.innerHTML = "<h2>IMPOSTOR</h2>";
+    } else {
+        roleDisplay.classList.add("citizen");
+        roleDisplay.innerHTML = `
+            <h2>CIUDADANO</h2>
+            <p>Palabra secreta:</p>
+            <h2>${secretWord}</h2>
+        `;
+    }
+};
+
+/* SIGUIENTE */
+nextBtn.onclick = () => {
+    currentPlayer++;
+    showTurn();
+};
+</script>
+
+</body>
+</html>
+
+
