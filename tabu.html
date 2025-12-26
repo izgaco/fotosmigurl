@@ -14,12 +14,13 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
     }
 
-    .container {
+    .screen {
+      display: none;
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       padding: 20px;
       box-sizing: border-box;
       text-align: center;
@@ -28,47 +29,92 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
-    h1 {
-      font-size: 32px;
-      margin-bottom: 15px;
+    .screen.active {
+      display: block;
     }
 
-    p {
-      font-size: 20px;
-      margin-bottom: 30px;
+    h1 {
+      margin-bottom: 25px;
+      font-size: 30px;
     }
 
     .btn {
       width: 100%;
-      padding: 16px;
-      font-size: 18px;
+      padding: 18px;
+      margin: 15px 0;
+      font-size: 20px;
       font-weight: bold;
       border: none;
       border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .btn-red {
       background: #c62828;
       color: white;
-      cursor: pointer;
+    }
+
+    .btn-gray {
+      background: #9e9e9e;
+      color: white;
     }
 
     .btn:active {
       transform: scale(0.97);
     }
+
+    .small-text {
+      font-size: 14px;
+      color: #555;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
 
-  <div class="container">
+  <!-- PANTALLA 1: SELECCIÓN DE MODO -->
+  <div id="screen-mode" class="screen active">
     <h1>🟥 Tabú</h1>
-    <p>🚧 En construcción</p>
 
-    <button class="btn" onclick="volverMenu()">
-      Volver al menú
+    <button class="btn btn-red" onclick="irModoEquipos()">
+      Modo por equipos
+    </button>
+
+    <button class="btn btn-gray" onclick="irEnConstruccion()">
+      Modo uno contra todos
+    </button>
+    <div class="small-text">En construcción</div>
+  </div>
+
+  <!-- PANTALLA 2: EN CONSTRUCCIÓN -->
+  <div id="screen-construction" class="screen">
+    <h1>🚧 En construcción</h1>
+    <p>Este modo estará disponible próximamente.</p>
+
+    <button class="btn btn-red" onclick="volverInicio()">
+      Volver
     </button>
   </div>
 
   <script>
-    function volverMenu() {
-      window.location.href = "./index.html";
+    function mostrarPantalla(id) {
+      document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+      });
+      document.getElementById(id).classList.add('active');
+    }
+
+    function irModoEquipos() {
+      // siguiente paso
+      alert("Aquí irá la configuración del modo por equipos");
+    }
+
+    function irEnConstruccion() {
+      mostrarPantalla('screen-construction');
+    }
+
+    function volverInicio() {
+      mostrarPantalla('screen-mode');
     }
   </script>
 
