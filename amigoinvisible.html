@@ -52,4 +52,186 @@ button {
   font-weight: bold;
   border: none;
   border-radius: 12px;
-  cursor: poi
+  cursor: pointer;
+}
+
+.green { background: #2e7d32; color: white; }
+.red { background: #c62828; color: white; }
+.gray { background: #9e9e9e; color: white; }
+
+.checkbox {
+  text-align: left;
+  margin: 5px 0;
+}
+
+.result {
+  background: #c8e6c9;
+  padding: 15px;
+  border-radius: 12px;
+  font-size: 22px;
+  font-weight: bold;
+  margin: 15px 0;
+  display: none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- PANTALLA 1 -->
+<div id="countScreen" class="screen active">
+  <h1>🎁 Amigo Invisible</h1>
+  <input id="numPlayers" type="number" min="2" placeholder="Número de participantes">
+  <button class="green" onclick="continuarNumero()">Continuar</button>
+</div>
+
+<!-- PANTALLA 2 -->
+<div id="nameScreen" class="screen">
+  <h1>Introduce el nombre</h1>
+  <div id="nameCounter"></div>
+  <input id="playerName" placeholder="Nombre">
+  <button class="green" onclick="guardarNombre()">Guardar</button>
+</div>
+
+<!-- PANTALLA 3 -->
+<div id="banScreen" class="screen">
+  <h1 id="banTitle"></h1>
+  <div id="banList"></div>
+  <button class="green" onclick="guardarProhibidos()">Continuar</button>
+</div>
+
+<!-- PANTALLA 4 -->
+<div id="revealScreen" class="screen">
+  <h1 id="revealName"></h1>
+  <button class="green" onclick="revelar()">Revelar a quién regalas</button>
+  <div id="revealResult" class="result"></div>
+  <button class="gray" onclick="siguienteReveal()">Siguiente participante</button>
+</div>
+
+<script>
+let totalPlayers = 0;
+let currentPlayer = 0;
+let names = [];
+let banned = {};
+let pairs = {};
+let revealIndex = 0;
+
+function mostrar(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* PASO 1 */
+function continuarNumero() {
+  const n = parseInt(document.getElementById("numPlayers").value);
+  if (!n || n < 2) {
+    alert("Introduce al menos 2 participantes");
+    return;
+  }
+  totalPlayers = n;
+  currentPlayer = 0;
+  names = [];
+  mostrar("nameScreen");
+  actualizarContador();
+}
+
+/* PASO 2 */
+function actualizarContador() {
+  nameCounter.textContent = `Participante ${currentPlayer + 1} de ${totalPlayers}`;
+  playerName.value = "";
+}
+
+function guardarNombre() {
+  const name = playerName.value.trim();
+  if (!name) return;
+  names.push(name);
+  currentPlayer++;
+  if (currentPlayer < totalPlayers) {
+    actualizarContador();
+  } else {
+    currentPlayer = 0;
+    mostrarBan();
+  }
+}
+
+/* PASO 3 */
+function mostrarBan() {
+  banTitle.textContent = `${names[currentPlayer]}, ¿con quién NO quieres regalar?`;
+  banList.innerHTML = "";
+  banned[names[currentPlayer]] = [];
+
+  names.forEach(n => {
+    if (n !== names[currentPlayer]) {
+      banList.innerHTML += `
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" value="${n}"> ${n}
+          </label>
+        </div>`;
+    }
+  });
+
+  mostrar("banScreen");
+}
+
+function guardarProhibidos() {
+  document.querySelectorAll("#banList input:checked").forEach(cb => {
+    banned[names[currentPlayer]].push(cb.value);
+  });
+
+  currentPlayer++;
+  if (currentPlayer < totalPlayers) {
+    mostrarBan();
+  } else {
+    generarParejas();
+    revealIndex = 0;
+    prepararReveal();
+  }
+}
+
+/* ASIGNACIÓN */
+function generarParejas() {
+  let receivers = [...names];
+
+  names.forEach(giver => {
+    let posibles = receivers.filter(r =>
+      r !== giver && !banned[giver].includes(r)
+    );
+
+    if (posibles.length === 0) {
+      alert("No se pudo generar una combinación válida.");
+      location.reload();
+      return;
+    }
+
+    let elegido = posibles[Math.floor(Math.random() * posibles.length)];
+    pairs[giver] = elegido;
+    receivers = receivers.filter(r => r !== elegido);
+  });
+}
+
+/* PASO 4 */
+function prepararReveal() {
+  revealName.textContent = names[revealIndex];
+  revealResult.style.display = "none";
+  revealResult.textContent = pairs[names[revealIndex]];
+  mostrar("revealScreen");
+}
+
+function revelar() {
+  revealResult.style.display = "block";
+}
+
+function siguienteReveal() {
+  revealIndex++;
+  if (revealIndex < names.length) {
+    prepararReveal();
+  } else {
+    alert("🎉 Todos los regalos han sido revelados");
+    location.reload();
+  }
+}
+</script>
+
+</body>
+</html>
