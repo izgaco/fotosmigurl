@@ -6,6 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
+
+    .input-red {
+  border: 2px solid #c62828;
+}
+
+.input-blue {
+  border: 2px solid #1565c0;
+}
+    
     label {
       display: block;
       text-align: left;
@@ -123,10 +132,10 @@
 <div id="config" class="screen">
   <h1>⚙️ Configuración</h1>
   <label for="teamRed">Nombre equipo rojo</label>
-  <input id="teamRed" placeholder="Equipo rojo">
-  
+  <input id="teamRed" class="input-red" placeholder="Equipo rojo">
+
   <label for="teamBlue">Nombre equipo azul</label>
-  <input id="teamBlue" placeholder="Equipo azul">
+  <input id="teamBlue" class="input-blue" placeholder="Equipo azul">
 
   <label for="time">Segundos por ronda</label>
   <input id="time" type="number" value="60" min="10">
