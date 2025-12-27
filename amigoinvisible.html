@@ -2,253 +2,269 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Amigo Invisible</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f5f5f5;
-  }
+/* =========================
+   Estilos generales (igual que migurl.com)
+========================= */
+body {
+  margin: 0;
+  padding: 0;
+  background: #e0e0e0;
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-  .screen {
-    display: none;
-    padding: 20px;
-    max-width: 600px;
-    margin: 50px auto;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  }
+.screen {
+  display: none;
+  background: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  text-align: center;
+}
 
-  .screen.active {
-    display: block;
-  }
+.screen.active {
+  display: block;
+}
 
-  h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
+h1 { margin-bottom: 10px; }
 
-  input[type="number"], input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin: 5px 0 15px 0;
-    box-sizing: border-box;
-    font-size: 16px;
-  }
+button {
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
 
-  button {
-    padding: 12px 20px;
-    font-size: 16px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    display: block;
-    margin: 20px auto 0 auto;
-  }
+.red { background: #c62828; color: white; }
+.blue { background: #1565c0; color: white; }
+.gray { background: #9e9e9e; color: white; }
+.green { background: #2e7d32; color: white; }
 
-  button:hover {
-    background-color: #0056b3;
-  }
+input {
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
 
-  .checkbox {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 5px 0;
-    flex-wrap: wrap; /* para nombres largos */
-    word-break: break-word; /* evita que se salga del contenedor */
-  }
+label {
+  display: block;
+  text-align: left;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
 
-  .checkbox input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-  }
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: #f5f5f5;
+}
 
-  .checkbox label {
-    font-size: 16px;
-    flex: 1; /* que ocupe todo el ancho disponible */
-  }
-
-  .reveal {
-    text-align: center;
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #28a745;
-    color: white;
-    font-size: 18px;
-    border-radius: 5px;
-    display: none;
-  }
-
+.result-box {
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 12px;
+  background: #2e7d32;
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
+}
 </style>
 </head>
 <body>
 
-<!-- Pantalla 1: Número de participantes -->
-<div id="numScreen" class="screen active">
-  <h2>Amigo Invisible</h2>
-  <label for="numParticipants">Número de participantes:</label>
-  <input type="number" id="numParticipants" min="2" max="20" placeholder="Ej: 5">
-  <button onclick="goToNameScreen()">Continuar</button>
+<!-- =========================
+     Pantalla: Número de participantes
+========================= -->
+<div id="numParticipants" class="screen active">
+  <h1>👥 Amigo Invisible</h1>
+  <label for="num">Número de participantes</label>
+  <input id="num" type="number" min="2" placeholder="Ej: 5">
+  <button class="green" onclick="generarInputs()">Continuar</button>
 </div>
 
-<!-- Pantalla 2: Nombres de los participantes -->
-<div id="nameScreen" class="screen">
-  <h2>Introduce los nombres de los participantes</h2>
-  <div id="namesContainer"></div>
-  <button onclick="goToBanScreen()">Continuar</button>
+<!-- =========================
+     Pantalla: Nombres de participantes
+========================= -->
+<div id="participants" class="screen">
+  <h1>✏️ Nombres</h1>
+  <div id="participantInputs"></div>
+  <button class="green" onclick="guardarParticipantes()">Continuar</button>
+  <button class="gray" onclick="mostrar('numParticipants')">Volver</button>
 </div>
 
-<!-- Pantalla 3: Selección de no querer regalar a -->
-<div id="banScreen" class="screen">
-  <h2 id="banTitle"></h2>
-  <div id="banContainer"></div>
-  <button onclick="nextBan()">Siguiente participante</button>
+<!-- =========================
+     Pantalla: Selección de exclusiones
+========================= -->
+<div id="exclusions" class="screen">
+  <h1>🚫 Exclusiones</h1>
+  <div id="exclusionList"></div>
+  <button class="green" onclick="guardarExclusiones()">Continuar</button>
 </div>
 
-<!-- Pantalla 4: Revelar regalo -->
-<div id="revealScreen" class="screen">
-  <h2>Es tu turno</h2>
-  <div id="revealName" class="reveal"></div>
-  <button id="nextRevealBtn" onclick="nextReveal()">Siguiente participante</button>
+<!-- =========================
+     Pantalla: Revelar regalos
+========================= -->
+<div id="reveal" class="screen">
+  <h1>🎁 Revelar regalos</h1>
+  <div id="currentParticipant" style="font-size:22px;font-weight:bold;margin-bottom:10px"></div>
+  <button class="green" id="revealBtn" onclick="revelar()">Revelar a quién regalas</button>
+  <div id="giftBox" class="result-box" style="display:none;"></div>
+  <button class="gray" id="nextParticipantBtn" style="display:none;" onclick="siguiente()">Siguiente participante</button>
 </div>
 
 <script>
-let numParticipants = 0;
 let participants = [];
-let bans = [];
-let currentBanIndex = 0;
-let assignments = [];
+let exclusions = {};
+let currentIndex = 0;
+let gifts = {};
 
-function goToNameScreen() {
-  const num = parseInt(document.getElementById('numParticipants').value);
-  if(num >= 2) {
-    numParticipants = num;
-    document.getElementById('numScreen').classList.remove('active');
-    document.getElementById('nameScreen').classList.add('active');
-    
-    const container = document.getElementById('namesContainer');
-    container.innerHTML = '';
-    for(let i=0; i<numParticipants; i++) {
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = `Nombre participante ${i+1}`;
-      input.id = `participant${i}`;
-      container.appendChild(input);
-    }
-  } else {
-    alert("Introduce un número válido (mínimo 2).");
-  }
+function mostrar(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-function goToBanScreen() {
+// =========================
+// Generar inputs según número
+// =========================
+function generarInputs() {
+  const n = parseInt(document.getElementById('num').value);
+  if (isNaN(n) || n < 2) { alert("Introduce al menos 2 participantes"); return; }
+  const container = document.getElementById('participantInputs');
+  container.innerHTML = '';
+  for (let i=0; i<n; i++) {
+    container.innerHTML += `
+      <label for="p${i}">Participante ${i+1}</label>
+      <input id="p${i}" type="text" placeholder="Nombre">
+    `;
+  }
+  mostrar('participants');
+}
+
+// =========================
+// Guardar participantes
+// =========================
+function guardarParticipantes() {
   participants = [];
-  for(let i=0; i<numParticipants; i++) {
-    const name = document.getElementById(`participant${i}`).value.trim();
-    if(name === '') {
-      alert('Todos los participantes deben tener nombre.');
-      return;
-    }
+  const n = document.getElementById('participantInputs').children.length/2;
+  for (let i=0;i<n;i++) {
+    const name = document.getElementById(`p${i}`).value.trim();
+    if (!name) { alert("Rellena todos los nombres"); return; }
     participants.push(name);
   }
-
-  bans = participants.map(() => []);
-  currentBanIndex = 0;
-
-  showBanScreen();
+  // Inicializar exclusiones
+  exclusions = {};
+  participants.forEach(p => exclusions[p] = []);
+  currentIndex = 0;
+  mostrarExclusion(currentIndex);
 }
 
-function showBanScreen() {
-  document.getElementById('nameScreen').classList.remove('active');
-  document.getElementById('banScreen').classList.add('active');
-
-  document.getElementById('banTitle').innerText = `Selecciona a quién no quiere regalar ${participants[currentBanIndex]}`;
-  const container = document.getElementById('banContainer');
-  container.innerHTML = '';
-
-  participants.forEach((p, i) => {
-    if(i !== currentBanIndex) {
-      const div = document.createElement('div');
-      div.className = 'checkbox';
-      div.innerHTML = `<label><input type="checkbox" value="${p}"> ${p}</label>`;
-      container.appendChild(div);
+// =========================
+// Pantalla de exclusiones
+// =========================
+function mostrarExclusion(idx) {
+  const container = document.getElementById('exclusionList');
+  container.innerHTML = `<h3>${participants[idx]}</h3>`;
+  participants.forEach(p => {
+    if (p !== participants[idx]) {
+      container.innerHTML += `
+        <div class="checkbox">
+          <input type="checkbox" id="ex_${idx}_${p}" value="${p}">
+          <label for="ex_${idx}_${p}">${p}</label>
+        </div>
+      `;
     }
   });
+  mostrar('exclusions');
 }
 
-function nextBan() {
-  const checkboxes = document.querySelectorAll('#banContainer input[type="checkbox"]');
-  bans[currentBanIndex] = [];
-  checkboxes.forEach(cb => {
-    if(cb.checked) bans[currentBanIndex].push(cb.value);
+function guardarExclusiones() {
+  const idx = currentIndex;
+  const pName = participants[idx];
+  exclusions[pName] = [];
+  participants.forEach(p => {
+    if (p !== pName && document.getElementById(`ex_${idx}_${p}`).checked) {
+      exclusions[pName].push(p);
+    }
   });
-
-  currentBanIndex++;
-  if(currentBanIndex < participants.length) {
-    showBanScreen();
+  currentIndex++;
+  if (currentIndex < participants.length) {
+    mostrarExclusion(currentIndex);
   } else {
-    assignGifts();
-    document.getElementById('banScreen').classList.remove('active');
-    showRevealScreen(0);
+    // Generar regalos
+    asignarRegalos();
+    currentIndex = 0;
+    document.getElementById('giftBox').style.display='none';
+    document.getElementById('revealBtn').style.display='inline-block';
+    document.getElementById('nextParticipantBtn').style.display='none';
+    mostrar('reveal');
+    actualizarRevelar();
   }
 }
 
-function assignGifts() {
-  // Simple random assignment avoiding banned participants
-  const available = [...participants];
-  assignments = [];
-  
-  participants.forEach((p, i) => {
-    let options = available.filter(name => !bans[i].includes(name) && name !== p);
-    if(options.length === 0) {
-      // Si no hay opción, reinicia todo
-      alert('No se puede asignar, intenta cambiar las restricciones.');
-      location.reload();
+// =========================
+// Asignar regalos aleatoriamente respetando exclusiones
+// =========================
+function asignarRegalos() {
+  let disponibles = [...participants];
+  gifts = {};
+  for (let p of participants) {
+    let posibles = disponibles.filter(x => x !== p && !exclusions[p].includes(x));
+    if (posibles.length === 0) {
+      alert("No se pudo generar una asignación válida. Cambia las exclusiones.");
       return;
     }
-    const choice = options[Math.floor(Math.random() * options.length)];
-    assignments.push(choice);
-    const index = available.indexOf(choice);
-    available.splice(index, 1);
-  });
+    const elegido = posibles[Math.floor(Math.random()*posibles.length)];
+    gifts[p] = elegido;
+    disponibles = disponibles.filter(x => x !== elegido);
+  }
 }
 
-let currentReveal = 0;
-function showRevealScreen(index) {
-  currentReveal = index;
-  document.getElementById('revealScreen').classList.add('active');
-  document.getElementById('revealName').style.display = 'none';
-  document.getElementById('nextRevealBtn').style.display = 'none';
-  document.getElementById('revealScreen').querySelector('h2').innerText = `Es el turno de ${participants[index]}`;
-  
-  const btn = document.createElement('button');
-  btn.innerText = 'Revelar a quién regalas';
-  btn.onclick = () => {
-    document.getElementById('revealName').innerText = assignments[index];
-    document.getElementById('revealName').style.display = 'block';
-    btn.style.display = 'none';
-    document.getElementById('nextRevealBtn').style.display = 'block';
-  };
-  const revealScreen = document.getElementById('revealScreen');
-  revealScreen.appendChild(btn);
+// =========================
+// Pantalla de revelar
+// =========================
+function actualizarRevelar() {
+  document.getElementById('currentParticipant').textContent = participants[currentIndex];
 }
 
-function nextReveal() {
-  currentReveal++;
-  if(currentReveal < participants.length) {
-    document.getElementById('revealScreen').innerHTML = `
-      <h2>Es tu turno</h2>
-      <div id="revealName" class="reveal"></div>
-      <button id="nextRevealBtn" onclick="nextReveal()">Siguiente participante</button>
-    `;
-    showRevealScreen(currentReveal);
+function revelar() {
+  document.getElementById('giftBox').textContent = gifts[participants[currentIndex]];
+  document.getElementById('giftBox').style.display='block';
+  document.getElementById('revealBtn').style.display='none';
+  document.getElementById('nextParticipantBtn').style.display='inline-block';
+}
+
+function siguiente() {
+  currentIndex++;
+  if (currentIndex < participants.length) {
+    document.getElementById('giftBox').style.display='none';
+    document.getElementById('revealBtn').style.display='inline-block';
+    document.getElementById('nextParticipantBtn').style.display='none';
+    actualizarRevelar();
   } else {
-    document.getElementById('revealScreen').innerHTML = '<h2>Todos han recibido su asignación. ¡Feliz Amigo Invisible!</h2>';
+    alert("Todos los regalos han sido revelados 🎉");
+    mostrar('numParticipants');
   }
 }
 </script>
