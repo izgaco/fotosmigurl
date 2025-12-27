@@ -44,17 +44,6 @@ input {
   border: 1px solid #ccc;
 }
 
-textarea {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  margin: 8px 0;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  height: 120px;
-  resize: none;
-}
-
 button {
   width: 100%;
   padding: 16px;
@@ -88,22 +77,29 @@ button {
 
 <body>
 
-<!-- PANTALLA 1: NOMBRES -->
-<div id="nameScreen" class="screen active">
+<!-- PANTALLA 1: NÚMERO DE PARTICIPANTES -->
+<div id="numberScreen" class="screen active">
   <h1>🎁 Amigo Invisible</h1>
-  <p>Introduce los nombres de todos los participantes, separados por comas o saltos de línea:</p>
-  <textarea id="playersInput" placeholder="Ej: Ana, Luis, Marta, Carlos"></textarea>
+  <p>¿Cuántos participantes habrá?</p>
+  <input type="number" id="numPlayers" min="2" placeholder="Ej: 4">
+  <button class="green" onclick="guardarNumero()">Continuar</button>
+</div>
+
+<!-- PANTALLA 2: NOMBRES DE PARTICIPANTES -->
+<div id="nameScreen" class="screen">
+  <h1>Introduce los nombres</h1>
+  <form id="nameForm"></form>
   <button class="green" onclick="guardarNombres()">Continuar</button>
 </div>
 
-<!-- PANTALLA 2: Selección de prohibidos -->
+<!-- PANTALLA 3: Selección de prohibidos -->
 <div id="banScreen" class="screen">
   <h1 id="banTitle"></h1>
   <div id="banList"></div>
   <button class="green" onclick="guardarProhibidos()">Continuar</button>
 </div>
 
-<!-- PANTALLA 3: Revelar -->
+<!-- PANTALLA 4: Revelar -->
 <div id="revealScreen" class="screen">
   <h1 id="revealName"></h1>
   <button class="green" onclick="revelar()">Revelar a quién regalas</button>
@@ -118,29 +114,44 @@ let banned = {};
 let pairs = {};
 let revealIndex = 0;
 
+/* FUNCIONES DE PANTALLAS */
 function mostrar(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-/* PASO 1: GUARDAR NOMBRES */
-function guardarNombres() {
-  const input = document.getElementById("playersInput").value.trim();
-  if (!input) {
+/* PASO 1: GUARDAR NÚMERO */
+function guardarNumero() {
+  const n = parseInt(document.getElementById("numPlayers").value);
+  if (!n || n < 2) {
     alert("Introduce al menos 2 participantes");
     return;
   }
-  // Separar por comas o saltos de línea
-  names = input.split(/[\n,]+/).map(n => n.trim()).filter(n => n);
+
+  const form = document.getElementById("nameForm");
+  form.innerHTML = "";
+  for (let i = 0; i < n; i++) {
+    form.innerHTML += `<input type="text" class="playerName" placeholder="Nombre participante ${i+1}">`;
+  }
+  mostrar("nameScreen");
+}
+
+/* PASO 2: GUARDAR NOMBRES */
+function guardarNombres() {
+  names = Array.from(document.querySelectorAll(".playerName"))
+               .map(input => input.value.trim())
+               .filter(n => n);
+
   if (names.length < 2) {
     alert("Introduce al menos 2 participantes");
     return;
   }
+
   currentPlayer = 0;
   mostrarBan();
 }
 
-/* PASO 2: SELECCIÓN DE PROHIBIDOS */
+/* PASO 3: SELECCIÓN DE PROHIBIDOS */
 function mostrarBan() {
   const title = document.getElementById("banTitle");
   const list = document.getElementById("banList");
@@ -177,7 +188,7 @@ function guardarProhibidos() {
   }
 }
 
-/* ASIGNACIÓN DE PAREJAS */
+/* PASO 4: ASIGNACIÓN DE PAREJAS */
 function generarParejas() {
   let receivers = [...names];
 
@@ -198,7 +209,7 @@ function generarParejas() {
   });
 }
 
-/* PASO 3: REVELAR */
+/* PASO 5: REVELAR */
 function prepararReveal() {
   document.getElementById("revealName").textContent = names[revealIndex];
   const resultDiv = document.getElementById("revealResult");
