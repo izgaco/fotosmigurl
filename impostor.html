@@ -10,8 +10,7 @@
 
 body {
     font-family: system-ui, sans-serif;
-    background: #cccccc; /* gris uniforme */
-    color: #000;
+    background: #ccc;
     margin: 0;
     padding: 20px;
     display: flex;
@@ -59,6 +58,17 @@ button {
 
 .citizen { background-color: #1b5e20; color: white; }
 .impostor { background-color: #b71c1c; color: white; }
+
+.pass-screen {
+    background: #333;
+    color: white;
+    padding: 30px;
+    border-radius: 16px;
+}
+
+.secondary {
+    background-color: #555;
+}
 </style>
 </head>
 
@@ -68,49 +78,53 @@ button {
 
 <h1>🕵️ Juego del Impostor</h1>
 
+<!-- SETUP -->
 <div id="setup">
     <input id="numPlayers" type="number" min="2" placeholder="Número de jugadores">
     <input id="numImpostors" type="number" min="1" placeholder="Número de impostores">
     <button id="setPlayersBtn">Siguiente</button>
 </div>
 
+<!-- NOMBRES -->
 <div id="playerNames" class="hidden"></div>
 
+<!-- PASA EL MÓVIL -->
+<div id="passScreen" class="hidden pass-screen">
+    <h2 id="passText"></h2>
+    <button id="continueBtn">Continuar</button>
+</div>
+
+<!-- REVELAR ROL -->
 <div id="roleReveal" class="hidden">
-    <h2 id="currentPlayer"></h2>
     <button id="revealBtn">Revelar rol</button>
     <div id="roleDisplay" class="hidden"></div>
     <button id="nextBtn" class="hidden">Siguiente jugador</button>
 </div>
 
+<!-- FINAL -->
+<div id="endScreen" class="hidden">
+    <h2>✅ Roles repartidos</h2>
+    <button onclick="location.reload()">Nueva partida</button>
+</div>
+
 </div>
 
 <script>
-/* LISTA DE 250 SUSTANTIVOS */
+/* PALABRAS (sin duplicados) */
 const words = [
-"gato","perro","caballo","elefante","león","tigre","oso","lobo","zorro","conejo",
-"vaca","oveja","cerdo","gallina","pato","águila","paloma","pez","tiburón","ballena",
-"playa","montaña","bosque","desierto","río","lago","mar","isla","valle","cueva",
-"avión","tren","barco","coche","bicicleta","moto","camión","metro","helicóptero","tranvía",
-"pizza","hamburguesa","paella","pasta","arroz","sopa","ensalada","tortilla","pan","pastel",
-"balón","raqueta","bicicleta","patines","tabla","casco","guantes","red","portería","canasta",
-"película","libro","cuadro","escultura","fotografía","cartel","revista","periódico","cómic","novela",
-"ordenador","móvil","tablet","teclado","ratón","pantalla","altavoz","cámara","impresora","router",
-"casa","edificio","castillo","palacio","iglesia","escuela","hospital","biblioteca","museo","teatro",
-"ciudad","pueblo","barrio","plaza","calle","avenida","parque","puente","carretera","túnel",
-"profesor","médico","ingeniero","arquitecto","abogado","policía","bombero","científico","artista","cocinero",
-"reloj","anillo","collar","pulsera","pendiente","sombrero","camiseta","pantalón","zapatos","chaqueta",
-"árbol","flor","planta","hoja","raíz","semilla","fruta","césped","jardín","huerto",
-"sol","luna","estrella","planeta","cohete","satélite","telescopio","astronauta","nave","cometa",
-"mesa","silla","sofá","cama","armario","espejo","lámpara","alfombra","puerta","ventana",
-"cuchara","tenedor","cuchillo","plato","vaso","taza","sartén","olla","horno","nevera",
-"maleta","mochila","bolso","cartera","llave","candado","mapa","brújula","linterna","tienda",
-"pelota","dados","cartas","tablero","rompecabezas","fichas","reloj","cronómetro","trofeo","medalla",
-"barco","puerto","faro","ancla","vela","remo","chaleco","boya","red","timón",
-"tractor","granja","establo","huerto","espantapájaros","molino","campo","cosecha","sembrado","granero",
-"avellana","manzana","pera","plátano","naranja","limón","fresa","melón","sandía","cereza",
-"zapato","bota","sandalia","zapatilla","cordón","calcetín","suela","tacón","plantilla","hebilla",
-"cámara","objetivo","trípode","flash","batería","memoria","carrete","visor","pantalla","botón"
+"gato","perro","elefante","león","tigre","oso","lobo","zorro","conejo",
+"playa","montaña","bosque","desierto","río","mar","isla",
+"avión","tren","barco","coche","bicicleta","moto",
+"pizza","hamburguesa","paella","pasta","arroz",
+"película","libro","cuadro","fotografía",
+"ordenador","móvil","tablet","teclado","pantalla",
+"casa","castillo","escuela","hospital","biblioteca",
+"ciudad","pueblo","plaza","calle","parque",
+"profesor","médico","ingeniero","policía","bombero",
+"árbol","flor","planta","jardín",
+"sol","luna","estrella","planeta",
+"mesa","silla","sofá","cama","armario",
+"pelota","dados","cartas","rompecabezas"
 ];
 
 let secretWord = words[Math.floor(Math.random() * words.length)];
@@ -118,20 +132,24 @@ let players = [];
 let impostors = [];
 let currentPlayer = 0;
 let numImpostors = 1;
+let gameState = "setup";
 
+/* ELEMENTOS */
 const setup = document.getElementById("setup");
 const namesDiv = document.getElementById("playerNames");
+const passScreen = document.getElementById("passScreen");
+const passText = document.getElementById("passText");
+const continueBtn = document.getElementById("continueBtn");
 const revealDiv = document.getElementById("roleReveal");
-const currentPlayerH2 = document.getElementById("currentPlayer");
 const revealBtn = document.getElementById("revealBtn");
 const roleDisplay = document.getElementById("roleDisplay");
 const nextBtn = document.getElementById("nextBtn");
-const numPlayers = document.getElementById("numPlayers");
+const endScreen = document.getElementById("endScreen");
 
 /* CONFIGURACIÓN */
 document.getElementById("setPlayersBtn").onclick = () => {
     const n = Number(numPlayers.value);
-    numImpostors = Number(document.getElementById("numImpostors").value);
+    numImpostors = Number(numImpostorsInput.value || document.getElementById("numImpostors").value);
 
     if (n < 2 || numImpostors < 1 || numImpostors >= n) {
         alert("Datos incorrectos");
@@ -160,7 +178,7 @@ function createNameInputs(n) {
         }
         assignImpostors();
         namesDiv.classList.add("hidden");
-        showTurn();
+        showPassScreen();
     };
 }
 
@@ -173,63 +191,38 @@ function assignImpostors() {
     }
 }
 
-/* TURNO */
-function showTurn() {
-    revealDiv.classList.remove("hidden");
-    roleDisplay.classList.add("hidden");
-    roleDisplay.classList.remove("citizen","impostor");
-    nextBtn.classList.add("hidden");
-    revealBtn.classList.remove("hidden");
-
-    if (currentPlayer >= players.length) {
-        currentPlayerH2.textContent = "";
-        revealBtn.classList.add("hidden");
-        nextBtn.classList.add("hidden");
-        roleDisplay.classList.add("hidden");
-
-        // Mensaje final
-        const finalMsg = document.createElement("h2");
-        finalMsg.textContent = "✅ Roles repartidos";
-        revealDiv.innerHTML = "";
-        revealDiv.appendChild(finalMsg);
-
-        // Botón Nueva partida
-        const newGameBtn = document.createElement("button");
-        newGameBtn.textContent = "Nueva partida";
-        newGameBtn.style.width = "100%";
-        newGameBtn.style.padding = "16px";
-        newGameBtn.style.margin = "12px 0";
-        newGameBtn.style.fontSize = "1.2rem";
-        newGameBtn.style.fontWeight = "bold";
-        newGameBtn.style.borderRadius = "14px";
-        newGameBtn.style.border = "none";
-        newGameBtn.style.cursor = "pointer";
-        newGameBtn.style.backgroundColor = "#1e90ff";
-        newGameBtn.style.color = "white";
-
-        newGameBtn.onclick = () => { 
-            secretWord = words[Math.floor(Math.random() * words.length)]; // palabra nueva
-            location.reload(); 
-        };
-
-        revealDiv.appendChild(newGameBtn);
-        return;
-    }
-
-    currentPlayerH2.textContent = players[currentPlayer];
+/* PASA EL MÓVIL */
+function showPassScreen() {
+    gameState = "pass";
+    passText.textContent = `Pasa el móvil a ${players[currentPlayer]}`;
+    passScreen.classList.remove("hidden");
+    revealDiv.classList.add("hidden");
 }
 
+continueBtn.onclick = () => {
+    passScreen.classList.add("hidden");
+    showReveal();
+};
+
 /* REVELAR */
+function showReveal() {
+    gameState = "reveal";
+    revealDiv.classList.remove("hidden");
+    roleDisplay.classList.add("hidden");
+    revealBtn.classList.remove("hidden");
+    nextBtn.classList.add("hidden");
+}
+
 revealBtn.onclick = () => {
     revealBtn.classList.add("hidden");
     roleDisplay.classList.remove("hidden");
     nextBtn.classList.remove("hidden");
 
     if (impostors.includes(currentPlayer)) {
-        roleDisplay.classList.add("impostor");
+        roleDisplay.className = "impostor";
         roleDisplay.innerHTML = "<h2>IMPOSTOR</h2>";
     } else {
-        roleDisplay.classList.add("citizen");
+        roleDisplay.className = "citizen";
         roleDisplay.innerHTML = `
             <h2>CIUDADANO</h2>
             <p>Palabra secreta:</p>
@@ -238,13 +231,16 @@ revealBtn.onclick = () => {
     }
 };
 
-/* SIGUIENTE */
 nextBtn.onclick = () => {
     currentPlayer++;
-    showTurn();
+    if (currentPlayer >= players.length) {
+        revealDiv.classList.add("hidden");
+        endScreen.classList.remove("hidden");
+    } else {
+        showPassScreen();
+    }
 };
 </script>
 
 </body>
 </html>
-
