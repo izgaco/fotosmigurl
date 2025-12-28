@@ -65,6 +65,11 @@ button {
     padding: 30px;
     border-radius: 16px;
 }
+
+.danger {
+    background-color: #b71c1c;
+}
+
 </style>
 </head>
 
@@ -100,9 +105,17 @@ button {
 <!-- FINAL -->
 <div id="endScreen" class="hidden">
     <h2>✅ Roles repartidos</h2>
+
+    <button id="revealImpostorsBtn" class="danger">
+        Revelar impostor
+    </button>
+
+    <div id="impostorsResult" class="hidden"></div>
+
     <button id="repeatBtn">Repetir partida</button>
     <button onclick="location.reload()">Nueva partida</button>
 </div>
+
 
 </div>
 
@@ -151,6 +164,9 @@ const revealBtn = document.getElementById("revealBtn");
 const roleDisplay = document.getElementById("roleDisplay");
 const nextBtn = document.getElementById("nextBtn");
 const endScreen = document.getElementById("endScreen");
+const revealImpostorsBtn = document.getElementById("revealImpostorsBtn");
+const impostorsResult = document.getElementById("impostorsResult");
+
 
 const numPlayersInput = document.getElementById("numPlayers");
 const numImpostorsInput = document.getElementById("numImpostors");
@@ -286,6 +302,22 @@ revealFromPassBtn.onclick = () => {
             <h2>${secretWord}</h2>
         `;
     }
+};
+
+revealImpostorsBtn.onclick = () => {
+    // Obtener nombres de los impostores
+    const names = impostors.map(i => players[i]);
+
+    // Texto según cantidad
+    const text = names.length === 1
+        ? `🕵️ El impostor era: <strong>${names[0]}</strong>`
+        : `🕵️ Los impostores eran: <strong>${names.join(", ")}</strong>`;
+
+    impostorsResult.innerHTML = text;
+    impostorsResult.classList.remove("hidden");
+
+    // Opcional: desactivar el botón tras usarlo
+    revealImpostorsBtn.disabled = true;
 };
     
 </script>
