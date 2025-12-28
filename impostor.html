@@ -87,7 +87,7 @@ button {
 <!-- PASA EL MÓVIL -->
 <div id="passScreen" class="hidden pass-screen">
     <h2 id="passText"></h2>
-    <button id="continueBtn">Continuar</button>
+    <button id="revealFromPassBtn">Revelar rol</button>
 </div>
 
 <!-- REVELAR -->
@@ -141,11 +141,11 @@ let currentPlayer = 0;
 let numImpostors = 1;
 
 /* ELEMENTOS */
+const revealFromPassBtn = document.getElementById("revealFromPassBtn");
 const setup = document.getElementById("setup");
 const namesDiv = document.getElementById("playerNames");
 const passScreen = document.getElementById("passScreen");
 const passText = document.getElementById("passText");
-const continueBtn = document.getElementById("continueBtn");
 const revealDiv = document.getElementById("roleReveal");
 const revealBtn = document.getElementById("revealBtn");
 const roleDisplay = document.getElementById("roleDisplay");
@@ -206,11 +206,6 @@ function showPassScreen() {
     passScreen.classList.remove("hidden");
     revealDiv.classList.add("hidden");
 }
-
-continueBtn.onclick = () => {
-    passScreen.classList.add("hidden");
-    showReveal();
-};
 
 /* REVELAR */
 function showReveal() {
@@ -274,6 +269,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+revealFromPassBtn.onclick = () => {
+    passScreen.classList.add("hidden");
+    showReveal();
+};
     
 </script>
 
