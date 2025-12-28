@@ -187,32 +187,31 @@ function showTurn() {
         nextBtn.classList.add("hidden");
         roleDisplay.classList.add("hidden");
 
-        // Mensaje final
-        const finalMsg = document.createElement("h2");
-        finalMsg.textContent = "✅ Roles repartidos";
-        revealDiv.innerHTML = "";
-        revealDiv.appendChild(finalMsg);
+                revealDiv.innerHTML = "<h2>✅ Roles repartidos</h2>";
 
-        // Botón Nueva partida
-        const newGameBtn = document.createElement("button");
-        newGameBtn.textContent = "Nueva partida";
-        newGameBtn.style.width = "100%";
-        newGameBtn.style.padding = "16px";
-        newGameBtn.style.margin = "12px 0";
-        newGameBtn.style.fontSize = "1.2rem";
-        newGameBtn.style.fontWeight = "bold";
-        newGameBtn.style.borderRadius = "14px";
-        newGameBtn.style.border = "none";
-        newGameBtn.style.cursor = "pointer";
-        newGameBtn.style.backgroundColor = "#1e90ff";
-        newGameBtn.style.color = "white";
+        const revealImpostorBtn = document.createElement("button");
+        revealImpostorBtn.textContent = "Revelar impostor";
 
-        newGameBtn.onclick = () => { 
-            secretWord = words[Math.floor(Math.random() * words.length)]; // palabra nueva
-            location.reload(); 
+        revealImpostorBtn.onclick = () => {
+            const names = impostors.map(i => players[i]).join(", ");
+            revealDiv.innerHTML += `<p><strong>Impostor(es):</strong> ${names}</p>`;
+            revealImpostorBtn.disabled = true;
         };
 
-        revealDiv.appendChild(newGameBtn);
+        const repeatBtn = document.createElement("button");
+        repeatBtn.textContent = "Repetir partida";
+
+        repeatBtn.onclick = () => {
+            secretWord = words[Math.floor(Math.random() * words.length)];
+            assignImpostors();
+            currentPlayer = 0;
+
+            revealDiv.classList.add("hidden");
+            showTurn();
+        };
+
+        revealDiv.appendChild(revealImpostorBtn);
+        revealDiv.appendChild(repeatBtn);
         return;
     }
 
