@@ -100,6 +100,7 @@ button {
 <!-- FINAL -->
 <div id="endScreen" class="hidden">
     <h2>✅ Roles repartidos</h2>
+    <button id="repeatBtn">Repetir partida</button>
     <button onclick="location.reload()">Nueva partida</button>
 </div>
 
@@ -150,6 +151,7 @@ const revealBtn = document.getElementById("revealBtn");
 const roleDisplay = document.getElementById("roleDisplay");
 const nextBtn = document.getElementById("nextBtn");
 const endScreen = document.getElementById("endScreen");
+const repeatBtn = document.getElementById("repeatBtn");
 
 const numPlayersInput = document.getElementById("numPlayers");
 const numImpostorsInput = document.getElementById("numImpostors");
@@ -247,6 +249,24 @@ nextBtn.onclick = () => {
         showPassScreen();
     }
 };
+
+function resetGame() {
+    // Nueva palabra
+    secretWord = words[Math.floor(Math.random() * words.length)];
+
+    // Nuevos impostores
+    assignImpostors();
+
+    // Reiniciar turno
+    currentPlayer = 0;
+
+    // Ocultar pantalla final
+    endScreen.classList.add("hidden");
+
+    // Volver a empezar
+    showPassScreen();
+}
+    
 </script>
 
 </body>
