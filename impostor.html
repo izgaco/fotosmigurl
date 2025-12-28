@@ -269,6 +269,10 @@ function resetGame() {
 
     // Ocultar pantalla final
     endScreen.classList.add("hidden");
+    // Limpiar el resultado del botón revelar impostor
+    impostorsResult.classList.add("hidden");
+    impostorsResult.innerHTML = "";
+    revealImpostorsBtn.disabled = false;
 
     // Volver a empezar
     showPassScreen();
