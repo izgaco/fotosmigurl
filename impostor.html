@@ -145,4 +145,109 @@ const namesDiv = document.getElementById("playerNames");
 const passScreen = document.getElementById("passScreen");
 const passText = document.getElementById("passText");
 const continueBtn = document.getElementById("continueBtn");
-const re
+const revealDiv = document.getElementById("roleReveal");
+const revealBtn = document.getElementById("revealBtn");
+const roleDisplay = document.getElementById("roleDisplay");
+const nextBtn = document.getElementById("nextBtn");
+const endScreen = document.getElementById("endScreen");
+
+const numPlayersInput = document.getElementById("numPlayers");
+const numImpostorsInput = document.getElementById("numImpostors");
+
+/* CONFIGURACIÓN */
+document.getElementById("setPlayersBtn").onclick = () => {
+    const n = Number(numPlayersInput.value);
+    numImpostors = Number(numImpostorsInput.value);
+
+    if (n < 2 || numImpostors < 1 || numImpostors >= n) {
+        alert("Datos incorrectos");
+        return;
+    }
+
+    setup.classList.add("hidden");
+    createNameInputs(n);
+};
+
+/* NOMBRES */
+function createNameInputs(n) {
+    namesDiv.innerHTML = "<h2>Nombres</h2>";
+    for (let i = 0; i < n; i++) {
+        namesDiv.innerHTML += `<input id="p${i}" placeholder="Jugador ${i+1}">`;
+    }
+    namesDiv.innerHTML += `<button id="startBtn">Comenzar</button>`;
+    namesDiv.classList.remove("hidden");
+
+    document.getElementById("startBtn").onclick = () => {
+        players = [];
+        for (let i = 0; i < n; i++) {
+            const name = document.getElementById(`p${i}`).value.trim();
+            if (!name) return alert("Faltan nombres");
+            players.push(name);
+        }
+        assignImpostors();
+        namesDiv.classList.add("hidden");
+        showPassScreen();
+    };
+}
+
+/* IMPOSTORES */
+function assignImpostors() {
+    impostors = [];
+    while (impostors.length < numImpostors) {
+        const r = Math.floor(Math.random() * players.length);
+        if (!impostors.includes(r)) impostors.push(r);
+    }
+}
+
+/* PASA EL MÓVIL */
+function showPassScreen() {
+    passText.textContent = `Pasa el móvil a ${players[currentPlayer]}`;
+    passScreen.classList.remove("hidden");
+    revealDiv.classList.add("hidden");
+}
+
+continueBtn.onclick = () => {
+    passScreen.classList.add("hidden");
+    showReveal();
+};
+
+/* REVELAR */
+function showReveal() {
+    revealDiv.classList.remove("hidden");
+    roleDisplay.classList.add("hidden");
+    revealBtn.classList.remove("hidden");
+    nextBtn.classList.add("hidden");
+}
+
+revealBtn.onclick = () => {
+    revealBtn.classList.add("hidden");
+    roleDisplay.classList.remove("hidden");
+    nextBtn.classList.remove("hidden");
+
+    if (impostors.includes(currentPlayer)) {
+        roleDisplay.className = "impostor";
+        roleDisplay.innerHTML = "<h2>IMPOSTOR</h2>";
+    } else {
+        roleDisplay.className = "citizen";
+        roleDisplay.innerHTML = `
+            <h2>CIUDADANO</h2>
+            <p>Palabra secreta:</p>
+            <h2>${secretWord}</h2>
+        `;
+    }
+};
+
+/* SIGUIENTE */
+nextBtn.onclick = () => {
+    currentPlayer++;
+    if (currentPlayer >= players.length) {
+        revealDiv.classList.add("hidden");
+        endScreen.classList.remove("hidden");
+    } else {
+        showPassScreen();
+    }
+};
+</script>
+
+</body>
+</html>
