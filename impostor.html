@@ -151,7 +151,6 @@ const revealBtn = document.getElementById("revealBtn");
 const roleDisplay = document.getElementById("roleDisplay");
 const nextBtn = document.getElementById("nextBtn");
 const endScreen = document.getElementById("endScreen");
-const repeatBtn = document.getElementById("repeatBtn");
 
 const numPlayersInput = document.getElementById("numPlayers");
 const numImpostorsInput = document.getElementById("numImpostors");
@@ -266,6 +265,15 @@ function resetGame() {
     // Volver a empezar
     showPassScreen();
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const repeatBtn = document.getElementById("repeatBtn");
+
+    if (repeatBtn) {
+        repeatBtn.onclick = resetGame;
+    }
+});
+
     
 </script>
 
