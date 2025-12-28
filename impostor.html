@@ -175,20 +175,16 @@ function assignImpostors() {
 
 /* TURNO */
 function restartGame() {
-    // Nueva palabra secreta
+    // Genera nueva palabra secreta
     secretWord = words[Math.floor(Math.random() * words.length)];
-    // Nuevos impostores
+    // Reasigna impostores
     assignImpostors();
-    // Volvemos al primer jugador
+    // Reinicia el turno
     currentPlayer = 0;
-
-    // Ocultamos la pantalla final
-    revealDiv.innerHTML = "";
-    revealDiv.classList.add("hidden");
-
-    // Volvemos a mostrar el turno del primer jugador
+    // Muestra la primera pantalla de revelación de rol
     showTurn();
 }
+
 
 function showTurn() {
     revealDiv.classList.remove("hidden");
@@ -198,39 +194,56 @@ function showTurn() {
     revealBtn.classList.remove("hidden");
 
     if (currentPlayer >= players.length) {
-        currentPlayerH2.textContent = "";
-        revealBtn.classList.add("hidden");
-        nextBtn.classList.add("hidden");
-        roleDisplay.classList.add("hidden");
+    currentPlayerH2.textContent = "";
+    revealBtn.classList.add("hidden");
+    nextBtn.classList.add("hidden");
+    roleDisplay.classList.add("hidden");
 
-                revealDiv.innerHTML = "<h2>✅ Roles repartidos</h2>";
+    // Limpiar contenido
+    revealDiv.innerHTML = "";
 
-        const revealImpostorBtn = document.createElement("button");
-        revealImpostorBtn.textContent = "Revelar impostor";
+    // Mensaje final
+    const finalMsg = document.createElement("h2");
+    finalMsg.textContent = "✅ Roles repartidos";
+    revealDiv.appendChild(finalMsg);
 
-        revealImpostorBtn.onclick = () => {
-            const names = impostors.map(i => players[i]).join(", ");
-            revealDiv.innerHTML += `<p><strong>Impostor(es):</strong> ${names}</p>`;
-            revealImpostorBtn.disabled = true;
-        };
+    // Botón Revelar impostores
+    const revealImpostorsBtn = document.createElement("button");
+    revealImpostorsBtn.textContent = "Revelar impostores";
+    revealImpostorsBtn.style.width = "100%";
+    revealImpostorsBtn.style.padding = "16px";
+    revealImpostorsBtn.style.margin = "12px 0";
+    revealImpostorsBtn.style.fontSize = "1.2rem";
+    revealImpostorsBtn.style.fontWeight = "bold";
+    revealImpostorsBtn.style.borderRadius = "14px";
+    revealImpostorsBtn.style.border = "none";
+    revealImpostorsBtn.style.cursor = "pointer";
+    revealImpostorsBtn.style.backgroundColor = "#b71c1c";
+    revealImpostorsBtn.style.color = "white";
+    revealImpostorsBtn.onclick = () => {
+        alert("Impostores: " + impostors.map(i => players[i]).join(", "));
+    };
+    revealDiv.appendChild(revealImpostorsBtn);
 
-        const repeatBtn = document.createElement("button");
-        repeatBtn.textContent = "Repetir partida";
-        repeatBtn.onclick = restartGame;
+    // Botón Repetir partida
+    const repeatBtn = document.createElement("button");
+    repeatBtn.textContent = "Repetir partida";
+    repeatBtn.style.width = "100%";
+    repeatBtn.style.padding = "16px";
+    repeatBtn.style.margin = "12px 0";
+    repeatBtn.style.fontSize = "1.2rem";
+    repeatBtn.style.fontWeight = "bold";
+    repeatBtn.style.borderRadius = "14px";
+    repeatBtn.style.border = "none";
+    repeatBtn.style.cursor = "pointer";
+    repeatBtn.style.backgroundColor = "#1e90ff";
+    repeatBtn.style.color = "white";
+    repeatBtn.onclick = restartGame; // ⚡ aquí es clave
+    revealDiv.appendChild(repeatBtn);
 
-        repeatBtn.onclick = () => {
-            secretWord = words[Math.floor(Math.random() * words.length)];
-            assignImpostors();
-            currentPlayer = 0;
+    return;
+}
 
-            revealDiv.classList.add("hidden");
-            showTurn();
-        };
-
-        revealDiv.appendChild(revealImpostorBtn);
-        revealDiv.appendChild(repeatBtn);
-        return;
-    }
 
     currentPlayerH2.textContent = players[currentPlayer];
 }
