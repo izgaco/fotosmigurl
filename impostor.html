@@ -209,10 +209,7 @@ function showPassScreen() {
 
 /* REVELAR */
 function showReveal() {
-    revealDiv.classList.remove("hidden");
-    roleDisplay.classList.add("hidden");
-    revealBtn.classList.remove("hidden");
-    nextBtn.classList.add("hidden");
+    // Función en desuso (flujo antiguo)
 }
 
 revealBtn.onclick = () => {
@@ -271,7 +268,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
 revealFromPassBtn.onclick = () => {
     passScreen.classList.add("hidden");
-    showReveal();
+
+    // Mostrar directamente el rol
+    revealDiv.classList.remove("hidden");
+    roleDisplay.classList.remove("hidden");
+    nextBtn.classList.remove("hidden");
+    revealBtn.classList.add("hidden");
+
+    if (impostors.includes(currentPlayer)) {
+        roleDisplay.className = "impostor";
+        roleDisplay.innerHTML = "<h2>IMPOSTOR</h2>";
+    } else {
+        roleDisplay.className = "citizen";
+        roleDisplay.innerHTML = `
+            <h2>CIUDADANO</h2>
+            <p>Palabra secreta:</p>
+            <h2>${secretWord}</h2>
+        `;
+    }
 };
     
 </script>
