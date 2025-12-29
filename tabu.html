@@ -376,6 +376,13 @@ function mostrarCarta() {
 
 function respuesta(t) {
   game.results[t]++;
+
+  if (t === 'fail') {
+    const sound = document.getElementById('failSound');
+    sound.currentTime = 0; // reinicia el sonido por si se pulsa rápido
+    sound.play();
+  }
+
   mostrarCarta();
 }
 
