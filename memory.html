@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Memory · Migurl.com</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      padding-top: 56px;
+      background: #e0e0e0;
+      font-family: Arial, Helvetica, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* HEADER */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #111;
+      color: white;
+      text-align: center;
+      padding: 12px 0;
+      font-size: 20px;
+      font-weight: bold;
+      z-index: 1000;
+    }
+
+    .site-header a {
+      color: white;
+      text-decoration: none;
+    }
+
+    /* SCREENS */
+    .screen {
+      display: none;
+      background: #ffffff;
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    h1 {
+      margin-bottom: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin: 8px 0;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .red { background: #c62828; color: white; }
+    .blue { background: #1565c0; color: white; }
+    .gray { background: #9e9e9e; color: white; }
+
+    /* GAME */
+    .info {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .card {
+      width: 60px;
+      height: 60px;
+      background: #1565c0;
+      color: transparent;
+      font-size: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .card.open,
+    .card.matched {
+      background: #f5f5f5;
+      color: #000;
+      cursor: default;
+    }
+
+    .card.matched {
+      background: #c8e6c9;
+    }
+
+    @media (min-width: 500px) {
+      .card {
+        width: 70px;
+        height: 70px;
+        font-size: 36px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/">Migurl.com</a>
+</header>
+
+<!-- CONFIG -->
+<div id="config" class="screen active">
+  <h1>🧠 Memory</h1>
+  <p>Selecciona dificultad</p>
+
+  <button class="blue" onclick="startGame(4)">Principiante (4×4)</button>
+  <button class="blue" onclick="startGame(6)">Intermedio (6×6)</button>
+  <button class="blue" onclick="startGame(8)">Experto (8×8)</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+  <div class="info" id="info"></div>
+  <div id="grid" class="grid"></div>
+  <button class="gray" onclick="volver()">Volver</button>
+</div>
+
+<script>
+const emojis = [
+  "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼",
+  "🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔",
+  "🐧","🐦","🐤","🐣","🐺","🦄","🐝","🐛",
+  "🍎","🍌","🍓","🍇","🍉","🍒","🍍","🥝"
+];
+
+let first = null;
+let lock = false;
+let matches = 0;
+let attempts = 0;
+let totalPairs = 0;
+
+function startGame(size) {
+  const grid = document.getElementById("grid");
+  const info = document.getElementById("info");
+
+  first = null;
+  lock = false;
+  matches = 0;
+  attempts = 0;
+
+  const totalCards = size * size;
+  totalPairs = totalCards / 2;
+
+  const selected = emojis.slice(0, totalPairs);
+  const cards = [...selected, ...selected]
+    .sort(() => Math.random() - 0.5);
+
+  grid.innerHTML = "";
+  grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+
+  cards.forEach(emoji => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.textContent = emoji;
+
+    card.addEventListener("click", () => {
+      if (lock || card.classList.contains("open")) return;
+
+      card.classList.add("open");
+
+      if (!first) {
+        first = card;
+      } else {
+        attempts++;
+        lock = true;
+
+        if (first.textContent === card.textContent) {
+          first.classList.add("matched");
+          card.classList.add("matched");
+          matches++;
+          resetTurn();
+        } else {
+          setTimeout(() => {
+            first.classList.remove("open");
+            card.classList.remove("open");
+            resetTurn();
+          }, 800);
+        }
+      }
+
+      info.textContent = `Intentos: ${attempts}`;
+      if (matches === totalPairs) {
+        info.textContent = `🎉 Completado en ${attempts} intentos`;
+      }
+    });
+
+    grid.appendChild(card);
+  });
+
+  info.textContent = "Intentos: 0";
+  mostrar("game");
+}
+
+function resetTurn() {
+  first = null;
+  lock = false;
+}
+
+function volver() {
+  mostrar("config");
+}
+
+function mostrar(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+</script>
+
+</body>
+</html>
