@@ -169,24 +169,26 @@ window.openModal=(user,type,day,month,cell)=>{
   currentContext={user,type,day,month,cell};
   const opts=document.getElementById('modal-options'); opts.innerHTML='';
   if(type==='biblia'){
-    document.getElementById('modal-title').textContent='Lectura de la Biblia'; addOpt('✔','tick'); addOpt('✖','cross'); addOpt('Dejar en blanco','');
+    document.getElementById('modal-title').textContent='Lectura de la Biblia'; addOpt('✔','tick'); addOpt('✖','cross'); addOpt('','');
   } else if(type==='emocional'){
-    document.getElementById('modal-title').textContent='Estado del día'; addOpt('😞','bad'); addOpt('😐','normal'); addOpt('🙂','good'); addOpt('🤩','great'); addOpt('Dejar en blanco','');
+    document.getElementById('modal-title').textContent='Estado del día'; addOpt('😞','bad'); addOpt('😐','normal'); addOpt('🙂','good'); addOpt('🤩','great'); addOpt('','');
   } else if(type==='agua'){
-    document.getElementById('modal-title').textContent='Vasos de agua'; addOpt('2 💧','water-2'); addOpt('4 💧','water-4'); addOpt('6 💧','water-6'); addOpt('8 💧','water-8'); addOpt('Dejar en blanco','');
+    document.getElementById('modal-title').textContent='Vasos de agua'; addOpt('2 💧','water-2'); addOpt('4 💧','water-4'); addOpt('6 💧','water-6'); addOpt('8 💧','water-8'); addOpt('','');
   } else if(type==='ejercicio'){
     document.getElementById('modal-title').textContent='Ejercicio';
     addOpt('🏋️ Fuerza','exercise-strength');
     addOpt('🏃 Cardio','exercise-cardio');
     addOpt('🛌 Descanso','exercise-rest');
-    addOpt('Dejar en blanco','');
+    addOpt('','');
   }
   document.getElementById('modal').classList.add('active');
 };
 
 function addOpt(label,cls){
-  const b=document.createElement('button'); b.textContent=label || 'Dejar en blanco'; b.onclick=()=>{
-    const displayLabel = label.includes(' ') ? label.split(' ')[0] : (label === '' ? '' : label);
+  const b=document.createElement('button');
+  b.textContent = label === '' ? 'Dejar en blanco' : label;
+  b.onclick=()=>{
+    const displayLabel = label === '' ? '' : (label.includes(' ') ? label.split(' ')[0] : label);
     saveOpt(displayLabel,cls);
   };
   document.getElementById('modal-options').appendChild(b);
