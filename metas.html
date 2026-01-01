@@ -264,13 +264,20 @@ window.openModal = (cell) => {
 };
 
 function addOption(label, cls) {
-  const b=document.createElement("button");
+  const b = document.createElement("button");
   b.textContent = label || "Dejar en blanco";
-  b.onclick = ()=>{
+
+  b.onclick = () => {
     currentCell.textContent = label;
     currentCell.className = "cell clickable";
+
+    if (cls) {
+      currentCell.classList.add(cls);
+    }
+
     closeModal();
   };
+
   document.getElementById("modal-options").appendChild(b);
 }
 
