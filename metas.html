@@ -198,12 +198,9 @@ document.getElementById('confirm-delete').onclick = async function(){
     const container=document.getElementById(id);
     const cells = container.querySelectorAll('.calendar-cell');
     for(const cell of cells){
-      if(!cell.classList.contains('day') && !cell.classList.contains('header') && cell.textContent.trim()!==''){
-        const {day,month} = cell.dataset;
-        const type = id.includes('biblia')?'biblia':id.includes('ejercicio')?'ejercicio':id.includes('emocional')?'emocional':'agua';
-        const user = borrarContext;
-        cell.textContent=''; cell.className='calendar-cell';
-        await deleteDoc(doc(db,'metas',`${user}_${type}_${day}_${month}`));
+      if(!cell.classList.contains('day') && !cell.classList.contains('header')){
+        currentContext = { user: borrarContext, type: id.includes('biblia')?'biblia':id.includes('ejercicio')?'ejercicio':id.includes('emocional')?'emocional':'agua', day: cell.dataset.day, month: cell.dataset.month, cell };
+        saveOpt('', '');
       }
     }
   }
