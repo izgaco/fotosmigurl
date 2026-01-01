@@ -11,6 +11,10 @@
   --card: #ffffff;
   --primary: #4f46e5;        /* azul oscuro */
   --primary-light: #a5b4fc;  /* azul claro */
+  --water-2: #bfdbfe;       /* azul muy claro */
+  --water-4: #93c5fd;
+  --water-6: #60a5fa;
+  --water-8: #4f46e5;       /* azul oscuro */
   --text: #1f2937;
 }
 
@@ -65,7 +69,7 @@ button.secondary {
 /* ===== GRID VISUAL ===== */
 .calendar-grid {
   display: grid;
-  grid-template-columns: 42px repeat(12, 1fr);
+  grid-template-columns: 28px repeat(12, 1fr); /* columna días más estrecha */
   gap: 4px;
   font-size: 11px;
   margin-top: 12px;
@@ -98,6 +102,12 @@ button.secondary {
 .calendar-cell.normal { background: #fde68a; }
 .calendar-cell.good   { background: #bbf7d0; }
 .calendar-cell.great  { background: #bfdbfe; }
+
+/* ===== COLORES AGUA ===== */
+.calendar-cell.water-2 { background: var(--water-2); }
+.calendar-cell.water-4 { background: var(--water-4); }
+.calendar-cell.water-6 { background: var(--water-6); }
+.calendar-cell.water-8 { background: var(--water-8); color: #fff; }
 
 /* ===== MODAL ===== */
 .modal {
@@ -255,7 +265,10 @@ window.openModal=(user,type,day,month,cell)=>{
     addOpt('','');
   } else if(type==='agua'){
     document.getElementById('modal-title').textContent='Vasos de agua';
-    [2,4,6,8].forEach(n=>addOpt(`${n} 💧`, ''));
+    addOpt('2 💧','water-2');
+    addOpt('4 💧','water-4');
+    addOpt('6 💧','water-6');
+    addOpt('8 💧','water-8');
     addOpt('','');
   }
 
