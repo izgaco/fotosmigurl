@@ -62,6 +62,16 @@ button.secondary {
   flex: 1;
 }
 
+.menu button {
+  background: #e0e7ff;
+  color: #1e1b4b;
+}
+
+.menu button.active {
+  background: #4f46e5;
+  color: #ffffff;
+}
+
 .grid {
   display: grid;
   grid-template-columns: 40px repeat(12, 1fr);
@@ -192,6 +202,7 @@ window.selectUser = (user) => {
     document.getElementById("screen-camila").classList.add("active");
     renderEmotional();
     renderWater();
+    showSection("emocional");
   } else {
     document.getElementById("screen-izhar").classList.add("active");
   }
@@ -199,8 +210,23 @@ window.selectUser = (user) => {
 
 window.showSection = (section) => {
   currentMode = section;
-  document.getElementById("section-emocional").style.display = section==="emocional"?"block":"none";
-  document.getElementById("section-agua").style.display = section==="agua"?"block":"none";
+
+  document.getElementById("section-emocional").style.display =
+    section === "emocional" ? "block" : "none";
+
+  document.getElementById("section-agua").style.display =
+    section === "agua" ? "block" : "none";
+
+  // Estado visual de botones
+  document.querySelectorAll(".menu button").forEach(b =>
+    b.classList.remove("active")
+  );
+
+  if (section === "emocional") {
+    document.querySelector(".menu button:nth-child(1)").classList.add("active");
+  } else {
+    document.querySelector(".menu button:nth-child(2)").classList.add("active");
+  }
 };
 
 function baseGrid(container) {
