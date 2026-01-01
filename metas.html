@@ -20,6 +20,10 @@
   --exercise-rest: #bbf7d0; /* verde claro */
   --tick-green: #bbf7d0;
   --cross-red: #fecaca;
+  --emotional-bad: #f87171; /* rojo */
+  --emotional-normal: #86efac; /* verde claro */
+  --emotional-good: #4ade80; /* verde normal */
+  --emotional-great: #16a34a; /* verde oscuro */
   --text: #1f2937;
 }
 
@@ -51,6 +55,10 @@ button.secondary { background: #e5e7eb; color: #111; }
 .calendar-cell.exercise-rest { background: var(--exercise-rest); }
 .calendar-cell.tick { background: var(--tick-green); }
 .calendar-cell.cross { background: var(--cross-red); }
+.calendar-cell.bad { background: var(--emotional-bad); }
+.calendar-cell.normal { background: var(--emotional-normal); }
+.calendar-cell.good { background: var(--emotional-good); }
+.calendar-cell.great { background: var(--emotional-great); }
 
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 10; }
 .modal.active { display: flex; }
