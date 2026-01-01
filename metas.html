@@ -11,10 +11,12 @@
   --card: #ffffff;
   --primary: #4f46e5;        /* azul oscuro */
   --primary-light: #a5b4fc;  /* azul claro */
-  --water-2: #bfdbfe;       /* azul muy claro */
+  --water-2: #bfdbfe;
   --water-4: #93c5fd;
   --water-6: #60a5fa;
-  --water-8: #4f46e5;       /* azul oscuro */
+  --water-8: #4f46e5;
+  --exercise-strength: #fecaca; /* rojo */
+  --exercise-cardio: #fde68a;   /* amarillo */
   --text: #1f2937;
 }
 
@@ -69,7 +71,7 @@ button.secondary {
 /* ===== GRID VISUAL ===== */
 .calendar-grid {
   display: grid;
-  grid-template-columns: 28px repeat(12, 1fr); /* columna días más estrecha */
+  grid-template-columns: 28px repeat(12, 1fr);
   gap: 4px;
   font-size: 11px;
   margin-top: 12px;
@@ -98,16 +100,13 @@ button.secondary {
   cursor: default;
 }
 
-.calendar-cell.bad    { background: #fecaca; }
-.calendar-cell.normal { background: #fde68a; }
-.calendar-cell.good   { background: #bbf7d0; }
-.calendar-cell.great  { background: #bfdbfe; }
-
-/* ===== COLORES AGUA ===== */
 .calendar-cell.water-2 { background: var(--water-2); }
 .calendar-cell.water-4 { background: var(--water-4); }
 .calendar-cell.water-6 { background: var(--water-6); }
-.calendar-cell.water-8 { background: var(--water-8); color: #fff; }
+.calendar-cell.water-8 { background: var(--water-8); color:#fff; }
+
+.calendar-cell.exercise-strength { background: var(--exercise-strength); }
+.calendar-cell.exercise-cardio { background: var(--exercise-cardio); }
 
 /* ===== MODAL ===== */
 .modal {
@@ -148,8 +147,13 @@ button.secondary {
 
 <!-- IZHAR -->
 <div id="screen-izhar" class="screen">
-  <h2>Izhar · Lectura de la Biblia</h2>
+  <h2>Izhar · Metas 2026</h2>
+  <div class="menu">
+    <button id="btn-biblia" class="active" onclick="showIzharSection('biblia')">Lectura Biblia</button>
+    <button id="btn-ejercicio" onclick="showIzharSection('ejercicio')">Ejercicio</button>
+  </div>
   <div id="izhar-biblia"></div>
+  <div id="izhar-ejercicio" style="display:none"></div>
 </div>
 
 <!-- CAMILA -->
@@ -195,16 +199,23 @@ window.selectUser = (user) => {
 
   if (user === 'Izhar') {
     renderCalendar('Izhar','biblia',document.getElementById('izhar-biblia'));
+    renderCalendar('Izhar','ejercicio',document.getElementById('izhar-ejercicio'));
   } else {
     renderCalendar('Camila','emocional',document.getElementById('camila-emocional'));
     renderCalendar('Camila','agua',document.getElementById('camila-agua'));
   }
 };
 
+window.showIzharSection = (section) => {
+  document.getElementById('izhar-biblia').style.display = section==='biblia'?'block':'none';
+  document.getElementById('izhar-ejercicio').style.display = section==='ejercicio'?'block':'none';
+  document.getElementById('btn-biblia').classList.toggle('active', section==='biblia');
+  document.getElementById('btn-ejercicio').classList.toggle('active', section==='ejercicio');
+};
+
 window.showSection = (section) => {
   document.getElementById('camila-emocional').style.display = section==='emocional'?'block':'none';
   document.getElementById('camila-agua').style.display = section==='agua'?'block':'none';
-
   document.getElementById('btn-emocional').classList.toggle('active', section==='emocional');
   document.getElementById('btn-agua').classList.toggle('active', section==='agua');
 };
@@ -213,24 +224,13 @@ function renderCalendar(user,type,container){
   container.innerHTML='';
   const grid=document.createElement('div');
   grid.className='calendar-grid';
-
   grid.appendChild(document.createElement('div'));
-  months.forEach(m=>{
-    const c=document.createElement('div');
-    c.className='calendar-cell header';
-    c.textContent=m;
-    grid.appendChild(c);
-  });
+  months.forEach(m=>{ const c=document.createElement('div'); c.className='calendar-cell header'; c.textContent=m; grid.appendChild(c); });
 
   for(let d=1;d<=31;d++){
-    const day=document.createElement('div');
-    day.className='calendar-cell day';
-    day.textContent=d;
-    grid.appendChild(day);
-
+    const day=document.createElement('div'); day.className='calendar-cell day'; day.textContent=d; grid.appendChild(day);
     months.forEach((_,mi)=>{
-      const cell=document.createElement('div');
-      cell.className='calendar-cell';
+      const cell=document.createElement('div'); cell.className='calendar-cell';
       cell.onclick=()=>openModal(user,type,d,mi,cell);
       grid.appendChild(cell);
       loadCell(user,type,d,mi,cell);
@@ -251,24 +251,21 @@ async function loadCell(user,type,day,month,cell){
 
 window.openModal=(user,type,day,month,cell)=>{
   currentContext={user,type,day,month,cell};
-  const opts=document.getElementById('modal-options');
-  opts.innerHTML='';
+  const opts=document.getElementById('modal-options'); opts.innerHTML='';
 
   if(type==='biblia'){
     document.getElementById('modal-title').textContent='Lectura de la Biblia';
-    addOpt('✔','good');
-    addOpt('✖','bad');
-    addOpt('','');
+    addOpt('✔','good'); addOpt('✖','bad'); addOpt('','');
   } else if(type==='emocional'){
     document.getElementById('modal-title').textContent='Estado del día';
-    addOpt('😞','bad'); addOpt('😐','normal'); addOpt('🙂','good'); addOpt('🤩','great');
-    addOpt('','');
+    addOpt('😞','bad'); addOpt('😐','normal'); addOpt('🙂','good'); addOpt('🤩','great'); addOpt('','');
   } else if(type==='agua'){
     document.getElementById('modal-title').textContent='Vasos de agua';
-    addOpt('2 💧','water-2');
-    addOpt('4 💧','water-4');
-    addOpt('6 💧','water-6');
-    addOpt('8 💧','water-8');
+    addOpt('2 💧','water-2'); addOpt('4 💧','water-4'); addOpt('6 💧','water-6'); addOpt('8 💧','water-8'); addOpt('','');
+  } else if(type==='ejercicio'){
+    document.getElementById('modal-title').textContent='Ejercicio';
+    addOpt('🏋️','exercise-strength');
+    addOpt('🏃','exercise-cardio');
     addOpt('','');
   }
 
@@ -276,9 +273,7 @@ window.openModal=(user,type,day,month,cell)=>{
 };
 
 function addOpt(label,cls){
-  const b=document.createElement('button');
-  b.textContent=label||'Dejar en blanco';
-  b.onclick=()=>saveOpt(label,cls);
+  const b=document.createElement('button'); b.textContent=label||'Dejar en blanco'; b.onclick=()=>saveOpt(label,cls);
   document.getElementById('modal-options').appendChild(b);
 }
 
@@ -290,9 +285,7 @@ async function saveOpt(label,cls){
   closeModal();
 }
 
-window.closeModal=()=>{
-  document.getElementById('modal').classList.remove('active');
-};
+window.closeModal=()=>{ document.getElementById('modal').classList.remove('active'); };
 </script>
 
 </body>
