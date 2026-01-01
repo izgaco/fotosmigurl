@@ -114,7 +114,7 @@ button.danger { background: #ef4444; color: #fff; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 const firebaseConfig = { apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro", authDomain: "migurl-metas.firebaseapp.com", projectId: "migurl-metas" };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -200,11 +200,17 @@ document.getElementById('confirm-delete').onclick = async function(){
       if(!cell.classList.contains('day') && !cell.classList.contains('header')){
         cell.textContent='';
         cell.className='calendar-cell';
-        if(cell.dataset.day && cell.dataset.month){
-          await setDoc(doc(db,'metas',`${borrarContext}_${id}_${cell.dataset.day}_${cell.dataset.month}`),{label:'',class:''});
-        }
       }
     }
+    // Eliminar los documentos de Firestore del calendario
+    const collRef = collection(db, 'metas');
+    const snapshot = await getDocs(collRef);
+    snapshot.forEach(async docSnap => {
+      const docId = docSnap.id;
+      if(docId.startsWith(`${borrarContext}_${id.split('-')[1]}_`)){
+        await deleteDoc(doc(db,'metas',docId));
+      }
+    });
   }
   window.closeBorrar();
 };
