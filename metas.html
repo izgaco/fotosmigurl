@@ -6,89 +6,128 @@
 <title>Metas 2026</title>
 
 <style>
-/* =================
-   MOBILE FIRST
-================= */
-body {
+/* ===== BASE ===== */
+body{
   font-family: system-ui, sans-serif;
-  margin: 0;
-  padding: 8px;
+  margin:0;
+  padding:12px;
+  background: linear-gradient(180deg,#eef2f7,#f9fafb);
 }
 
-h1, h2 {
-  text-align: center;
-  margin: 8px 0;
+h1{
+  text-align:center;
+  margin-bottom:10px;
 }
 
-select, button {
-  font-size: 15px;
-  padding: 6px;
-  margin: 4px;
+/* ===== SELECT ===== */
+.select-card{
+  background:white;
+  padding:15px;
+  border-radius:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
+  max-width:320px;
+  margin:0 auto 15px;
 }
 
-.menu {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+select{
+  width:100%;
+  padding:12px;
+  font-size:16px;
+  border-radius:10px;
+  border:1px solid #ccc;
 }
 
-.table-container {
-  overflow-x: auto;
+/* ===== PANEL MENU ===== */
+.menu{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom:12px;
 }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
-  table-layout: fixed;
-  font-size: 11px;
+.menu button{
+  background:white;
+  border:none;
+  border-radius:14px;
+  padding:14px;
+  min-width:140px;
+  font-size:15px;
+  box-shadow:0 6px 16px rgba(0,0,0,.1);
+  cursor:pointer;
 }
 
-th, td {
-  border: 1px solid #ccc;
-  text-align: center;
-  padding: 2px;
-  min-width: 22px;
+/* ===== CALENDAR ===== */
+.card{
+  background:white;
+  border-radius:16px;
+  padding:10px;
+  box-shadow:0 10px 24px rgba(0,0,0,.1);
 }
 
-td {
-  height: 26px;
-  cursor: pointer;
+.table-container{
+  overflow-x:auto;
 }
 
-/* Estados */
-.malo { background:#f44336; color:white; }
-.normal { background:#ffc107; }
-.bueno { background:#4caf50; color:white; }
-.genial { background:#2196f3; color:white; }
-
-.ok { background:#4caf50; color:white; }
-.no { background:#f44336; color:white; }
-
-/* Modal */
-#modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.6);
-  display: none;
-  align-items: center;
-  justify-content: center;
+table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  font-size:11px;
 }
 
-#modal-content {
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 300px;
+th,td{
+  border:1px solid #ddd;
+  text-align:center;
+  padding:2px;
+  min-width:22px;
 }
 
-button.modal-btn {
-  width: 100%;
-  padding: 10px;
-  margin: 6px 0;
+td{
+  height:26px;
+  cursor:pointer;
+  font-size:15px;
 }
 
-.hidden { display: none; }
+/* ===== STATES ===== */
+.malo{background:#f44336;color:white;}
+.normal{background:#ffc107;}
+.bueno{background:#4caf50;color:white;}
+.genial{background:#2196f3;color:white;}
+
+.vasos2,.vasos4,.vasos6,.vasos8{
+  background:#4caf50;color:white;
+}
+
+.ok{background:#4caf50;color:white;}
+.no{background:#f44336;color:white;}
+
+/* ===== MODAL ===== */
+#modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+#modal-content{
+  background:white;
+  padding:16px;
+  border-radius:16px;
+  width:90%;
+  max-width:300px;
+}
+
+.modal-btn{
+  width:100%;
+  padding:12px;
+  margin:6px 0;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+}
 </style>
 </head>
 
@@ -96,11 +135,15 @@ button.modal-btn {
 
 <h1>Metas 2026</h1>
 
-<select id="userSelect"></select>
+<div class="select-card">
+  <select id="userSelect">
+    <option value="">Usuario</option>
+  </select>
+</div>
 
 <div id="panelMenu" class="menu"></div>
 
-<div class="table-container">
+<div class="card table-container">
   <div id="grid"></div>
 </div>
 
@@ -113,84 +156,64 @@ button.modal-btn {
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-/* =================
-   FIREBASE
-================= */
 firebase.initializeApp({
-  apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro",
-  authDomain: "migurl-metas.firebaseapp.com",
-  projectId: "migurl-metas"
+  apiKey:"AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro",
+  authDomain:"migurl-metas.firebaseapp.com",
+  projectId:"migurl-metas"
 });
-const db = firebase.firestore();
+const db=firebase.firestore();
 
-/* =================
-   CONFIGURACIÓN
-================= */
-const USERS = {
-  Izhar: ["emocional", "lectura"],
-  Camila: ["emocional", "agua"]
+const USERS={
+  Izhar:["lectura"],
+  Camila:["emocional","agua"]
 };
 
-const PANELS = {
-  emocional: { label:"Año emocional", modal:"emocional" },
-  agua: { label:"Beber agua", modal:"agua" },
-  lectura: { label:"Lectura Biblia", modal:"lectura" }
+const PANELS={
+  emocional:{label:"Año emocional 🧠"},
+  agua:{label:"Beber agua 💧"},
+  lectura:{label:"Lectura Biblia 📖"}
 };
 
-const months = ["E","F","M","A","M","J","J","A","S","O","N","D"];
-const daysInMonth = [31,29,31,30,31,30,31,31,30,31,30,31];
+const months=["E","F","M","A","M","J","J","A","S","O","N","D"];
+const daysInMonth=[31,29,31,30,31,30,31,31,30,31,30,31];
 
-let currentUser = "";
-let currentPanel = "";
-let selectedCell = null;
+let currentUser="",currentPanel="",selectedCell=null;
 
-/* =================
-   INIT
-================= */
-const userSelect = document.getElementById("userSelect");
-userSelect.innerHTML = `<option value="">Usuario</option>` +
-  Object.keys(USERS).map(u=>`<option>${u}</option>`).join("");
+const userSelect=document.getElementById("userSelect");
+Object.keys(USERS).forEach(u=>{
+  userSelect.innerHTML+=`<option>${u}</option>`;
+});
 
-userSelect.onchange = () => {
-  currentUser = userSelect.value;
-  buildPanelMenu();
-};
+userSelect.onchange=()=>{
+  currentUser=userSelect.value;
+  document.getElementById("grid").innerHTML="";
+  document.getElementById("panelMenu").innerHTML="";
+  if(!currentUser) return;
 
-/* =================
-   PANEL MENU
-================= */
-function buildPanelMenu() {
-  const menu = document.getElementById("panelMenu");
-  menu.innerHTML = "";
   USERS[currentUser].forEach(p=>{
-    const b = document.createElement("button");
-    b.textContent = PANELS[p].label;
-    b.onclick = ()=>showGrid(p);
-    menu.appendChild(b);
+    const b=document.createElement("button");
+    b.textContent=PANELS[p].label;
+    b.onclick=()=>showGrid(p);
+    document.getElementById("panelMenu").appendChild(b);
   });
-}
+};
 
-/* =================
-   GRID
-================= */
-function showGrid(panel) {
-  currentPanel = panel;
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "";
+function showGrid(panel){
+  currentPanel=panel;
+  const grid=document.getElementById("grid");
+  grid.innerHTML="";
 
-  const table = document.createElement("table");
-  table.innerHTML = `
-    <tr><th></th>${months.map(m=>`<th>${m}</th>`).join("")}</tr>
-  `;
+  const table=document.createElement("table");
+  table.innerHTML=`<tr><th></th>${months.map(m=>`<th>${m}</th>`).join("")}</tr>`;
 
   for(let d=1;d<=31;d++){
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<th>${d}</th>`;
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<th>${d}</th>`;
     for(let m=0;m<12;m++){
-      const td = document.createElement("td");
+      const td=document.createElement("td");
       if(d<=daysInMonth[m]){
-        td.dataset.id = `${currentUser}-${panel}-${d}-${m+1}`;
-        td.onclick = ()=>openModal(td);
+        td.dataset.id=`${currentUser}-${panel}-${d}-${m+1}`;
+        td.onclick=()=>openModal(td);
       }
       tr.appendChild(td);
     }
@@ -200,54 +223,55 @@ function showGrid(panel) {
   loadDays();
 }
 
-/* =================
-   MODAL
-================= */
+function applyValue(cell,v){
+  cell.className="";
+  cell.textContent="";
+  if(!v) return;
+
+  cell.classList.add(v);
+  if(v.startsWith("vasos")) cell.textContent="💧";
+  else if(v==="malo") cell.textContent="😞";
+  else if(v==="normal") cell.textContent="😐";
+  else if(v==="bueno") cell.textContent="🙂";
+  else if(v==="genial") cell.textContent="🤩";
+  else if(v==="ok") cell.textContent="✔️";
+  else if(v==="no") cell.textContent="❌";
+}
+
 function openModal(td){
-  selectedCell = td;
-  const c = document.getElementById("modal-content");
+  selectedCell=td;
+  const c=document.getElementById("modal-content");
   if(currentPanel==="lectura"){
-    c.innerHTML = `
+    c.innerHTML=`
       <button class="modal-btn" onclick="setDay('ok')">✔️ Leído</button>
       <button class="modal-btn" onclick="setDay('no')">❌ No leído</button>
-      <button class="modal-btn" onclick="setDay('')">⬜ En blanco</button>
-    `;
-  } else {
-    c.innerHTML = `
+      <button class="modal-btn" onclick="setDay('')">⬜ En blanco</button>`;
+  }else if(currentPanel==="agua"){
+    c.innerHTML=[2,4,6,8].map(v=>
+      `<button class="modal-btn" onclick="setDay('vasos${v}')">${v} vasos 💧</button>`
+    ).join("")+`<button class="modal-btn" onclick="setDay('')">⬜</button>`;
+  }else{
+    c.innerHTML=`
       <button class="modal-btn" onclick="setDay('malo')">😞</button>
       <button class="modal-btn" onclick="setDay('normal')">😐</button>
       <button class="modal-btn" onclick="setDay('bueno')">🙂</button>
       <button class="modal-btn" onclick="setDay('genial')">🤩</button>
-      <button class="modal-btn" onclick="setDay('')">⬜</button>
-    `;
+      <button class="modal-btn" onclick="setDay('')">⬜</button>`;
   }
   document.getElementById("modal").style.display="flex";
 }
 
 function setDay(v){
-  selectedCell.className="";
-  selectedCell.textContent="";
-  if(v){
-    selectedCell.classList.add(v);
-    selectedCell.textContent = v==="ok"?"✔":v==="no"?"✖":"";
-  }
+  applyValue(selectedCell,v);
   db.collection("days").doc(selectedCell.dataset.id).set({value:v});
   document.getElementById("modal").style.display="none";
 }
 
-/* =================
-   LOAD
-================= */
 function loadDays(){
   db.collection("days").get().then(s=>{
     s.forEach(d=>{
       const cell=document.querySelector(`[data-id="${d.id}"]`);
-      if(!cell) return;
-      const v=d.data().value;
-      if(v){
-        cell.classList.add(v);
-        cell.textContent = v==="ok"?"✔":v==="no"?"✖":"";
-      }
+      if(cell) applyValue(cell,d.data().value);
     });
   });
 }
@@ -256,6 +280,5 @@ document.getElementById("modal").onclick=e=>{
   if(e.target.id==="modal") e.target.style.display="none";
 };
 </script>
-
 </body>
 </html>
