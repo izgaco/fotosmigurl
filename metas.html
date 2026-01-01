@@ -128,14 +128,27 @@ td.disabled {
 
 <script>
 /* 🔴 PEGA AQUÍ TU CONFIGURACIÓN REAL DE FIREBASE */
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "PEGA_AQUI_TU_APIKEY",
-    authDomain: "PEGA_AQUI",
-    projectId: "PEGA_AQUI",
-    storageBucket: "PEGA_AQUI",
-    messagingSenderId: "PEGA_AQUI",
-    appId: "PEGA_AQUI"
+  apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro",
+  authDomain: "migurl-metas.firebaseapp.com",
+  projectId: "migurl-metas",
+  storageBucket: "migurl-metas.firebasestorage.app",
+  messagingSenderId: "1012055520964",
+  appId: "1:1012055520964:web:b67ae486ed1ce5edf77b91",
+  measurementId: "G-GJTCYQFVF2"
 };
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
