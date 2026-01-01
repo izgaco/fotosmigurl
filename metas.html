@@ -122,7 +122,23 @@
     </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script>
+
+const firebaseConfig = {
+  apiKey: "PEGA_AQUÍ_TU_APIKEY",
+  authDomain: "PEGA_AQUÍ",
+  projectId: "PEGA_AQUÍ",
+  storageBucket: "PEGA_AQUÍ",
+  messagingSenderId: "PEGA_AQUÍ",
+  appId: "PEGA_AQUÍ"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 const months = [
     { name: "Enero", days: 31 },
     { name: "Febrero", days: 28 },
@@ -177,19 +193,24 @@ function setDay(type, emoji) {
     selectedCell.textContent = emoji;
 
     const id = selectedCell.dataset.id;
-    localStorage.setItem(id, JSON.stringify({ type, emoji }));
+
+    db.collection("days").doc(id).set({
+        type: type,
+        emoji: emoji
+    });
 
     modal.style.display = "none";
 }
 
 // Cargar datos guardados
-document.querySelectorAll("td[data-id]").forEach(cell => {
-    const data = localStorage.getItem(cell.dataset.id);
-    if (data) {
-        const saved = JSON.parse(data);
-        cell.className = saved.type;
-        cell.textContent = saved.emoji;
-    }
+db.collection("days").onSnapshot(snapshot => {
+    snapshot.forEach(doc => {
+        const cell = document.querySelector(`td[data-id="${doc.id}"]`);
+        if (cell) {
+            cell.className = doc.data().type;
+            cell.textContent = doc.data().emoji;
+        }
+    });
 });
 
 // Cerrar modal al hacer clic fuera
