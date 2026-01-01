@@ -17,31 +17,27 @@
   --water-8: #4f46e5;
   --exercise-strength: #fecaca;
   --exercise-cardio: #fde68a;
-  --exercise-rest: #bbf7d0; /* verde claro */
+  --exercise-rest: #bbf7d0;
   --tick-green: #bbf7d0;
   --cross-red: #fecaca;
-  --emotional-bad: #f87171; /* rojo */
-  --emotional-normal: #86efac; /* verde claro */
-  --emotional-good: #4ade80; /* verde normal */
-  --emotional-great: #16a34a; /* verde oscuro */
+  --emotional-bad: #f87171;
+  --emotional-normal: #86efac;
+  --emotional-good: #4ade80;
+  --emotional-great: #16a34a;
   --text: #1f2937;
 }
 
 * { box-sizing: border-box; }
-
 body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
 .screen { display: none; padding: 16px; }
 .screen.active { display: block; }
 h2 { margin-top: 0; }
-
 button { border: none; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 600; background: var(--primary-light); color: #111; }
 button.active { background: var(--primary); color: #fff; }
 button.secondary { background: #e5e7eb; color: #111; }
 .user-select { display: grid; gap: 16px; margin-top: 40px; }
 .menu { display: flex; gap: 10px; margin-bottom: 16px; }
 .menu button { flex: 1; }
-
-/* ===== GRID VISUAL ===== */
 .calendar-grid { display: grid; grid-template-columns: 28px repeat(12, 1fr); gap: 4px; font-size: 11px; margin-top: 12px; }
 .calendar-cell { background: #ffffff; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; user-select: none; }
 .calendar-cell.header { font-weight: 700; background: #eef2ff; cursor: default; }
@@ -59,7 +55,6 @@ button.secondary { background: #e5e7eb; color: #111; }
 .calendar-cell.normal { background: var(--emotional-normal); }
 .calendar-cell.good { background: var(--emotional-good); }
 .calendar-cell.great { background: var(--emotional-great); }
-
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 10; }
 .modal.active { display: flex; }
 .modal-box { background: white; width: 90%; max-width: 320px; padding: 20px; border-radius: 16px; }
@@ -69,7 +64,6 @@ button.secondary { background: #e5e7eb; color: #111; }
 </head>
 <body>
 
-<!-- SELECCIÓN USUARIO -->
 <div id="screen-user" class="screen active">
   <h2>¿Quién hace el seguimiento?</h2>
   <div class="user-select">
@@ -78,19 +72,17 @@ button.secondary { background: #e5e7eb; color: #111; }
   </div>
 </div>
 
-<!-- IZHAR -->
 <div id="screen-izhar" class="screen">
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Izhar · Metas 2026</h2>
   <div class="menu">
-    <button id="btn-biblia" class="active" onclick="showIzharSection('biblia')">Lectura Biblia</button>
+    <button id="btn-biblia" class="active" onclick="showIzharSection('biblia')">Lectura de la Biblia</button>
     <button id="btn-ejercicio" onclick="showIzharSection('ejercicio')">Ejercicio</button>
   </div>
   <div id="izhar-biblia"></div>
   <div id="izhar-ejercicio" style="display:none"></div>
 </div>
 
-<!-- CAMILA -->
 <div id="screen-camila" class="screen">
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Camila · Metas 2026</h2>
@@ -102,7 +94,6 @@ button.secondary { background: #e5e7eb; color: #111; }
   <div id="camila-agua" style="display:none"></div>
 </div>
 
-<!-- MODAL -->
 <div id="modal" class="modal">
   <div class="modal-box">
     <h3 id="modal-title">Selecciona</h3>
@@ -114,34 +105,26 @@ button.secondary { background: #e5e7eb; color: #111; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
 const firebaseConfig = { apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro", authDomain: "migurl-metas.firebaseapp.com", projectId: "migurl-metas" };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const monthsFull = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const monthsShort = monthsFull.map(m => m.slice(0,3).toUpperCase());
 let currentContext = null;
 
 window.volverUsuario = () => { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById('screen-user').classList.add('active'); };
-
 window.selectUser = (user) => {
   document.getElementById('screen-user').classList.remove('active');
-  document.getElementById(user === 'Izhar' ? 'screen-izhar' : 'screen-camila').classList.add('active');
-  if (user === 'Izhar') {
-    renderCalendar('Izhar','biblia',document.getElementById('izhar-biblia'));
-    renderCalendar('Izhar','ejercicio',document.getElementById('izhar-ejercicio'));
-  } else {
-    renderCalendar('Camila','emocional',document.getElementById('camila-emocional'));
-    renderCalendar('Camila','agua',document.getElementById('camila-agua'));
-  }
+  document.getElementById(user==='Izhar'?'screen-izhar':'screen-camila').classList.add('active');
+  if(user==='Izhar') { renderCalendar('Izhar','biblia',document.getElementById('izhar-biblia')); renderCalendar('Izhar','ejercicio',document.getElementById('izhar-ejercicio')); }
+  else { renderCalendar('Camila','emocional',document.getElementById('camila-emocional')); renderCalendar('Camila','agua',document.getElementById('camila-agua')); }
 };
-
 window.showIzharSection = (section) => {
   document.getElementById('izhar-biblia').style.display = section==='biblia'?'block':'none';
   document.getElementById('izhar-ejercicio').style.display = section==='ejercicio'?'block':'none';
   document.getElementById('btn-biblia').classList.toggle('active', section==='biblia');
   document.getElementById('btn-ejercicio').classList.toggle('active', section==='ejercicio');
 };
-
 window.showSection = (section) => {
   document.getElementById('camila-emocional').style.display = section==='emocional'?'block':'none';
   document.getElementById('camila-agua').style.display = section==='agua'?'block':'none';
@@ -151,18 +134,11 @@ window.showSection = (section) => {
 
 function renderCalendar(user,type,container){
   container.innerHTML='';
-  const grid=document.createElement('div');
-  grid.className='calendar-grid';
+  const grid=document.createElement('div'); grid.className='calendar-grid';
   grid.appendChild(document.createElement('div'));
-  months.forEach(m=>{ const c=document.createElement('div'); c.className='calendar-cell header'; c.textContent=m; grid.appendChild(c); });
-  for(let d=1;d<=31;d++){
-    const day=document.createElement('div'); day.className='calendar-cell day'; day.textContent=d; grid.appendChild(day);
-    months.forEach((_,mi)=>{
-      const cell=document.createElement('div'); cell.className='calendar-cell';
-      cell.onclick=()=>openModal(user,type,d,mi,cell);
-      grid.appendChild(cell);
-      loadCell(user,type,d,mi,cell);
-    });
+  monthsShort.forEach((m,i)=>{ const c=document.createElement('div'); c.className='calendar-cell header'; c.textContent=m; grid.appendChild(c); });
+  for(let d=1;d<=31;d++){ const day=document.createElement('div'); day.className='calendar-cell day'; day.textContent=d; grid.appendChild(day);
+    monthsFull.forEach((_,mi)=>{ const cell=document.createElement('div'); cell.className='calendar-cell'; cell.onclick=()=>openModal(user,type,d,mi,cell); grid.appendChild(cell); loadCell(user,type,d,mi,cell); });
   }
   container.appendChild(grid);
 }
@@ -170,17 +146,13 @@ function renderCalendar(user,type,container){
 async function loadCell(user,type,day,month,cell){
   const ref=doc(db,'metas',`${user}_${type}_${day}_${month}`);
   const snap=await getDoc(ref);
-  if(snap.exists()){
-    const v=snap.data();
-    cell.textContent=v.label||'';
-    cell.className='calendar-cell '+(v.class||'');
-  }
+  if(snap.exists()){ const v=snap.data(); cell.textContent=v.label||''; cell.className='calendar-cell '+(v.class||''); }
 }
 
 window.openModal=(user,type,day,month,cell)=>{
   currentContext={user,type,day,month,cell};
   const opts=document.getElementById('modal-options'); opts.innerHTML='';
-  document.getElementById('modal-title').textContent=`${day} de ${months[month]}`;
+  document.getElementById('modal-title').textContent=`${day} de ${monthsFull[month]}`;
   if(type==='biblia'){ addOpt('✔','tick'); addOpt('✖','cross'); addOpt('',''); }
   else if(type==='emocional'){ addOpt('😞','bad'); addOpt('😐','normal'); addOpt('🙂','good'); addOpt('🤩','great'); addOpt('',''); }
   else if(type==='agua'){ addOpt('2 💧','water-2'); addOpt('4 💧','water-4'); addOpt('6 💧','water-6'); addOpt('8 💧','water-8'); addOpt('',''); }
@@ -202,9 +174,7 @@ async function saveOpt(label,cls){
   await setDoc(doc(db,'metas',`${user}_${type}_${day}_${month}`),{label,class:cls});
   closeModal();
 }
-
 window.closeModal=()=>{ document.getElementById('modal').classList.remove('active'); };
 </script>
-
 </body>
 </html>
