@@ -12,17 +12,24 @@
 body {
   font-family: system-ui, sans-serif;
   margin: 0;
-  padding: 10px;
+  padding: 8px;
 }
 
 h1, h2 {
   text-align: center;
+  margin: 8px 0;
 }
 
 select, button {
-  font-size: 16px;
+  font-size: 15px;
   padding: 6px;
-  margin: 5px;
+  margin: 4px;
+}
+
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .table-container {
@@ -32,33 +39,32 @@ select, button {
 table {
   border-collapse: collapse;
   width: 100%;
-  font-size: 12px;
-  margin: 10px 0;
+  table-layout: fixed;
+  font-size: 11px;
 }
 
 th, td {
   border: 1px solid #ccc;
   text-align: center;
-  padding: 4px;
-  min-width: 30px;
+  padding: 2px;
+  min-width: 22px;
 }
 
 td {
+  height: 26px;
   cursor: pointer;
-  height: 32px;
 }
 
+/* Estados */
 .malo { background:#f44336; color:white; }
 .normal { background:#ffc107; }
 .bueno { background:#4caf50; color:white; }
 .genial { background:#2196f3; color:white; }
 
-/* Beber agua colores */
-.vasos2 { background:#c8e6c9; }
-.vasos4 { background:#81c784; color:white; }
-.vasos6 { background:#4caf50; color:white; }
-.vasos8 { background:#2e7d32; color:white; }
+.ok { background:#4caf50; color:white; }
+.no { background:#f44336; color:white; }
 
+/* Modal */
 #modal {
   position: fixed;
   inset: 0;
@@ -66,12 +72,11 @@ td {
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 100;
 }
 
-#modal div {
+#modal-content {
   background: white;
-  padding: 20px;
+  padding: 15px;
   border-radius: 10px;
   width: 90%;
   max-width: 300px;
@@ -79,223 +84,177 @@ td {
 
 button.modal-btn {
   width: 100%;
-  margin: 6px 0;
   padding: 10px;
-  font-size: 16px;
+  margin: 6px 0;
 }
 
 .hidden { display: none; }
-
-/* =================
-   TABLET / DESKTOP
-================= */
-@media (min-width: 768px) {
-  table { font-size: 14px; }
-  th, td { padding: 6px; min-width: 40px; }
-}
 </style>
 </head>
+
 <body>
 
-<h1>Seguimiento de Metas 2026</h1>
+<h1>Metas 2026</h1>
 
-<!-- Selección de usuario -->
-<div id="user-select">
-  <label for="user">Selecciona usuario:</label>
-  <select id="user" onchange="selectUser()">
-    <option value="">--Elige--</option>
-    <option value="Izhar">Izhar</option>
-    <option value="Camila">Camila</option>
-  </select>
+<select id="userSelect"></select>
+
+<div id="panelMenu" class="menu"></div>
+
+<div class="table-container">
+  <div id="grid"></div>
 </div>
 
-<!-- Menú Camila -->
-<div id="camila-menu" class="hidden">
-  <h2>Menú Camila</h2>
-  <button onclick="showGrid('agua')">Beber agua 💧</button>
-  <button onclick="showGrid('emocional')">Año emocional 🗓️</button>
-</div>
-
-<!-- Contenedor de cuadrículas -->
-<div id="grid-container"></div>
-
-<!-- Modal -->
 <div id="modal">
   <div id="modal-content"></div>
 </div>
 
-<!-- Firebase COMPAT -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-/* =========================
-   FIREBASE CONFIG
-========================= */
-const firebaseConfig = {
+/* =================
+   FIREBASE
+================= */
+firebase.initializeApp({
   apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro",
   authDomain: "migurl-metas.firebaseapp.com",
-  projectId: "migurl-metas",
-  storageBucket: "migurl-metas.firebasestorage.app",
-  messagingSenderId: "1012055520964",
-  appId: "1:1012055520964:web:b67ae486ed1ce5edf77b91",
-  measurementId: "G-GJTCYQFVF2"
-};
-firebase.initializeApp(firebaseConfig);
+  projectId: "migurl-metas"
+});
 const db = firebase.firestore();
 
-/* =========================
-   VARIABLES
-========================= */
-const months = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
+/* =================
+   CONFIGURACIÓN
+================= */
+const USERS = {
+  Izhar: ["emocional", "lectura"],
+  Camila: ["emocional", "agua"]
+};
+
+const PANELS = {
+  emocional: { label:"Año emocional", modal:"emocional" },
+  agua: { label:"Beber agua", modal:"agua" },
+  lectura: { label:"Lectura Biblia", modal:"lectura" }
+};
+
+const months = ["E","F","M","A","M","J","J","A","S","O","N","D"];
 const daysInMonth = [31,29,31,30,31,30,31,31,30,31,30,31];
-let selectedCell = null;
-let currentGrid = "";
+
 let currentUser = "";
+let currentPanel = "";
+let selectedCell = null;
 
-/* =========================
-   USUARIO
-========================= */
-function selectUser() {
-  const sel = document.getElementById("user").value;
-  currentUser = sel;
-  document.getElementById("grid-container").innerHTML = "";
-  if (sel === "Camila") {
-    document.getElementById("camila-menu").classList.remove("hidden");
-  } else {
-    document.getElementById("camila-menu").classList.add("hidden");
-    if (sel === "Izhar") showGrid('emocional'); // Izhar solo ve Año emocional
-  }
+/* =================
+   INIT
+================= */
+const userSelect = document.getElementById("userSelect");
+userSelect.innerHTML = `<option value="">Usuario</option>` +
+  Object.keys(USERS).map(u=>`<option>${u}</option>`).join("");
+
+userSelect.onchange = () => {
+  currentUser = userSelect.value;
+  buildPanelMenu();
+};
+
+/* =================
+   PANEL MENU
+================= */
+function buildPanelMenu() {
+  const menu = document.getElementById("panelMenu");
+  menu.innerHTML = "";
+  USERS[currentUser].forEach(p=>{
+    const b = document.createElement("button");
+    b.textContent = PANELS[p].label;
+    b.onclick = ()=>showGrid(p);
+    menu.appendChild(b);
+  });
 }
 
-/* =========================
-   MOSTRAR CUADRÍCULA
-========================= */
-function showGrid(gridName) {
-  currentGrid = gridName;
-  const container = document.getElementById("grid-container");
-  container.innerHTML = "";
+/* =================
+   GRID
+================= */
+function showGrid(panel) {
+  currentPanel = panel;
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
 
-  if (gridName === "emocional") createCalendar(container, "emocional");
-  else if (gridName === "agua") createCalendar(container, "agua");
-}
-
-/* =========================
-   CREAR CALENDARIO
-========================= */
-function createCalendar(container, type) {
   const table = document.createElement("table");
+  table.innerHTML = `
+    <tr><th></th>${months.map(m=>`<th>${m}</th>`).join("")}</tr>
+  `;
 
-  const header = document.createElement("tr");
-  header.innerHTML = "<th>Día</th>" + months.map(m => `<th>${m}</th>`).join("");
-  table.appendChild(header);
-
-  for (let d = 1; d <= 31; d++) {
+  for(let d=1;d<=31;d++){
     const tr = document.createElement("tr");
     tr.innerHTML = `<th>${d}</th>`;
-
-    for (let m = 0; m < 12; m++) {
+    for(let m=0;m<12;m++){
       const td = document.createElement("td");
-      if (d <= daysInMonth[m]) {
-        td.dataset.id = `${currentUser}-${type}-${d}-${m+1}`;
-        td.onclick = () => openModal(td, type);
+      if(d<=daysInMonth[m]){
+        td.dataset.id = `${currentUser}-${panel}-${d}-${m+1}`;
+        td.onclick = ()=>openModal(td);
       }
       tr.appendChild(td);
     }
     table.appendChild(tr);
   }
-
-  container.appendChild(table);
-
-  loadDays(type);
+  grid.appendChild(table);
+  loadDays();
 }
 
-/* =========================
+/* =================
    MODAL
-========================= */
-function openModal(td, type) {
+================= */
+function openModal(td){
   selectedCell = td;
-  const modal = document.getElementById("modal");
-  const content = document.getElementById("modal-content");
-  content.innerHTML = "";
-
-  if (type === "emocional") {
-    content.innerHTML = `
-      <button class="modal-btn" onclick="setDay('malo')">😞 Día malo</button>
-      <button class="modal-btn" onclick="setDay('normal')">😐 Día normal</button>
-      <button class="modal-btn" onclick="setDay('bueno')">🙂 Día bueno</button>
-      <button class="modal-btn" onclick="setDay('genial')">🤩 Día genial</button>
+  const c = document.getElementById("modal-content");
+  if(currentPanel==="lectura"){
+    c.innerHTML = `
+      <button class="modal-btn" onclick="setDay('ok')">✔️ Leído</button>
+      <button class="modal-btn" onclick="setDay('no')">❌ No leído</button>
       <button class="modal-btn" onclick="setDay('')">⬜ En blanco</button>
     `;
-  } else if (type === "agua") {
-    content.innerHTML = `
-      <button class="modal-btn" onclick="setDay('vasos2')">2 vasos 💧</button>
-      <button class="modal-btn" onclick="setDay('vasos4')">4 vasos 💧</button>
-      <button class="modal-btn" onclick="setDay('vasos6')">6 vasos 💧</button>
-      <button class="modal-btn" onclick="setDay('vasos8')">8 vasos 💧</button>
-      <button class="modal-btn" onclick="setDay('')">⬜ En blanco</button>
+  } else {
+    c.innerHTML = `
+      <button class="modal-btn" onclick="setDay('malo')">😞</button>
+      <button class="modal-btn" onclick="setDay('normal')">😐</button>
+      <button class="modal-btn" onclick="setDay('bueno')">🙂</button>
+      <button class="modal-btn" onclick="setDay('genial')">🤩</button>
+      <button class="modal-btn" onclick="setDay('')">⬜</button>
     `;
   }
-
-  modal.style.display = "flex";
+  document.getElementById("modal").style.display="flex";
 }
 
-function closeModal() {
-  document.getElementById("modal").style.display = "none";
-}
-
-function setDay(typeClass) {
-  selectedCell.className = "";
-  selectedCell.textContent = "";
-
-  if (typeClass) {
-    selectedCell.classList.add(typeClass);
-    if (typeClass.startsWith("vasos")) selectedCell.textContent = typeClass.replace("vasos","") + " 💧";
-    else selectedCell.textContent =
-      typeClass === "malo" ? "😞" :
-      typeClass === "normal" ? "😐" :
-      typeClass === "bueno" ? "🙂" : "🤩";
+function setDay(v){
+  selectedCell.className="";
+  selectedCell.textContent="";
+  if(v){
+    selectedCell.classList.add(v);
+    selectedCell.textContent = v==="ok"?"✔":v==="no"?"✖":"";
   }
-
-  saveDay(selectedCell.dataset.id, typeClass);
-  closeModal();
+  db.collection("days").doc(selectedCell.dataset.id).set({value:v});
+  document.getElementById("modal").style.display="none";
 }
 
-/* =========================
-   FIRESTORE
-========================= */
-function saveDay(id, value) {
-  if (!db) return;
-  db.collection("days").doc(id).set({ value });
-}
-
-function loadDays(type) {
-  if (!db) return;
-  const prefix = `${currentUser}-${type}-`;
-  db.collection("days").get().then(snapshot => {
-    snapshot.forEach(doc => {
-      if (!doc.id.startsWith(prefix)) return;
-      const cell = document.querySelector(`[data-id="${doc.id}"]`);
-      if (!cell) return;
-      const v = doc.data().value;
-      if (v) {
+/* =================
+   LOAD
+================= */
+function loadDays(){
+  db.collection("days").get().then(s=>{
+    s.forEach(d=>{
+      const cell=document.querySelector(`[data-id="${d.id}"]`);
+      if(!cell) return;
+      const v=d.data().value;
+      if(v){
         cell.classList.add(v);
-        if (v.startsWith("vasos")) cell.textContent = v.replace("vasos","") + " 💧";
-        else cell.textContent =
-          v === "malo" ? "😞" :
-          v === "normal" ? "😐" :
-          v === "bueno" ? "🙂" : "🤩";
+        cell.textContent = v==="ok"?"✔":v==="no"?"✖":"";
       }
     });
   });
 }
 
-/* =========================
-   CERRAR MODAL AL TOCAR FUERA
-========================= */
-document.getElementById("modal").addEventListener("click", e => {
-  if (e.target === document.getElementById("modal")) closeModal();
-});
+document.getElementById("modal").onclick=e=>{
+  if(e.target.id==="modal") e.target.style.display="none";
+};
 </script>
 
 </body>
