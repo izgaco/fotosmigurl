@@ -246,18 +246,18 @@ window.openModal = (cell) => {
   opts.innerHTML = "";
 
   if(currentMode === "emocional") {
-    document.getElementById("modal-title").textContent = "Estado del día";
-    addOption("😞","bad");
-    addOption("😐","normal");
-    addOption("🙂","good");
-    addOption("🤩","great");
-  } else {
-    document.getElementById("modal-title").textContent = "Vasos de agua";
-    addOption("💧","2");
-    addOption("💧💧","4");
-    addOption("💧💧💧","6");
-    addOption("💧💧💧💧","8");
-  }
+  document.getElementById("modal-title").textContent = "Estado del día";
+  addOption("😞", "bad");
+  addOption("😐", "normal");
+  addOption("🙂", "good");
+  addOption("🤩", "great");
+} else {
+  document.getElementById("modal-title").textContent = "Vasos de agua";
+  addOption("1💧", "water-1");
+  addOption("2💧", "water-2");
+  addOption("3💧", "water-3");
+  addOption("4💧", "water-4");
+}
   addOption("","");
 
   document.getElementById("modal").classList.add("active");
