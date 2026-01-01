@@ -26,7 +26,6 @@
   --emotional-great: #16a34a;
   --text: #1f2937;
 }
-
 * { box-sizing: border-box; }
 body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
 .screen { display: none; padding: 16px; }
@@ -35,6 +34,7 @@ h2 { margin-top: 0; }
 button { border: none; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 600; background: var(--primary-light); color: #111; }
 button.active { background: var(--primary); color: #fff; }
 button.secondary { background: #e5e7eb; color: #111; }
+button.danger { background: #ef4444; color: #fff; }
 .user-select { display: grid; gap: 16px; margin-top: 40px; }
 .menu { display: flex; gap: 10px; margin-bottom: 16px; }
 .menu button { flex: 1; }
@@ -81,6 +81,7 @@ button.secondary { background: #e5e7eb; color: #111; }
   </div>
   <div id="izhar-biblia"></div>
   <div id="izhar-ejercicio" style="display:none"></div>
+  <button class="secondary" onclick="confirmBorrar('izhar')">Borrar todo</button>
 </div>
 
 <div id="screen-camila" class="screen">
@@ -92,6 +93,7 @@ button.secondary { background: #e5e7eb; color: #111; }
   </div>
   <div id="camila-emocional"></div>
   <div id="camila-agua" style="display:none"></div>
+  <button class="secondary" onclick="confirmBorrar('camila')">Borrar todo</button>
 </div>
 
 <div id="modal" class="modal">
@@ -99,6 +101,14 @@ button.secondary { background: #e5e7eb; color: #111; }
     <h3 id="modal-title">Selecciona</h3>
     <div id="modal-options"></div>
     <button class="secondary" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
+<div id="modal-borrar" class="modal">
+  <div class="modal-box">
+    <h3>Se borrarán todos los registros. ¿Continuar?</h3>
+    <button class="secondary" onclick="closeBorrar()">Volver</button>
+    <button class="danger" onclick="borrarTodos()">Borrar</button>
   </div>
 </div>
 
@@ -111,6 +121,7 @@ const db = getFirestore(app);
 const monthsFull = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const monthsShort = monthsFull.map(m => m.slice(0,3).toUpperCase());
 let currentContext = null;
+let borrarContext = null;
 
 window.volverUsuario = () => { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById('screen-user').classList.add('active'); };
 window.selectUser = (user) => {
@@ -175,6 +186,17 @@ async function saveOpt(label,cls){
   closeModal();
 }
 window.closeModal=()=>{ document.getElementById('modal').classList.remove('active'); };
+
+window.confirmBorrar=(user)=>{ borrarContext=user; document.getElementById('modal-borrar').classList.add('active'); };
+window.closeBorrar=()=>{ document.getElementById('modal-borrar').classList.remove('active'); };
+async function borrarTodos(){
+  const screen = borrarContext==='Izhar'?['izhar-biblia','izhar-ejercicio']:['camila-emocional','camila-agua'];
+  for(const id of screen){
+    const container=document.getElementById(id);
+    container.querySelectorAll('.calendar-cell').forEach(cell=>{ if(!cell.classList.contains('day') && !cell.classList.contains('header')){ cell.textContent=''; cell.className='calendar-cell'; setDoc(doc(db,'metas',`${borrarContext}_${id}_${cell.dataset.day}_${cell.dataset.month}`),{label:'',class:''}); } });
+  }
+  closeBorrar();
+}
 </script>
 </body>
 </html>
