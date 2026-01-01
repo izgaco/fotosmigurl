@@ -26,6 +26,7 @@
   --emotional-great: #16a34a;
   --text: #1f2937;
 }
+
 * { box-sizing: border-box; }
 body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
 .screen { display: none; padding: 16px; }
@@ -34,7 +35,6 @@ h2 { margin-top: 0; }
 button { border: none; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 600; background: var(--primary-light); color: #111; }
 button.active { background: var(--primary); color: #fff; }
 button.secondary { background: #e5e7eb; color: #111; }
-button.danger { background: #ef4444; color: #fff; }
 .user-select { display: grid; gap: 16px; margin-top: 40px; }
 .menu { display: flex; gap: 10px; margin-bottom: 16px; }
 .menu button { flex: 1; }
@@ -81,7 +81,6 @@ button.danger { background: #ef4444; color: #fff; }
   </div>
   <div id="izhar-biblia"></div>
   <div id="izhar-ejercicio" style="display:none"></div>
-  <button class="secondary" onclick="borrarTodoLocal('izhar')">Borrar todo</button>
 </div>
 
 <div id="screen-camila" class="screen">
@@ -93,7 +92,6 @@ button.danger { background: #ef4444; color: #fff; }
   </div>
   <div id="camila-emocional"></div>
   <div id="camila-agua" style="display:none"></div>
-  <button class="secondary" onclick="borrarTodoLocal('camila')">Borrar todo</button>
 </div>
 
 <div id="modal" class="modal">
@@ -106,7 +104,7 @@ button.danger { background: #ef4444; color: #fff; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 const firebaseConfig = { apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro", authDomain: "migurl-metas.firebaseapp.com", projectId: "migurl-metas" };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -140,9 +138,15 @@ function renderCalendar(user,type,container){
   grid.appendChild(document.createElement('div'));
   monthsShort.forEach((m,i)=>{ const c=document.createElement('div'); c.className='calendar-cell header'; c.textContent=m; grid.appendChild(c); });
   for(let d=1;d<=31;d++){ const day=document.createElement('div'); day.className='calendar-cell day'; day.textContent=d; grid.appendChild(day);
-    monthsFull.forEach((_,mi)=>{ const cell=document.createElement('div'); cell.className='calendar-cell'; cell.dataset.day=d; cell.dataset.month=mi; cell.onclick=()=>openModal(user,type,d,mi,cell); grid.appendChild(cell); });
+    monthsFull.forEach((_,mi)=>{ const cell=document.createElement('div'); cell.className='calendar-cell'; cell.onclick=()=>openModal(user,type,d,mi,cell); grid.appendChild(cell); loadCell(user,type,d,mi,cell); });
   }
   container.appendChild(grid);
+}
+
+async function loadCell(user,type,day,month,cell){
+  const ref=doc(db,'metas',`${user}_${type}_${day}_${month}`);
+  const snap=await getDoc(ref);
+  if(snap.exists()){ const v=snap.data(); cell.textContent=v.label||''; cell.className='calendar-cell '+(v.class||''); }
 }
 
 window.openModal=(user,type,day,month,cell)=>{
@@ -159,32 +163,18 @@ window.openModal=(user,type,day,month,cell)=>{
 function addOpt(label,cls){
   const b=document.createElement('button');
   b.textContent = label === '' ? 'Dejar en blanco' : label;
-  b.onclick=()=>{ const displayLabel = label === '' ? '' : (label.includes(' ') ? label.split(' ')[0] : label); applyOptLocally(displayLabel,cls); };
+  b.onclick=()=>{ const displayLabel = label === '' ? '' : (label.includes(' ') ? label.split(' ')[0] : label); saveOpt(displayLabel,cls); };
   document.getElementById('modal-options').appendChild(b);
 }
 
-function applyOptLocally(label,cls){
-  const {cell}=currentContext;
-  cell.textContent = label||'';
-  cell.className = 'calendar-cell '+(cls||'');
+async function saveOpt(label,cls){
+  const {user,type,day,month,cell}=currentContext;
+  cell.textContent=label||'';
+  cell.className='calendar-cell '+(cls||'');
+  await setDoc(doc(db,'metas',`${user}_${type}_${day}_${month}`),{label,class:cls});
   closeModal();
 }
-
 window.closeModal=()=>{ document.getElementById('modal').classList.remove('active'); };
-
-window.borrarTodoLocal=(user)=>{
-  const screenIds = user==='Izhar'?['izhar-biblia','izhar-ejercicio']:['camila-emocional','camila-agua'];
-  for(const id of screenIds){
-    const container=document.getElementById(id);
-    const cells = container.querySelectorAll('.calendar-cell');
-    for(const cell of cells){
-      if(!cell.classList.contains('day') && !cell.classList.contains('header')){
-        cell.textContent='';
-        cell.className='calendar-cell';
-      }
-    }
-  }
-};
 </script>
 </body>
 </html>
