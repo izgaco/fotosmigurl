@@ -2,140 +2,92 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Mis metas 2026</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metas 2026</title>
 
 <style>
 body {
-    font-family: Arial, sans-serif;
-    background: #f4f4f4;
-    margin: 0;
-    padding: 10px;
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 10px;
 }
 
 h1 {
-    text-align: center;
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-}
-
-.table-container {
-    overflow-x: auto;
+  text-align: center;
 }
 
 table {
-    border-collapse: collapse;
-    width: 100%;
-    min-width: 800px;
-    background: white;
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
 }
 
 th, td {
-    border: 1px solid #ccc;
-    text-align: center;
-    padding: 8px;
-    font-size: 12px;
-}
-
-th {
-    background: #eee;
+  border: 1px solid #ccc;
+  text-align: center;
+  padding: 4px;
 }
 
 td {
-    cursor: pointer;
+  cursor: pointer;
+  height: 32px;
 }
 
-td.disabled {
-    background: #f0f0f0;
-    cursor: not-allowed;
+.malo { background:#f44336; color:white; }
+.normal { background:#ffc107; }
+.bueno { background:#4caf50; color:white; }
+.genial { background:#2196f3; color:white; }
+
+#modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Estados */
-.bad { background: #f28b82; }
-.normal { background: #fbbc04; }
-.good { background: #a7ffeb; }
-.great { background: #81c995; }
-
-/* Modal */
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
+#modal div {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 300px;
 }
 
-.modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 320px;
-    text-align: center;
-}
-
-.modal-content h3 {
-    margin-bottom: 15px;
-}
-
-.modal-content button {
-    width: 100%;
-    padding: 14px;
-    margin: 6px 0;
-    font-size: 1rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.btn-bad { background: #f28b82; }
-.btn-normal { background: #fbbc04; }
-.btn-good { background: #a7ffeb; }
-.btn-great { background: #81c995; }
-.btn-clear { background: #e0e0e0; }
-
-@media (min-width: 768px) {
-    h1 { font-size: 2rem; }
-    th, td { font-size: 14px; padding: 6px; }
+button {
+  width: 100%;
+  margin: 6px 0;
+  padding: 10px;
+  font-size: 16px;
 }
 </style>
 </head>
+
 <body>
 
-<h1>📆 Seguimiento anual de metas</h1>
+<h1>Metas 2026</h1>
+<div id="grid"></div>
 
-<div class="table-container">
-    <table id="calendar"></table>
+<div id="modal">
+  <div>
+    <button onclick="setDay('')">⬜ En blanco</button>
+    <button onclick="setDay('malo')">😞 Día malo</button>
+    <button onclick="setDay('normal')">😐 Día normal</button>
+    <button onclick="setDay('bueno')">🙂 Día bueno</button>
+    <button onclick="setDay('genial')">🤩 Día genial</button>
+    <button onclick="closeModal()">Cancelar</button>
+  </div>
 </div>
 
-<!-- Modal -->
-<div class="modal" id="modal">
-    <div class="modal-content">
-        <h3>¿Cómo fue el día?</h3>
-        <button class="btn-bad" onclick="setDay('bad','😞')">Día malo 😞</button>
-        <button class="btn-normal" onclick="setDay('normal','😐')">Día normal 😐</button>
-        <button class="btn-good" onclick="setDay('good','🙂')">Día bueno 🙂</button>
-        <button class="btn-great" onclick="setDay('great','🤩')">Día genial 🤩</button>
-        <button class="btn-clear" onclick="clearDay()">Dejar en blanco ⬜</button>
-    </div>
-</div>
-
-<!-- Firebase (VERSIÓN CORRECTA, SIN IMPORTS) -->
+<!-- Firebase COMPAT (SIN IMPORTS) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-/* 🔴 PEGA AQUÍ TU CONFIGURACIÓN REAL DE FIREBASE */
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+/* =========================
+   FIREBASE CONFIG (TUYA)
+========================= */
 const firebaseConfig = {
   apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro",
   authDomain: "migurl-metas.firebaseapp.com",
@@ -146,101 +98,112 @@ const firebaseConfig = {
   measurementId: "G-GJTCYQFVF2"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+/* =========================
+   VARIABLES
+========================= */
+const months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const daysInMonth = [31,29,31,30,31,30,31,31,30,31,30,31];
 
-/* Inicializar Firebase */
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-/* Meses */
-const months = [
-    { name: "Enero", days: 31 },
-    { name: "Febrero", days: 28 },
-    { name: "Marzo", days: 31 },
-    { name: "Abril", days: 30 },
-    { name: "Mayo", days: 31 },
-    { name: "Junio", days: 30 },
-    { name: "Julio", days: 31 },
-    { name: "Agosto", days: 31 },
-    { name: "Septiembre", days: 30 },
-    { name: "Octubre", days: 31 },
-    { name: "Noviembre", days: 30 },
-    { name: "Diciembre", days: 31 }
-];
-
-const table = document.getElementById("calendar");
 let selectedCell = null;
+let db = null;
 
-/* Cabecera */
-let header = "<tr><th>Día</th>";
-months.forEach(m => header += `<th>${m.name}</th>`);
-header += "</tr>";
-table.innerHTML = header;
+/* =========================
+   CREAR CUADRÍCULA (SIEMPRE)
+========================= */
+function createGrid() {
+  const table = document.createElement("table");
+  const header = document.createElement("tr");
+  header.innerHTML = "<th>Día</th>" + months.map(m => `<th>${m}</th>`).join("");
+  table.appendChild(header);
 
-/* Filas */
-for (let day = 1; day <= 31; day++) {
-    let row = `<tr><th>${day}</th>`;
-    months.forEach((m, monthIndex) => {
-        if (day > m.days) {
-            row += `<td class="disabled"></td>`;
-        } else {
-            const id = `${monthIndex + 1}-${day}`;
-            row += `<td data-id="${id}" onclick="openModal(this)"></td>`;
-        }
-    });
-    row += "</tr>";
-    table.innerHTML += row;
+  for (let d = 1; d <= 31; d++) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<th>${d}</th>`;
+
+    for (let m = 0; m < 12; m++) {
+      const td = document.createElement("td");
+      if (d <= daysInMonth[m]) {
+        td.dataset.id = `${d}-${m+1}`;
+        td.onclick = () => openModal(td);
+      }
+      tr.appendChild(td);
+    }
+    table.appendChild(tr);
+  }
+
+  document.getElementById("grid").appendChild(table);
 }
 
-/* Modal */
-const modal = document.getElementById("modal");
-
-function openModal(cell) {
-    selectedCell = cell;
-    modal.style.display = "flex";
+/* =========================
+   MODAL
+========================= */
+function openModal(td) {
+  selectedCell = td;
+  document.getElementById("modal").style.display = "flex";
 }
 
-function setDay(type, emoji) {
-    if (!selectedCell) return;
-    const id = selectedCell.dataset.id;
-
-    db.collection("days").doc(id).set({
-        type: type,
-        emoji: emoji
-    });
-
-    modal.style.display = "none";
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
 }
 
-function clearDay() {
-    if (!selectedCell) return;
-    const id = selectedCell.dataset.id;
-    db.collection("days").doc(id).delete();
-    modal.style.display = "none";
+function setDay(type) {
+  selectedCell.className = "";
+  selectedCell.textContent = "";
+
+  if (type) {
+    selectedCell.classList.add(type);
+    selectedCell.textContent =
+      type === "malo" ? "😞" :
+      type === "normal" ? "😐" :
+      type === "bueno" ? "🙂" : "🤩";
+  }
+
+  saveDay(selectedCell.dataset.id, type);
+  closeModal();
 }
 
-/* Escuchar cambios en tiempo real */
-db.collection("days").onSnapshot(snapshot => {
-    document.querySelectorAll("td[data-id]").forEach(cell => {
-        cell.className = "";
-        cell.textContent = "";
-    });
+/* =========================
+   FIRESTORE
+========================= */
+function initFirebase() {
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    loadDays();
+  } catch (e) {
+    console.warn("Firebase no disponible", e);
+  }
+}
 
+function saveDay(id, value) {
+  if (!db) return;
+  db.collection("days").doc(id).set({ value });
+}
+
+function loadDays() {
+  db.collection("days").get().then(snapshot => {
     snapshot.forEach(doc => {
-        const cell = document.querySelector(`td[data-id="${doc.id}"]`);
-        if (cell) {
-            cell.className = doc.data().type;
-            cell.textContent = doc.data().emoji;
-        }
-    });
-});
+      const cell = document.querySelector(`[data-id="${doc.id}"]`);
+      if (!cell) return;
 
-/* Cerrar modal tocando fuera */
-modal.addEventListener("click", e => {
-    if (e.target === modal) modal.style.display = "none";
-});
+      const v = doc.data().value;
+      if (v) {
+        cell.classList.add(v);
+        cell.textContent =
+          v === "malo" ? "😞" :
+          v === "normal" ? "😐" :
+          v === "bueno" ? "🙂" : "🤩";
+      }
+    });
+  });
+}
+
+/* =========================
+   ARRANQUE
+========================= */
+createGrid();   // SIEMPRE
+initFirebase(); // SI PUEDE
 </script>
 
 </body>
