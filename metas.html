@@ -114,7 +114,7 @@ button.danger { background: #ef4444; color: #fff; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 const firebaseConfig = { apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro", authDomain: "migurl-metas.firebaseapp.com", projectId: "migurl-metas" };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -202,15 +202,17 @@ document.getElementById('confirm-delete').onclick = async function(){
         cell.className='calendar-cell';
       }
     }
-    // Eliminar los documentos de Firestore del calendario
+    // Eliminar los documentos de Firestore del calendario usando batch para optimizar
+    const batch = writeBatch(db);
     const collRef = collection(db, 'metas');
     const snapshot = await getDocs(collRef);
-    snapshot.forEach(async docSnap => {
+    snapshot.forEach(docSnap => {
       const docId = docSnap.id;
       if(docId.startsWith(`${borrarContext}_${id.split('-')[1]}_`)){
-        await deleteDoc(doc(db,'metas',docId));
+        batch.delete(doc(db,'metas',docId));
       }
     });
+    await batch.commit();
   }
   window.closeBorrar();
 };
