@@ -6,6 +6,9 @@
 <title>Metas 2026</title>
 
 <style>
+/* =================
+   MOBILE FIRST
+================= */
 body {
   font-family: system-ui, sans-serif;
   margin: 0;
@@ -37,6 +40,7 @@ th, td {
   border: 1px solid #ccc;
   text-align: center;
   padding: 4px;
+  min-width: 30px;
 }
 
 td {
@@ -82,8 +86,12 @@ button.modal-btn {
 
 .hidden { display: none; }
 
+/* =================
+   TABLET / DESKTOP
+================= */
 @media (min-width: 768px) {
   table { font-size: 14px; }
+  th, td { padding: 6px; min-width: 40px; }
 }
 </style>
 </head>
@@ -139,8 +147,7 @@ const db = firebase.firestore();
 /* =========================
    VARIABLES
 ========================= */
-const months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
-                "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const months = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
 const daysInMonth = [31,29,31,30,31,30,31,31,30,31,30,31];
 let selectedCell = null;
 let currentGrid = "";
@@ -157,7 +164,7 @@ function selectUser() {
     document.getElementById("camila-menu").classList.remove("hidden");
   } else {
     document.getElementById("camila-menu").classList.add("hidden");
-    if (sel === "Izhar") showGrid('emocional'); // Izhar solo ve Año emocional por ahora
+    if (sel === "Izhar") showGrid('emocional'); // Izhar solo ve Año emocional
   }
 }
 
@@ -290,5 +297,6 @@ document.getElementById("modal").addEventListener("click", e => {
   if (e.target === document.getElementById("modal")) closeModal();
 });
 </script>
+
 </body>
 </html>
