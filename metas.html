@@ -26,7 +26,6 @@
   --emotional-great: #16a34a;
   --text: #1f2937;
 }
-
 * { box-sizing: border-box; }
 body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
 .screen { display: none; padding: 16px; }
@@ -144,9 +143,11 @@ function renderCalendar(user,type,container){
 }
 
 async function loadCell(user,type,day,month,cell){
-  const ref=doc(db,'metas',`${user}_${type}_${day}_${month}`);
-  const snap=await getDoc(ref);
-  if(snap.exists()){ const v=snap.data(); cell.textContent=v.label||''; cell.className='calendar-cell '+(v.class||''); }
+  try{
+    const ref=doc(db,'metas',`${user}_${type}_${day}_${month}`);
+    const snap=await getDoc(ref);
+    if(snap.exists()){ const v=snap.data(); cell.textContent=v.label||''; cell.className='calendar-cell '+(v.class||''); }
+  }catch(e){ console.warn('No se pudo cargar la celda:',e); }
 }
 
 window.openModal=(user,type,day,month,cell)=>{
@@ -163,17 +164,17 @@ window.openModal=(user,type,day,month,cell)=>{
 function addOpt(label,cls){
   const b=document.createElement('button');
   b.textContent = label === '' ? 'Dejar en blanco' : label;
-  b.onclick=()=>{ const displayLabel = label === '' ? '' : (label.includes(' ') ? label.split(' ')[0] : label); saveOpt(displayLabel,cls); };
+  b.onclick=()=>{ const displayLabel = label === '' ? '' : (label.includes(' ') ? label.split(' ')[0] : label); applyLocally(displayLabel,cls); };
   document.getElementById('modal-options').appendChild(b);
 }
 
-async function saveOpt(label,cls){
+async function applyLocally(label,cls){
   const {user,type,day,month,cell}=currentContext;
   cell.textContent=label||'';
   cell.className='calendar-cell '+(cls||'');
-  await setDoc(doc(db,'metas',`${user}_${type}_${day}_${month}`),{label,class:cls});
   closeModal();
 }
+
 window.closeModal=()=>{ document.getElementById('modal').classList.remove('active'); };
 </script>
 </body>
