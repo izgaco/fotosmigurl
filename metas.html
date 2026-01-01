@@ -104,34 +104,29 @@ button.secondary { background: #e5e7eb; color: #111; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
 const firebaseConfig = { apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro", authDomain: "migurl-metas.firebaseapp.com", projectId: "migurl-metas" };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 const monthsFull = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const monthsShort = monthsFull.map(m => m.slice(0,3).toUpperCase());
 let currentContext = null;
 
-window.volverUsuario = () => {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('screen-user').classList.add('active');
-};
+// Locks por celda para evitar picos
+const cellLocks = {};
 
+window.volverUsuario = () => { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById('screen-user').classList.add('active'); };
 window.selectUser = (user) => {
   document.getElementById('screen-user').classList.remove('active');
   document.getElementById(user==='Izhar'?'screen-izhar':'screen-camila').classList.add('active');
   if(user==='Izhar') { renderCalendar('Izhar','biblia',document.getElementById('izhar-biblia')); renderCalendar('Izhar','ejercicio',document.getElementById('izhar-ejercicio')); }
   else { renderCalendar('Camila','emocional',document.getElementById('camila-emocional')); renderCalendar('Camila','agua',document.getElementById('camila-agua')); }
 };
-
 window.showIzharSection = (section) => {
   document.getElementById('izhar-biblia').style.display = section==='biblia'?'block':'none';
   document.getElementById('izhar-ejercicio').style.display = section==='ejercicio'?'block':'none';
   document.getElementById('btn-biblia').classList.toggle('active', section==='biblia');
   document.getElementById('btn-ejercicio').classList.toggle('active', section==='ejercicio');
 };
-
 window.showSection = (section) => {
   document.getElementById('camila-emocional').style.display = section==='emocional'?'block':'none';
   document.getElementById('camila-agua').style.display = section==='agua'?'block':'none';
@@ -144,30 +139,22 @@ function renderCalendar(user,type,container){
   const grid=document.createElement('div'); grid.className='calendar-grid';
   grid.appendChild(document.createElement('div'));
   monthsShort.forEach((m,i)=>{ const c=document.createElement('div'); c.className='calendar-cell header'; c.textContent=m; grid.appendChild(c); });
-  for(let d=1;d<=31;d++){ 
-    const day=document.createElement('div'); day.className='calendar-cell day'; day.textContent=d; grid.appendChild(day);
-    monthsFull.forEach((_,mi)=>{ 
-      const cell=document.createElement('div'); 
-      cell.className='calendar-cell'; 
-      cell.onclick=()=>openModal(user,type,d,mi,cell); 
-      grid.appendChild(cell);
-      // carga controlada: solo si hay valor en Firestore
-      loadCell(user,type,d,mi,cell);
-    });
+  for(let d=1;d<=31;d++){ const day=document.createElement('div'); day.className='calendar-cell day'; day.textContent=d; grid.appendChild(day);
+    monthsFull.forEach((_,mi)=>{ const cell=document.createElement('div'); cell.className='calendar-cell'; cell.onclick=()=>openModal(user,type,d,mi,cell); grid.appendChild(cell); loadCell(user,type,d,mi,cell); });
   }
   container.appendChild(grid);
 }
 
 async function loadCell(user,type,day,month,cell){
   try{
-    const ref=doc(db,'metas',`${user}_${type}_${day}_${month}`);
+    const key=`${user}_${type}_${day}_${month}`;
+    if(cellLocks[key]) return; // evitar múltiples lecturas simultáneas
+    cellLocks[key]=true;
+    const ref=doc(db,'metas',key);
     const snap=await getDoc(ref);
-    if(snap.exists()){ 
-      const v=snap.data(); 
-      cell.textContent=v.label||''; 
-      cell.className='calendar-cell '+(v.class||''); 
-    }
-  }catch(e){ console.warn('No se pudo cargar la celda:',e); }
+    if(snap.exists()){ const v=snap.data(); cell.textContent=v.label||''; cell.className='calendar-cell '+(v.class||''); }
+    cellLocks[key]=false;
+  }catch(e){ console.warn('No se pudo cargar la celda:',e); cellLocks[`${user}_${type}_${day}_${month}`]=false; }
 }
 
 window.openModal=(user,type,day,month,cell)=>{
@@ -191,21 +178,22 @@ function addOpt(label,cls){
   document.getElementById('modal-options').appendChild(b);
 }
 
-// aplicación local + guardado controlado
 async function applyLocallyAndSave(label,cls){
   const {user,type,day,month,cell}=currentContext;
   cell.textContent=label||'';
   cell.className='calendar-cell '+(cls||'');
   closeModal();
-  // guardado controlado en Firestore
+  const key=`${user}_${type}_${day}_${month}`;
+  if(cellLocks[key]) return; // Si ya hay escritura en curso, ignorar
+  cellLocks[key]=true;
   try{
-    const ref=doc(db,'metas',`${user}_${type}_${day}_${month}`);
+    const ref=doc(db,'metas',key);
     await setDoc(ref,{label, class:cls});
-  }catch(e){ console.warn('No se pudo guardar la celda:',e); }
+  }catch(e){ console.warn('No se pudo guardar la celda:',e);}
+  cellLocks[key]=false;
 }
 
 window.closeModal=()=>{ document.getElementById('modal').classList.remove('active'); };
-
 </script>
 </body>
 </html>
