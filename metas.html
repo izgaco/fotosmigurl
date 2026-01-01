@@ -22,7 +22,6 @@ body {
   color: var(--text);
 }
 
-/* ---------- PANTALLAS ---------- */
 .screen {
   display: none;
   padding: 16px;
@@ -32,7 +31,6 @@ body {
   display: block;
 }
 
-/* ---------- BOTONES ---------- */
 button {
   border: none;
   padding: 14px;
@@ -48,14 +46,12 @@ button.secondary {
   color: #111;
 }
 
-/* ---------- SELECCIÓN USUARIO ---------- */
 .user-select {
   display: grid;
   gap: 16px;
   margin-top: 40px;
 }
 
-/* ---------- MENÚ ---------- */
 .menu {
   display: flex;
   gap: 10px;
@@ -66,7 +62,6 @@ button.secondary {
   flex: 1;
 }
 
-/* ---------- CUADRÍCULAS ---------- */
 .grid {
   display: grid;
   grid-template-columns: 40px repeat(12, 1fr);
@@ -91,7 +86,6 @@ button.secondary {
   cursor: pointer;
 }
 
-/* ---------- MODAL ---------- */
 .modal {
   position: fixed;
   inset: 0;
@@ -123,7 +117,6 @@ button.secondary {
   margin-top: 10px;
 }
 
-/* ---------- COLORES ---------- */
 .bad { background:#fecaca; }
 .normal { background:#fde68a; }
 .good { background:#bbf7d0; }
@@ -133,7 +126,7 @@ button.secondary {
 
 <body>
 
-<!-- PANTALLA USUARIO -->
+<!-- SELECCIÓN USUARIO -->
 <div id="screen-user" class="screen active">
   <h2>¿Quién hace el seguimiento?</h2>
   <div class="user-select">
@@ -142,7 +135,7 @@ button.secondary {
   </div>
 </div>
 
-<!-- PANTALLA CAMILA -->
+<!-- CAMILA -->
 <div id="screen-camila" class="screen">
   <h2>Camila · Metas 2026</h2>
 
@@ -155,22 +148,24 @@ button.secondary {
   <div id="section-agua" style="display:none"></div>
 </div>
 
+<!-- IZHAR -->
+<div id="screen-izhar" class="screen">
+  <h2>Izhar · Metas 2026</h2>
+  <p>📌 Próximamente se añadirán aquí las cuadrículas de seguimiento.</p>
+</div>
+
 <!-- MODAL -->
 <div id="modal" class="modal">
   <div class="modal-box">
-    <h3>Selecciona estado</h3>
-    <button onclick="saveValue('bad','😞')">Día malo</button>
-    <button onclick="saveValue('normal','😐')">Día normal</button>
-    <button onclick="saveValue('good','🙂')">Día bueno</button>
-    <button onclick="saveValue('great','🤩')">Día genial</button>
-    <button class="secondary" onclick="saveValue('','')">Dejar en blanco</button>
+    <h3 id="modal-title">Selecciona</h3>
+    <div id="modal-options"></div>
+    <button class="secondary" onclick="closeModal()">Cancelar</button>
   </div>
 </div>
 
-<!-- FIREBASE + APP -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro",
@@ -178,65 +173,103 @@ const firebaseConfig = {
   projectId: "migurl-metas"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+initializeApp(firebaseConfig);
+getFirestore();
 
 const months = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
 let currentCell = null;
+let currentMode = "emocional";
 
 window.selectUser = (user) => {
   document.getElementById("screen-user").classList.remove("active");
-  document.getElementById("screen-camila").classList.add("active");
-  renderGrid("section-emocional");
+  if(user === "Camila") {
+    document.getElementById("screen-camila").classList.add("active");
+    renderEmotional();
+    renderWater();
+  } else {
+    document.getElementById("screen-izhar").classList.add("active");
+  }
 };
 
 window.showSection = (section) => {
+  currentMode = section;
   document.getElementById("section-emocional").style.display = section==="emocional"?"block":"none";
   document.getElementById("section-agua").style.display = section==="agua"?"block":"none";
 };
 
-function renderGrid(containerId) {
-  const c = document.getElementById(containerId);
-  c.innerHTML = "";
+function baseGrid(container) {
+  container.innerHTML = "";
   const grid = document.createElement("div");
   grid.className = "grid";
 
   grid.appendChild(document.createElement("div"));
-  months.forEach(m => {
-    const d = document.createElement("div");
-    d.className="cell";
-    d.textContent=m;
-    grid.appendChild(d);
+  months.forEach(m=>{
+    const c=document.createElement("div");
+    c.className="cell";
+    c.textContent=m;
+    grid.appendChild(c);
   });
 
   for(let d=1; d<=31; d++){
-    const day = document.createElement("div");
+    const day=document.createElement("div");
     day.className="cell day";
     day.textContent=d;
     grid.appendChild(day);
 
-    months.forEach(m=>{
-      const cell = document.createElement("div");
+    months.forEach(()=>{
+      const cell=document.createElement("div");
       cell.className="cell clickable";
-      cell.onclick = () => openModal(cell);
+      cell.onclick=()=>openModal(cell);
       grid.appendChild(cell);
     });
   }
+  container.appendChild(grid);
+}
 
-  c.appendChild(grid);
+function renderEmotional() {
+  baseGrid(document.getElementById("section-emocional"));
+}
+
+function renderWater() {
+  baseGrid(document.getElementById("section-agua"));
 }
 
 window.openModal = (cell) => {
   currentCell = cell;
+  const opts = document.getElementById("modal-options");
+  opts.innerHTML = "";
+
+  if(currentMode === "emocional") {
+    document.getElementById("modal-title").textContent = "Estado del día";
+    addOption("😞","bad");
+    addOption("😐","normal");
+    addOption("🙂","good");
+    addOption("🤩","great");
+  } else {
+    document.getElementById("modal-title").textContent = "Vasos de agua";
+    addOption("💧","2");
+    addOption("💧💧","4");
+    addOption("💧💧💧","6");
+    addOption("💧💧💧💧","8");
+  }
+  addOption("","");
+
   document.getElementById("modal").classList.add("active");
 };
 
-window.saveValue = async (cls, emoji) => {
-  currentCell.className = "cell clickable " + cls;
-  currentCell.textContent = emoji;
-  document.getElementById("modal").classList.remove("active");
+function addOption(label, cls) {
+  const b=document.createElement("button");
+  b.textContent = label || "Dejar en blanco";
+  b.onclick = ()=>{
+    currentCell.textContent = label;
+    currentCell.className = "cell clickable";
+    closeModal();
+  };
+  document.getElementById("modal-options").appendChild(b);
+}
 
-  await setDoc(doc(db,"test","ejemplo"),{updated:Date.now()});
+window.closeModal = () => {
+  document.getElementById("modal").classList.remove("active");
 };
 </script>
 
