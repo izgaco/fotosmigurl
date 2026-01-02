@@ -73,6 +73,27 @@ button.secondary { background: #e5e7eb; color: #111; }
 .modal-box { background: white; width: 90%; max-width: 320px; padding: 20px; border-radius: 16px; }
 .modal-box h3 { margin-top: 0; }
 .modal-box button { width: 100%; margin-top: 10px; }
+
+.menu {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.menu select {
+  width: 100%;
+  max-width: 320px;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--primary-light);
+  color: #111;
+  appearance: none;
+  text-align: center;
+}
+
 </style>
 </head>
 <body>
@@ -89,9 +110,12 @@ button.secondary { background: #e5e7eb; color: #111; }
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Izhar · Metas 2026</h2>
   <div class="menu">
-    <button id="btn-biblia" class="active" onclick="showIzharSection('biblia')">Lectura de la Biblia</button>
-    <button id="btn-ejercicio" onclick="showIzharSection('ejercicio')">Ejercicio</button>
+    <select id="select-izhar" onchange="showIzharSection(this.value)">
+      <option value="biblia">📖 Lectura de la Biblia</option>
+      <option value="ejercicio">💪 Ejercicio</option>
+    </select>
   </div>
+
   <div id="izhar-biblia"></div>
   <div id="izhar-ejercicio" style="display:none"></div>
 </div>
@@ -100,10 +124,12 @@ button.secondary { background: #e5e7eb; color: #111; }
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Camila · Metas 2026</h2>
   <div class="menu">
-    <button id="btn-emocional" class="active" onclick="showSection('emocional')">Año emocional</button>
-    <button id="btn-agua" onclick="showSection('agua')">Beber agua</button>
-    <button id="btn-skincare" onclick="showSection('skincare')">Skincare</button>
-    <button id="btn-lectura" onclick="showSection('lectura')">Lectura</button>
+    <select id="select-camila" onchange="showSection(this.value)">
+      <option value="emocional">💭 Año emocional</option>
+      <option value="agua">💧 Beber agua</option>
+      <option value="skincare">🧴 Skincare</option>
+      <option value="lectura">📚 Lectura</option>
+    </select>
   </div>
   <div id="camila-emocional"></div>
   <div id="camila-agua" style="display:none"></div>
@@ -145,17 +171,16 @@ window.selectUser = (user) => {
   }
 };
 window.showIzharSection = (section) => {
-  document.getElementById('izhar-biblia').style.display = section==='biblia'?'block':'none';
-  document.getElementById('izhar-ejercicio').style.display = section==='ejercicio'?'block':'none';
-  document.getElementById('btn-biblia').classList.toggle('active', section==='biblia');
-  document.getElementById('btn-ejercicio').classList.toggle('active', section==='ejercicio');
+  document.getElementById('izhar-biblia').style.display =
+    section === 'biblia' ? 'block' : 'none';
+  document.getElementById('izhar-ejercicio').style.display =
+    section === 'ejercicio' ? 'block' : 'none';
 };
+
 window.showSection = (section) => {
   ['emocional','agua','skincare','lectura'].forEach(s=>{
-    const el=document.getElementById('camila-'+s);
-    if(el) el.style.display = s===section?'block':'none';
-    const btn=document.getElementById('btn-'+s);
-    if(btn) btn.classList.toggle('active', s===section);
+    const el = document.getElementById('camila-'+s);
+    if (el) el.style.display = s === section ? 'block' : 'none';
   });
 };
 
