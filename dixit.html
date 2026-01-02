@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dixit móvil</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #f4f6fb, #e9ecf5);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .card {
+      background: #fff;
+      width: 100%;
+      max-width: 420px;
+      padding: 24px;
+      border-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    }
+    h1, h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+    p {
+      text-align: center;
+      line-height: 1.4;
+    }
+    .field {
+      margin: 16px 0;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      max-width: 260px;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      background: #4a90e2;
+      color: #fff;
+    }
+    button.secondary {
+      background: #9aa3ad;
+    }
+    button.success {
+      background: #2ecc71;
+    }
+    .list {
+      text-align: left;
+      margin-top: 16px;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="card" id="app"></div>
+
+<script>
+let jugadores = [];
+let ronda = 0;
+let narradorIndex = 0;
+let cartas = {};
+let votos = {};
+let puntos = {};
+
+function render(html) {
+  document.getElementById('app').innerHTML = html;
+}
+
+function pantallaJugadores() {
+  render(`
+    <h1>Dixit</h1>
+    <p>¿Cuántos jugadores sois?</p>
+    <div class="field">
+      <input type="number" id="num" min="3" max="12" placeholder="3 - 12">
+    </div>
+    <button onclick="confirmarJugadores()">Continuar</button>
+  `);
+}
+
+function confirmarJugadores() {
+  const n = parseInt(document.getElementById('num').value);
+  if (!n || n < 3 || n > 12) return alert('Número no válido');
+  jugadores = new Array(n).fill('');
+  jugadores.forEach((_, i) => puntos[i] = 0);
+  pedirNombres(0);
+}
+
+function pedirNombres(i) {
+  render(`
+    <h2>Nombre del jugador ${i + 1}</h2>
+    <div class="field">
+      <input type="text" id="nombre" placeholder="Nombre">
+    </div>
+    <button onclick="guardarNombre(${i})">Continuar</button>
+  `);
+}
+
+function guardarNombre(i) {
+  const nombre = document.getElementById('nombre').value.trim();
+  if (!nombre) return alert('Introduce un nombre');
+  jugadores[i] = nombre;
+  if (i + 1 < jugadores.length) pedirNombres(i + 1);
+  else iniciarRonda();
+}
+
+function iniciarRonda() {
+  cartas = {};
+  votos = {};
+  render(`
+    <h2>Empieza ${jugadores[narradorIndex]}</h2>
+    <p>Escoge tu carta, di la palabra,<br>mezclad las cartas y colocadlas boca arriba.</p>
+    <button onclick="pedirCartaNarrador()">Continuar</button>
+  `);
+}
+
+function pedirCartaNarrador() {
+  render(`
+    <h2>${jugadores[narradorIndex]} (Narrador)</h2>
+    <p>¿Qué número es tu carta?</p>
+    <div class="field">
+      <input type="number" id="carta" min="1" max="${jugadores.length}">
+    </div>
+    <button onclick="guardarCartaNarrador()">Continuar</button>
+  `);
+}
+
+function guardarCartaNarrador() {
+  const c = parseInt(document.getElementById('carta').value);
+  if (!c || c < 1 || c > jugadores.length) return alert('Carta no válida');
+  cartas[narradorIndex] = c;
+  pedirJugador((narradorIndex + 1) % jugadores.length);
+}
+
+function pedirJugador(i) {
+  if (i === narradorIndex) return mostrarBotonResultados();
+  render(`
+    <h2>${jugadores[i]}</h2>
+    <p>¿Cuál es tu carta?</p>
+    <input type="number" id="carta" min="1" max="${jugadores.length}">
+    <p>¿Cuál crees que es la carta del narrador?</p>
+    <input type="number" id="voto" min="1" max="${jugadores.length}">
+    <button onclick="guardarJugador(${i})">Continuar</button>
+  `);
+}
+
+function guardarJugador(i) {
+  const carta = parseInt(document.getElementById('carta').value);
+  const voto = parseInt(document.getElementById('voto').value);
+  if (!carta || !voto) return alert('Datos no válidos');
+  cartas[i] = carta;
+  votos[i] = voto;
+  pedirJugador((i + 1) % jugadores.length);
+}
+
+function mostrarBotonResultados() {
+  render(`
+    <h2>Todos han votado</h2>
+    <button class="success" onclick="mostrarResultados()">Mostrar resultados</button>
+  `);
+}
+
+function mostrarResultados() {
+  let html = '<h2>Resultados</h2><div class="list">';
+  const cartaNarrador = cartas[narradorIndex];
+
+  jugadores.forEach((j, i) => {
+    html += `<strong>${j}</strong>: Carta ${cartas[i]}<br>`;
+  });
+
+  html += '<br><strong>Votaciones:</strong><br>';
+  Object.keys(votos).forEach(i => {
+    html += `${jugadores[i]} votó la carta ${votos[i]}<br>`;
+  });
+
+  let aciertos = Object.values(votos).filter(v => v === cartaNarrador).length;
+  if (aciertos > 0) puntos[narradorIndex] += 3;
+
+  Object.keys(votos).forEach(i => {
+    if (votos[i] === cartaNarrador) puntos[i] += 3;
+    Object.keys(cartas).forEach(j => {
+      if (parseInt(j) !== narradorIndex && cartas[j] === votos[i]) puntos[j] += 1;
+    });
+  });
+
+  html += '<br><strong>Total puntos:</strong><br>';
+  jugadores.forEach((j, i) => html += `${j}: ${puntos[i]}<br>`);
+  html += '</div>';
+
+  if (narradorIndex + 1 < jugadores.length) {
+    html += '<button class="success" onclick="siguienteRonda()">Siguiente ronda</button>';
+  } else {
+    html += '<p>Fin de la partida 🎉</p>';
+  }
+
+  render(html);
+}
+
+function siguienteRonda() {
+  narradorIndex++;
+  iniciarRonda();
+}
+
+pantallaJugadores();
+</script>
+
+</body>
+</html>
