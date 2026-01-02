@@ -11,8 +11,8 @@
   --card: #ffffff;
   --primary: #4f46e5;
   --primary-light: #a5b4fc;
-  --water-2: #bfdbfe;
-  --water-4: #93c5fd;
+  --water-2: #60a5fa;
+  --water-4: #60a5fa;
   --water-6: #60a5fa;
   --water-8: #4f46e5;
   --exercise-strength: #fecaca;
@@ -49,9 +49,7 @@ button.secondary { background: #e5e7eb; color: #111; }
 .calendar-cell { background: #ffffff; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; user-select: none; }
 .calendar-cell.header { font-weight: 700; background: #eef2ff; cursor: default; }
 .calendar-cell.day { font-weight: 700; background: #f1f5f9; cursor: default; }
-.calendar-cell.water-2 { background: var(--water-2); }
-.calendar-cell.water-4 { background: var(--water-4); }
-.calendar-cell.water-6 { background: var(--water-6); }
+.calendar-cell.water-2, .calendar-cell.water-4, .calendar-cell.water-6 { background: var(--water-2); }
 .calendar-cell.water-8 { background: var(--water-8); color:#fff; }
 .calendar-cell.exercise-strength { background: var(--exercise-strength); }
 .calendar-cell.exercise-cardio { background: var(--exercise-cardio); }
@@ -177,7 +175,8 @@ async function loadCell(user,type,day,month,cell){
       if(type==='lectura') cell.textContent = v.class==='reading-0' ? '❌' : (v.class==='blank'?'':'📖');
       else if(type==='skincare'){ cell.textContent = v.class==='skincare-journal' ? '📓' : v.class==='skincare-skin' ? '🧴' : v.class==='skincare-both' ? '⭐' : ''; }
       else if(type==='ejercicio'){ cell.textContent = v.class==='exercise-strength' ? '🏋️' : v.class==='exercise-cardio' ? '🏃' : v.class==='exercise-rest' ? '🛌' : ''; }
-      else if(type==='agua'){ cell.textContent = v.class==='water-2' ? '2 💧' : v.class==='water-4' ? '4 💧' : v.class==='water-6' ? '6 💧' : v.class==='water-8' ? '8 💧' : ''; }
+      else if(type==='agua'){ cell.textContent = v.class==='water-2' ? '💧' : v.class==='water-4' ? '💧' : v.class==='water-6' ? '💧' : v.class==='water-8' ? '💧' : ''; }
+      else if(type==='emocional'){ cell.textContent = v.class==='bad' ? '😞' : v.class==='normal' ? '😐' : v.class==='good' ? '🙂' : v.class==='great' ? '🤩' : ''; }
       else cell.textContent='';
       cell.className='calendar-cell '+(v.class||'');
     }
@@ -191,7 +190,7 @@ window.openModal=(user,type,day,month,cell)=>{
   document.getElementById('modal-title').textContent=`${day} de ${monthsFull[month]}`;
   if(type==='biblia'){ addOpt('✔','tick'); addOpt('✖','cross'); addOpt('','blank'); }
   else if(type==='emocional'){ addOpt('😞','bad'); addOpt('😐','normal'); addOpt('🙂','good'); addOpt('🤩','great'); addOpt('','blank'); }
-  else if(type==='agua'){ addOpt('2 💧','water-2'); addOpt('4 💧','water-4'); addOpt('6 💧','water-6'); addOpt('8 💧','water-8'); addOpt('','blank'); }
+  else if(type==='agua'){ addOpt('💧','water-2'); addOpt('💧','water-4'); addOpt('💧','water-6'); addOpt('💧','water-8'); addOpt('','blank'); }
   else if(type==='ejercicio'){ addOpt('🏋️ Fuerza','exercise-strength'); addOpt('🏃 Cardio','exercise-cardio'); addOpt('🛌 Descanso','exercise-rest'); addOpt('','blank'); }
   else if(type==='skincare'){ addOpt('📓 Journal','skincare-journal'); addOpt('🧴 Skincare','skincare-skin'); addOpt('⭐ Ambas','skincare-both'); addOpt('','blank'); }
   else if(type==='lectura'){
@@ -220,7 +219,8 @@ function addOpt(label,cls){ const b=document.createElement('button'); b.classNam
   if(type==='lectura') emoji = cls==='reading-0' ? '❌' : '📖';
   else if(type==='skincare') emoji = cls==='skincare-journal' ? '📓' : cls==='skincare-skin' ? '🧴' : cls==='skincare-both' ? '⭐' : '';
   else if(type==='ejercicio') emoji = cls==='exercise-strength' ? '🏋️' : cls==='exercise-cardio' ? '🏃' : cls==='exercise-rest' ? '🛌' : '';
-  else if(type==='agua') emoji = cls==='water-2' ? '2 💧' : cls==='water-4' ? '4 💧' : cls==='water-6' ? '6 💧' : cls==='water-8' ? '8 💧' : '';
+  else if(type==='agua') emoji = '💧';
+  else if(type==='emocional') emoji = cls==='bad' ? '😞' : cls==='normal' ? '😐' : cls==='good' ? '🙂' : cls==='great' ? '🤩' : '';
   applyLocallyAndSave(emoji,cls);
 }; document.getElementById('modal-options').appendChild(b); }
 
