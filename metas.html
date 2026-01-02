@@ -1,8 +1,11 @@
-<!DOCTYPE html><html lang="es">
+<!DOCTYPE html>
+<html lang="es">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Metas 2026</title><style>
+<title>Metas 2026</title>
+
+<style>
 :root {
   --bg: #f4f6fb;
   --card: #ffffff;
@@ -21,6 +24,13 @@
   --emotional-normal: #86efac;
   --emotional-good: #4ade80;
   --emotional-great: #16a34a;
+  --skincare-journal: #bbf7d0;
+  --skincare-skin: #16a34a;
+  --skincare-both: #93c5fd;
+  --reading-0: #fecaca;
+  --reading-10: #bbf7d0;
+  --reading-20: #4ade80;
+  --reading-30: #16a34a;
   --text: #1f2937;
 }
 * { box-sizing: border-box; }
@@ -51,28 +61,44 @@ button.secondary { background: #e5e7eb; color: #111; }
 .calendar-cell.normal { background: var(--emotional-normal); }
 .calendar-cell.good { background: var(--emotional-good); }
 .calendar-cell.great { background: var(--emotional-great); }
+.calendar-cell.skincare-journal { background: var(--skincare-journal); }
+.calendar-cell.skincare-skin { background: var(--skincare-skin); color:#fff; }
+.calendar-cell.skincare-both { background: var(--skincare-both); }
+.calendar-cell.reading-0 { background: var(--reading-0); }
+.calendar-cell.reading-10 { background: var(--reading-10); }
+.calendar-cell.reading-20 { background: var(--reading-20); }
+.calendar-cell.reading-30 { background: var(--reading-30); color:#fff; }
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 10; }
 .modal.active { display: flex; }
 .modal-box { background: white; width: 90%; max-width: 320px; padding: 20px; border-radius: 16px; }
 .modal-box h3 { margin-top: 0; }
 .modal-box button { width: 100%; margin-top: 10px; }
-</style></head>
-<body><div id="screen-user" class="screen active">
+</style>
+</head>
+<body>
+
+<div id="screen-user" class="screen active">
   <h2>¿Quién hace el seguimiento?</h2>
   <div class="user-select">
     <button onclick="selectUser('Izhar')">Izhar</button>
     <button onclick="selectUser('Camila')">Camila</button>
   </div>
-</div><div id="screen-izhar" class="screen">
+</div>
+
+<div id="screen-izhar" class="screen">
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Izhar · Metas 2026</h2>
   <div class="menu">
-    <button id="btn-biblia" class="active" onclick="showIzharSection('biblia')">Lectura de la Biblia</button>
-    <button id="btn-ejercicio" onclick="showIzharSection('ejercicio')">Ejercicio</button>
+    <button id="btn-emocional" class="active" onclick="showSection('emocional')">Año emocional</button>
+    <button id="btn-agua" onclick="showSection('agua')">Beber agua</button>
+    <button id="btn-skincare" onclick="showSection('skincare')">Skincare</button>
+    <button id="btn-lectura" onclick="showSection('lectura')">Lectura</button>
   </div>
   <div id="izhar-biblia"></div>
   <div id="izhar-ejercicio" style="display:none"></div>
-</div><div id="screen-camila" class="screen">
+</div>
+
+<div id="screen-camila" class="screen">
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Camila · Metas 2026</h2>
   <div class="menu">
@@ -81,13 +107,19 @@ button.secondary { background: #e5e7eb; color: #111; }
   </div>
   <div id="camila-emocional"></div>
   <div id="camila-agua" style="display:none"></div>
-</div><div id="modal" class="modal">
+  <div id="camila-skincare" style="display:none"></div>
+  <div id="camila-lectura" style="display:none"></div>
+</div>
+
+<div id="modal" class="modal">
   <div class="modal-box">
     <h3 id="modal-title">Selecciona</h3>
     <div id="modal-options"></div>
     <button class="secondary" onclick="closeModal()">Cancelar</button>
   </div>
-</div><script type="module">
+</div>
+
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 const firebaseConfig = { apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro", authDomain: "migurl-metas.firebaseapp.com", projectId: "migurl-metas" };
@@ -97,7 +129,7 @@ const monthsFull = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Ag
 const monthsShort = monthsFull.map(m => m.slice(0,3).toUpperCase());
 let currentContext = null;
 
-// Locks por celda para evitar picos de autorizaciones
+// Locks por celda para evitar picos
 const cellLocks = {};
 
 window.volverUsuario = () => { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById('screen-user').classList.add('active'); };
@@ -105,7 +137,12 @@ window.selectUser = (user) => {
   document.getElementById('screen-user').classList.remove('active');
   document.getElementById(user==='Izhar'?'screen-izhar':'screen-camila').classList.add('active');
   if(user==='Izhar') { renderCalendar('Izhar','biblia',document.getElementById('izhar-biblia')); renderCalendar('Izhar','ejercicio',document.getElementById('izhar-ejercicio')); }
-  else { renderCalendar('Camila','emocional',document.getElementById('camila-emocional')); renderCalendar('Camila','agua',document.getElementById('camila-agua')); }
+  else {
+    renderCalendar('Camila','emocional',document.getElementById('camila-emocional'));
+    renderCalendar('Camila','agua',document.getElementById('camila-agua'));
+    renderCalendar('Camila','skincare',document.getElementById('camila-skincare'));
+    renderCalendar('Camila','lectura',document.getElementById('camila-lectura'));
+  }
 };
 window.showIzharSection = (section) => {
   document.getElementById('izhar-biblia').style.display = section==='biblia'?'block':'none';
@@ -114,10 +151,12 @@ window.showIzharSection = (section) => {
   document.getElementById('btn-ejercicio').classList.toggle('active', section==='ejercicio');
 };
 window.showSection = (section) => {
-  document.getElementById('camila-emocional').style.display = section==='emocional'?'block':'none';
-  document.getElementById('camila-agua').style.display = section==='agua'?'block':'none';
-  document.getElementById('btn-emocional').classList.toggle('active', section==='emocional');
-  document.getElementById('btn-agua').classList.toggle('active', section==='agua');
+  ['emocional','agua','skincare','lectura'].forEach(s=>{
+    const el=document.getElementById('camila-'+s);
+    if(el) el.style.display = s===section?'block':'none';
+    const btn=document.getElementById('btn-'+s);
+    if(btn) btn.classList.toggle('active', s===section);
+  });
 };
 
 function renderCalendar(user,type,container){
@@ -132,15 +171,15 @@ function renderCalendar(user,type,container){
 }
 
 async function loadCell(user,type,day,month,cell){
-  const key=`${user}_${type}_${day}_${month}`;
-  if(cellLocks[key]) return;
-  cellLocks[key]=true;
   try{
+    const key=`${user}_${type}_${day}_${month}`;
+    if(cellLocks[key]) return;
+    cellLocks[key]=true;
     const ref=doc(db,'metas',key);
     const snap=await getDoc(ref);
     if(snap.exists()){ const v=snap.data(); cell.textContent=v.label||''; cell.className='calendar-cell '+(v.class||''); }
-  }catch(e){ console.warn('No se pudo cargar la celda:',e);}
-  cellLocks[key]=false;
+    cellLocks[key]=false;
+  }catch(e){ console.warn('No se pudo cargar la celda:',e); cellLocks[`${user}_${type}_${day}_${month}`]=false; }
 }
 
 window.openModal=(user,type,day,month,cell)=>{
@@ -151,13 +190,18 @@ window.openModal=(user,type,day,month,cell)=>{
   else if(type==='emocional'){ addOpt('😞','bad'); addOpt('😐','normal'); addOpt('🙂','good'); addOpt('🤩','great'); addOpt('',''); }
   else if(type==='agua'){ addOpt('2 💧','water-2'); addOpt('4 💧','water-4'); addOpt('6 💧','water-6'); addOpt('8 💧','water-8'); addOpt('',''); }
   else if(type==='ejercicio'){ addOpt('🏋️ Fuerza','exercise-strength'); addOpt('🏃 Cardio','exercise-cardio'); addOpt('🛌 Descanso','exercise-rest'); addOpt('',''); }
+  else if(type==='skincare'){ addOpt('📓 Journal','skincare-journal'); addOpt('🧴 Skincare','skincare-skin'); addOpt('📓🧴 Ambas','skincare-both'); addOpt('',''); }
+  else if(type==='lectura'){ addOpt('❌','reading-0'); addOpt('📖','reading-10'); addOpt('📖','reading-20'); addOpt('📖','reading-30'); addOpt('',''); }
   document.getElementById('modal').classList.add('active');
 };
 
 function addOpt(label,cls){
   const b=document.createElement('button');
   b.textContent = label === '' ? 'Dejar en blanco' : label;
-  b.onclick=()=>{ const displayLabel = label === '' ? '' : (label.includes(' ') ? label.split(' ')[0] : label); applyLocallyAndSave(displayLabel,cls); };
+  b.onclick=()=>{ 
+    const displayLabel = label === '' ? '' : (label.includes(' ') ? label.split(' ')[0] : label); 
+    applyLocallyAndSave(displayLabel,cls); 
+  };
   document.getElementById('modal-options').appendChild(b);
 }
 
@@ -177,5 +221,6 @@ async function applyLocallyAndSave(label,cls){
 }
 
 window.closeModal=()=>{ document.getElementById('modal').classList.remove('active'); };
-</script></body>
+</script>
+</body>
 </html>
