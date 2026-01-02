@@ -27,10 +27,11 @@
   --skincare-journal: #bbf7d0;
   --skincare-skin: #16a34a;
   --skincare-both: #93c5fd;
-  --reading-0: #fecaca;
-  --reading-10: #bbf7d0;
+  --reading-0: #f87171;
+  --reading-10: #86efac;
   --reading-20: #4ade80;
   --reading-30: #16a34a;
+  --blank-gray: #e5e7eb;
   --text: #1f2937;
 }
 * { box-sizing: border-box; }
@@ -68,11 +69,13 @@ button.secondary { background: #e5e7eb; color: #111; }
 .calendar-cell.reading-10 { background: var(--reading-10); }
 .calendar-cell.reading-20 { background: var(--reading-20); }
 .calendar-cell.reading-30 { background: var(--reading-30); color:#fff; }
+.calendar-cell.blank { background: var(--blank-gray); }
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 10; }
 .modal.active { display: flex; }
 .modal-box { background: white; width: 90%; max-width: 320px; padding: 20px; border-radius: 16px; }
 .modal-box h3 { margin-top: 0; }
 .modal-box button { width: 100%; margin-top: 10px; }
+.modal-box button.blank { background: var(--blank-gray); color: #111; }
 </style>
 </head>
 <body>
@@ -170,7 +173,7 @@ async function loadCell(user,type,day,month,cell){
   try{ const key=`${user}_${type}_${day}_${month}`; if(cellLocks[key]) return; cellLocks[key]=true;
   const ref=doc(db,'metas',key); const snap=await getDoc(ref);
   if(snap.exists()){ const v=snap.data();
-    if(type==='lectura') cell.textContent = v.class==='reading-0' ? '❌' : '📖';
+    if(type==='lectura') cell.textContent = v.class==='reading-0' ? '❌' : (v.class==='blank'?'':'📖');
     else cell.textContent=v.label||'';
     cell.className='calendar-cell '+(v.class||'');
   }
@@ -181,25 +184,25 @@ window.openModal=(user,type,day,month,cell)=>{
   currentContext={user,type,day,month,cell};
   const opts=document.getElementById('modal-options'); opts.innerHTML='';
   document.getElementById('modal-title').textContent=`${day} de ${monthsFull[month]}`;
-  if(type==='biblia'){ addOpt('✔','tick'); addOpt('✖','cross'); addOpt('',''); }
-  else if(type==='emocional'){ addOpt('😞','bad'); addOpt('😐','normal'); addOpt('🙂','good'); addOpt('🤩','great'); addOpt('',''); }
-  else if(type==='agua'){ addOpt('2 💧','water-2'); addOpt('4 💧','water-4'); addOpt('6 💧','water-6'); addOpt('8 💧','water-8'); addOpt('',''); }
-  else if(type==='ejercicio'){ addOpt('🏋️ Fuerza','exercise-strength'); addOpt('🏃 Cardio','exercise-cardio'); addOpt('🛌 Descanso','exercise-rest'); addOpt('',''); }
-  else if(type==='skincare'){ addOpt('📓 Journal','skincare-journal'); addOpt('🧴 Skincare','skincare-skin'); addOpt('⭐ Ambas','skincare-both'); addOpt('',''); }
+  if(type==='biblia'){ addOpt('✔','tick'); addOpt('✖','cross'); addOpt('','blank'); }
+  else if(type==='emocional'){ addOpt('😞','bad'); addOpt('😐','normal'); addOpt('🙂','good'); addOpt('🤩','great'); addOpt('','blank'); }
+  else if(type==='agua'){ addOpt('2 💧','water-2'); addOpt('4 💧','water-4'); addOpt('6 💧','water-6'); addOpt('8 💧','water-8'); addOpt('','blank'); }
+  else if(type==='ejercicio'){ addOpt('🏋️ Fuerza','exercise-strength'); addOpt('🏃 Cardio','exercise-cardio'); addOpt('🛌 Descanso','exercise-rest'); addOpt('','blank'); }
+  else if(type==='skincare'){ addOpt('📓 Journal','skincare-journal'); addOpt('🧴 Skincare','skincare-skin'); addOpt('⭐ Ambas','skincare-both'); addOpt('','blank'); }
   else if(type==='lectura'){
     addOpt('No he leído','reading-0');
     addOpt('0-10 páginas','reading-10');
     addOpt('10-20 páginas','reading-20');
     addOpt('Más de 20 páginas','reading-30');
-    addOpt('','');
+    addOpt('','blank');
   }
   document.getElementById('modal').classList.add('active');
 };
 
-function addOpt(label,cls){ const b=document.createElement('button'); b.textContent = label === '' ? 'Dejar en blanco' : label; b.onclick=()=>{
+function addOpt(label,cls){ const b=document.createElement('button'); b.className = cls==='blank'?'blank':''; b.textContent = label === '' ? 'Vaciar' : label; b.onclick=()=>{
   let displayLabel='';
-  if(currentContext.type==='lectura') displayLabel = cls==='reading-0'?'❌':'📖';
-  else displayLabel = label===''?'':(label.includes(' ')?label.split(' ')[0]:label);
+  if(currentContext.type==='lectura') displayLabel = cls==='reading-0' ? '❌' : (cls==='blank'?'':'📖');
+  else displayLabel = cls==='blank'?'':label===''?'':(label.includes(' ')?label.split(' ')[0]:label);
   applyLocallyAndSave(displayLabel,cls);
 }; document.getElementById('modal-options').appendChild(b); }
 
