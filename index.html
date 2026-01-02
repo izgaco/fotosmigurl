@@ -42,20 +42,24 @@
       border: none;
       border-radius: 12px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
-    .btn-red {
+    .btn-dixit {
+      background: linear-gradient(135deg, #9b59b6, #e056fd);
+      color: white;
+    }
+
+    .btn-impostor {
       background: #c62828;
       color: white;
     }
 
     .btn-gray {
       background: #9e9e9e;
-      color: white;
-    }
-
-    .btn-purple {
-      background: linear-gradient(135deg, #9b59b6, #e056fd);
       color: white;
     }
 
@@ -69,26 +73,23 @@
   <div class="container">
     <h1>🎮 Migurl Juegos</h1>
 
-    <button class="btn btn-purple" onclick="window.location.href='dixit.html'">
+    <button class="btn btn-dixit" onclick="window.location.href='dixit.html'">
       🎴 Dixit
     </button>
 
-    <button class="btn btn-red" onclick="window.location.href='impostor.html'">
-      Impostor
+    <button class="btn btn-impostor" onclick="window.location.href='impostor.html'">
+      👤 Impostor
     </button>
 
     <button class="btn btn-gray" onclick="window.location.href='tabu.html'">
-      Tabú
+      🗣️ Tabú
     </button>
 
     <button class="btn btn-gray" onclick="window.location.href='amigoinvisible.html'">
-      Amigo invisible
+      🎁 Amigo invisible
     </button>
 
   </div>
 
 </body>
 </html>
-
-
-
