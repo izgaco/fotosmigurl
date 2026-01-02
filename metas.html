@@ -170,14 +170,19 @@ function renderCalendar(user,type,container){
 }
 
 async function loadCell(user,type,day,month,cell){
-  try{ const key=`${user}_${type}_${day}_${month}`; if(cellLocks[key]) return; cellLocks[key]=true;
-  const ref=doc(db,'metas',key); const snap=await getDoc(ref);
-  if(snap.exists()){ const v=snap.data();
-    if(type==='lectura') cell.textContent = v.class==='reading-0' ? '❌' : (v.class==='blank'?'':'📖');
-    else cell.textContent=v.label||'';
-    cell.className='calendar-cell '+(v.class||'');
-  }
-  cellLocks[key]=false;} catch(e){ console.warn('No se pudo cargar la celda:',e); cellLocks[`${user}_${type}_${day}_${month}`]=false; }
+  try{
+    const key=`${user}_${type}_${day}_${month}`; if(cellLocks[key]) return; cellLocks[key]=true;
+    const ref=doc(db,'metas',key); const snap=await getDoc(ref);
+    if(snap.exists()){ const v=snap.data();
+      if(type==='lectura') cell.textContent = v.class==='reading-0' ? '❌' : (v.class==='blank'?'':'📖');
+      else if(type==='skincare'){ cell.textContent = v.class==='skincare-journal' ? '📓' : v.class==='skincare-skin' ? '🧴' : v.class==='skincare-both' ? '⭐' : ''; }
+      else if(type==='ejercicio'){ cell.textContent = v.class==='exercise-strength' ? '🏋️' : v.class==='exercise-cardio' ? '🏃' : v.class==='exercise-rest' ? '🛌' : ''; }
+      else if(type==='agua'){ cell.textContent = v.class==='water-2' ? '2 💧' : v.class==='water-4' ? '4 💧' : v.class==='water-6' ? '6 💧' : v.class==='water-8' ? '8 💧' : ''; }
+      else cell.textContent='';
+      cell.className='calendar-cell '+(v.class||'');
+    }
+    cellLocks[key]=false;
+  } catch(e){ console.warn('No se pudo cargar la celda:',e); cellLocks[`${user}_${type}_${day}_${month}`]=false; }
 }
 
 window.openModal=(user,type,day,month,cell)=>{
@@ -205,17 +210,18 @@ function addOpt(label,cls){ const b=document.createElement('button'); b.classNam
     cell.textContent='';
     cell.className='calendar-cell';
     const key=`${user}_${type}_${day}_${month}`;
-    if(cellLocks[key]) return;
-    cellLocks[key]=true;
+    if(cellLocks[key]) return; cellLocks[key]=true;
     try{ await deleteDoc(doc(db,'metas',key)); } catch(e){ console.warn('No se pudo borrar la celda:',e); }
     cellLocks[key]=false;
     closeModal();
     return;
   }
-  let displayLabel='';
-  if(type==='lectura') displayLabel = cls==='reading-0' ? '❌' : '📖';
-  else displayLabel = label;
-  applyLocallyAndSave(displayLabel,cls);
+  let emoji='';
+  if(type==='lectura') emoji = cls==='reading-0' ? '❌' : '📖';
+  else if(type==='skincare') emoji = cls==='skincare-journal' ? '📓' : cls==='skincare-skin' ? '🧴' : cls==='skincare-both' ? '⭐' : '';
+  else if(type==='ejercicio') emoji = cls==='exercise-strength' ? '🏋️' : cls==='exercise-cardio' ? '🏃' : cls==='exercise-rest' ? '🛌' : '';
+  else if(type==='agua') emoji = cls==='water-2' ? '2 💧' : cls==='water-4' ? '4 💧' : cls==='water-6' ? '6 💧' : cls==='water-8' ? '8 💧' : '';
+  applyLocallyAndSave(emoji,cls);
 }; document.getElementById('modal-options').appendChild(b); }
 
 async function applyLocallyAndSave(label,cls){
@@ -224,8 +230,7 @@ async function applyLocallyAndSave(label,cls){
   cell.className='calendar-cell '+(cls||'');
   closeModal();
   const key=`${user}_${type}_${day}_${month}`;
-  if(cellLocks[key]) return;
-  cellLocks[key]=true;
+  if(cellLocks[key]) return; cellLocks[key]=true;
   try{ const ref=doc(db,'metas',key); await setDoc(ref,{label,class:cls}); } catch(e){ console.warn('No se pudo guardar la celda:',e); }
   cellLocks[key]=false;
 }
