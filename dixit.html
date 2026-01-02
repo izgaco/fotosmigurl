@@ -26,13 +26,11 @@
       text-align: center;
       margin-top: 0;
     }
-    p {
-      text-align: center;
-      line-height: 1.4;
-    }
+    p { text-align: center; }
     .field {
-      margin: 16px 0;
-      text-align: center;
+      margin: 12px 0;
+      display: flex;
+      justify-content: center;
     }
     input {
       width: 100%;
@@ -55,17 +53,8 @@
       background: #4a90e2;
       color: #fff;
     }
-    button.secondary {
-      background: #9aa3ad;
-    }
-    button.success {
-      background: #2ecc71;
-    }
-    .list {
-      text-align: left;
-      margin-top: 16px;
-    }
-    .hidden { display: none; }
+    button.success { background: #2ecc71; }
+    .list { text-align: left; margin-top: 16px; }
   </style>
 </head>
 <body>
@@ -74,7 +63,6 @@
 
 <script>
 let jugadores = [];
-let ronda = 0;
 let narradorIndex = 0;
 let cartas = {};
 let votos = {};
@@ -88,9 +76,7 @@ function pantallaJugadores() {
   render(`
     <h1>Dixit</h1>
     <p>¿Cuántos jugadores sois?</p>
-    <div class="field">
-      <input type="number" id="num" min="3" max="12" placeholder="3 - 12">
-    </div>
+    <div class="field"><input type="number" id="num" min="3" max="12" placeholder="3 - 12"></div>
     <button onclick="confirmarJugadores()">Continuar</button>
   `);
 }
@@ -99,26 +85,26 @@ function confirmarJugadores() {
   const n = parseInt(document.getElementById('num').value);
   if (!n || n < 3 || n > 12) return alert('Número no válido');
   jugadores = new Array(n).fill('');
-  jugadores.forEach((_, i) => puntos[i] = 0);
-  pedirNombres(0);
+  for (let i = 0; i < n; i++) puntos[i] = 0;
+  pedirNombres();
 }
 
-function pedirNombres(i) {
-  render(`
-    <h2>Nombre del jugador ${i + 1}</h2>
-    <div class="field">
-      <input type="text" id="nombre" placeholder="Nombre">
-    </div>
-    <button onclick="guardarNombre(${i})">Continuar</button>
-  `);
+function pedirNombres() {
+  let html = '<h2>Nombres de los jugadores</h2>';
+  jugadores.forEach((_, i) => {
+    html += `<div class="field"><input type="text" id="nombre${i}" placeholder="Jugador ${i + 1}"></div>`;
+  });
+  html += '<button onclick="guardarNombres()">Continuar</button>';
+  render(html);
 }
 
-function guardarNombre(i) {
-  const nombre = document.getElementById('nombre').value.trim();
-  if (!nombre) return alert('Introduce un nombre');
-  jugadores[i] = nombre;
-  if (i + 1 < jugadores.length) pedirNombres(i + 1);
-  else iniciarRonda();
+function guardarNombres() {
+  for (let i = 0; i < jugadores.length; i++) {
+    const nombre = document.getElementById(`nombre${i}`).value.trim();
+    if (!nombre) return alert('Faltan nombres');
+    jugadores[i] = nombre;
+  }
+  iniciarRonda();
 }
 
 function iniciarRonda() {
@@ -126,7 +112,7 @@ function iniciarRonda() {
   votos = {};
   render(`
     <h2>Empieza ${jugadores[narradorIndex]}</h2>
-    <p>Escoge tu carta, di la palabra,<br>mezclad las cartas y colocadlas boca arriba.</p>
+    <p>Escoge tu carta, di la palabra y mezclad las cartas.</p>
     <button onclick="pedirCartaNarrador()">Continuar</button>
   `);
 }
@@ -135,9 +121,7 @@ function pedirCartaNarrador() {
   render(`
     <h2>${jugadores[narradorIndex]} (Narrador)</h2>
     <p>¿Qué número es tu carta?</p>
-    <div class="field">
-      <input type="number" id="carta" min="1" max="${jugadores.length}">
-    </div>
+    <div class="field"><input type="number" id="carta" min="1" max="${jugadores.length}"></div>
     <button onclick="guardarCartaNarrador()">Continuar</button>
   `);
 }
@@ -154,9 +138,9 @@ function pedirJugador(i) {
   render(`
     <h2>${jugadores[i]}</h2>
     <p>¿Cuál es tu carta?</p>
-    <input type="number" id="carta" min="1" max="${jugadores.length}">
+    <div class="field"><input type="number" id="carta" min="1" max="${jugadores.length}"></div>
     <p>¿Cuál crees que es la carta del narrador?</p>
-    <input type="number" id="voto" min="1" max="${jugadores.length}">
+    <div class="field"><input type="number" id="voto" min="1" max="${jugadores.length}"></div>
     <button onclick="guardarJugador(${i})">Continuar</button>
   `);
 }
@@ -171,28 +155,24 @@ function guardarJugador(i) {
 }
 
 function mostrarBotonResultados() {
-  render(`
-    <h2>Todos han votado</h2>
-    <button class="success" onclick="mostrarResultados()">Mostrar resultados</button>
-  `);
+  render('<h2>Todos han votado</h2><button class="success" onclick="mostrarResultados()">Mostrar resultados</button>');
 }
 
 function mostrarResultados() {
-  let html = '<h2>Resultados</h2><div class="list">';
+  let html = '<h2>Resumen de la ronda</h2><div class="list">';
   const cartaNarrador = cartas[narradorIndex];
 
-  jugadores.forEach((j, i) => {
-    html += `<strong>${j}</strong>: Carta ${cartas[i]}<br>`;
-  });
+  jugadores.forEach((j, i) => html += `<strong>${j}</strong>: Carta ${cartas[i]}<br>`);
 
   html += '<br><strong>Votaciones:</strong><br>';
-  Object.keys(votos).forEach(i => {
-    html += `${jugadores[i]} votó la carta ${votos[i]}<br>`;
-  });
+  Object.keys(votos).forEach(i => html += `${jugadores[i]} votó la carta ${votos[i]}<br>`);
 
-  let aciertos = Object.values(votos).filter(v => v === cartaNarrador).length;
-  if (aciertos > 0) puntos[narradorIndex] += 3;
+  const aciertos = Object.values(votos).filter(v => v === cartaNarrador).length;
 
+  // Narrador
+  if (aciertos > 0 && aciertos < jugadores.length - 1) puntos[narradorIndex] += 3;
+
+  // Jugadores
   Object.keys(votos).forEach(i => {
     if (votos[i] === cartaNarrador) puntos[i] += 3;
     Object.keys(cartas).forEach(j => {
@@ -204,11 +184,9 @@ function mostrarResultados() {
   jugadores.forEach((j, i) => html += `${j}: ${puntos[i]}<br>`);
   html += '</div>';
 
-  if (narradorIndex + 1 < jugadores.length) {
+  if (narradorIndex + 1 < jugadores.length)
     html += '<button class="success" onclick="siguienteRonda()">Siguiente ronda</button>';
-  } else {
-    html += '<p>Fin de la partida 🎉</p>';
-  }
+  else html += '<p>Fin de la partida 🎉</p>';
 
   render(html);
 }
@@ -220,6 +198,5 @@ function siguienteRonda() {
 
 pantallaJugadores();
 </script>
-
 </body>
 </html>
