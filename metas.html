@@ -11,10 +11,10 @@
   --card: #ffffff;
   --primary: #4f46e5;
   --primary-light: #a5b4fc;
-  --water-2: #60a5fa;
-  --water-4: #60a5fa;
-  --water-6: #60a5fa;
-  --water-8: #4f46e5;
+  --water-2: #dbeafe;   /* azul muy claro */
+  --water-4: #bfdbfe;   /* azul claro */
+  --water-6: #60a5fa;   /* azul normal */
+  --water-8: #4f46e5;   /* azul oscuro */
   --exercise-strength: #fecaca;
   --exercise-cardio: #fde68a;
   --exercise-rest: #bbf7d0;
@@ -49,7 +49,11 @@ button.secondary { background: #e5e7eb; color: #111; }
 .calendar-cell { background: #ffffff; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; user-select: none; }
 .calendar-cell.header { font-weight: 700; background: #eef2ff; cursor: default; }
 .calendar-cell.day { font-weight: 700; background: #f1f5f9; cursor: default; }
-.calendar-cell.water-2, .calendar-cell.water-4, .calendar-cell.water-6 { background: var(--water-2); }
+.calendar-cell.water-2,
+.calendar-cell.water-4,
+.calendar-cell.water-6 {
+  background: var(--water-2);
+}
 .calendar-cell.water-8 { background: var(--water-8); color:#fff; }
 .calendar-cell.exercise-strength { background: var(--exercise-strength); }
 .calendar-cell.exercise-cardio { background: var(--exercise-cardio); }
