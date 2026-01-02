@@ -48,7 +48,6 @@ button.secondary { background: #e5e7eb; color: #111; }
 .calendar-cell { background: #ffffff; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; user-select: none; }
 .calendar-cell.header { font-weight: 700; background: #eef2ff; cursor: default; }
 .calendar-cell.day { font-weight: 700; background: #f1f5f9; cursor: default; }
-/* Colores de celdas */
 .calendar-cell.water-2 { background: var(--water-2); }
 .calendar-cell.water-4 { background: var(--water-4); }
 .calendar-cell.water-6 { background: var(--water-6); }
@@ -170,7 +169,11 @@ function renderCalendar(user,type,container){
 async function loadCell(user,type,day,month,cell){
   try{ const key=`${user}_${type}_${day}_${month}`; if(cellLocks[key]) return; cellLocks[key]=true;
   const ref=doc(db,'metas',key); const snap=await getDoc(ref);
-  if(snap.exists()){ const v=snap.data(); cell.textContent=v.label||''; cell.className='calendar-cell '+(v.class||''); }
+  if(snap.exists()){ const v=snap.data();
+    if(type==='lectura') cell.textContent = v.class==='reading-0' ? '❌' : '📖';
+    else cell.textContent=v.label||'';
+    cell.className='calendar-cell '+(v.class||'');
+  }
   cellLocks[key]=false;} catch(e){ console.warn('No se pudo cargar la celda:',e); cellLocks[`${user}_${type}_${day}_${month}`]=false; }
 }
 
@@ -183,11 +186,22 @@ window.openModal=(user,type,day,month,cell)=>{
   else if(type==='agua'){ addOpt('2 💧','water-2'); addOpt('4 💧','water-4'); addOpt('6 💧','water-6'); addOpt('8 💧','water-8'); addOpt('',''); }
   else if(type==='ejercicio'){ addOpt('🏋️ Fuerza','exercise-strength'); addOpt('🏃 Cardio','exercise-cardio'); addOpt('🛌 Descanso','exercise-rest'); addOpt('',''); }
   else if(type==='skincare'){ addOpt('📓 Journal','skincare-journal'); addOpt('🧴 Skincare','skincare-skin'); addOpt('⭐ Ambas','skincare-both'); addOpt('',''); }
-  else if(type==='lectura'){ addOpt('No he leído','reading-0'); addOpt('0-10 páginas','reading-10'); addOpt('10-20 páginas','reading-20'); addOpt('Más de 20 páginas','reading-30'); addOpt('',''); }
+  else if(type==='lectura'){
+    addOpt('No he leído','reading-0');
+    addOpt('0-10 páginas','reading-10');
+    addOpt('10-20 páginas','reading-20');
+    addOpt('Más de 20 páginas','reading-30');
+    addOpt('','');
+  }
   document.getElementById('modal').classList.add('active');
 };
 
-function addOpt(label,cls){ const b=document.createElement('button'); b.textContent = label === '' ? 'Dejar en blanco' : label; b.onclick=()=>{ const displayLabel = label===''?'':(label.includes(' ')?label.split(' ')[0]:label); applyLocallyAndSave(displayLabel,cls); }; document.getElementById('modal-options').appendChild(b); }
+function addOpt(label,cls){ const b=document.createElement('button'); b.textContent = label === '' ? 'Dejar en blanco' : label; b.onclick=()=>{
+  let displayLabel='';
+  if(currentContext.type==='lectura') displayLabel = cls==='reading-0'?'❌':'📖';
+  else displayLabel = label===''?'':(label.includes(' ')?label.split(' ')[0]:label);
+  applyLocallyAndSave(displayLabel,cls);
+}; document.getElementById('modal-options').appendChild(b); }
 
 async function applyLocallyAndSave(label,cls){
   const {user,type,day,month,cell}=currentContext;
