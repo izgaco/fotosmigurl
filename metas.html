@@ -179,7 +179,7 @@ async function loadCell(user,type,day,month,cell){
     const key=`${user}_${type}_${day}_${month}`; if(cellLocks[key]) return; cellLocks[key]=true;
     const ref=doc(db,'metas',key); const snap=await getDoc(ref);
     if(snap.exists()){ const v=snap.data();
-      if (type === 'biblia') { cell.textContent = v.label || '';
+      if(type==='lectura') cell.textContent = v.class==='reading-0' ? '✖' : v.class==='tick' ? '✔' : '';
       else if(type==='skincare'){ cell.textContent = v.class==='skincare-journal' ? '📓' : v.class==='skincare-skin' ? '🧴' : v.class==='skincare-both' ? '⭐' : ''; }
       else if(type==='ejercicio'){ cell.textContent = v.class==='exercise-strength' ? '🏋️' : v.class==='exercise-cardio' ? '🏃' : v.class==='exercise-rest' ? '🛌' : ''; }
       else if(type==='agua'){ cell.textContent = v.class==='water-2' ? '💧' : v.class==='water-4' ? '💧' : v.class==='water-6' ? '💧' : v.class==='water-8' ? '💧' : ''; }
