@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Metas 2026</title>
+<style>
+  /* ... Tus estilos se mantienen, añadir estos ... */
+  :root {
+    --bg: #f4f6fb;
+    --primary: #4f46e5;
+    /* Colores de celdas según clase (Asegúrate de definirlos todos) */
+    --tick: #bbf7d0; --cross: #fecaca;
+    --water-2: #dbeafe; --water-8: #4f46e5;
+    /* ... etc */
+  }
+  .calendar-cell.invalid { background: #f3f4f6; cursor: default; opacity: 0.3; pointer-events: none; }
+  .calendar-cell.loading { animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+  
+  /* Estilos específicos para que las clases CSS pinten el fondo */
+  .tick { background-color: var(--tick-green) !important; }
+  .cross { background-color: var(--cross-red) !important; }
+  .water-8 { background-color: var(--water-8) !important; color: white; }
+  /* Añade el resto de mapeos de colores aquí */
+</style>
+</head>
+<body>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDocs, collection, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+const firebaseConfig = { 
+    apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro", 
+    authDomain: "migurl-metas.firebaseapp.com", 
+    projectId: "migurl-metas" 
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const monthsFull = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const monthsShort = monthsFull.map(m => m.slice(0,3).toUpperCase());
+
+// Configuración centralizada de tipos
+const CONFIG = {
+    biblia: { options: {'✔':'tick','✖':'cross'}, icons: {tick:'✔', cross:'✖'} },
+    emocional: { options: {'😞':'bad','😐':'normal','🙂':'good','🤩':'great'} },
+    agua: { options: {'2V':'water-2','4V':'water-4','6V':'water-6','8V':'water-8'}, defaultIcon: '💧' },
+    ejercicio: { options: {'🏋️':'exercise-strength','🏃':'exercise-cardio','🛌':'exercise-rest'} },
+    skincare: { options: {'📓':'skincare-journal','🧴':'skincare-skin','⭐':'skincare-both'} },
+    lectura: { options: {'❌':'reading-0','📖':'reading-10','📚':'reading-30'} }
+};
+
+let currentContext = null;
+
+// Función para saber si un día existe en el calendario
+const isDateValid = (day, month) => {
+    const date = new Date(2026, month, day);
+    return date.getFullYear() === 2026 && date.getMonth() === month && date.getDate() === day;
+};
+
+async function renderCalendar(user, type, container) {
+    container.innerHTML = '<p style="text-align:center">Cargando datos...</p>';
+    
+    // 1. Carga masiva: Traer todos los documentos de este usuario y tipo de una vez
+    const q = query(collection(db, "metas"), where("user", "==", user), where("type", "==", type));
+    const querySnapshot = await getDocs(q);
+    const savedData = {};
+    querySnapshot.forEach(doc => savedData[doc.id] = doc.data());
+
+    container.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'calendar-grid';
+    
+    // Header
+    grid.appendChild(document.createElement('div'));
+    monthsShort.forEach(m => {
+        const c = document.createElement('div');
+        c.className = 'calendar-cell header';
+        c.textContent = m;
+        grid.appendChild(c);
+    });
+
+    // Filas de días
+    for (let d = 1; d <= 31; d++) {
+        const dayLabel = document.createElement('div');
+        dayLabel.className = 'calendar-cell day';
+        dayLabel.textContent = d;
+        grid.appendChild(dayLabel);
+
+        monthsFull.forEach((_, mi) => {
+            const cell = document.createElement('div');
+            cell.className = 'calendar-cell';
+            const key = `${user}_${type}_2026_${mi + 1}_${d}`; // ID más semántico
+
+            if (!isDateValid(d, mi)) {
+                cell.classList.add('invalid');
+            } else {
+                const data = savedData[key];
+                if (data) {
+                    cell.textContent = data.icon || data.label;
+                    cell.className += ' ' + data.class;
+                }
+                cell.onclick = () => openModal(user, type, d, mi, cell, key);
+            }
+            grid.appendChild(cell);
+        });
+    }
+    container.appendChild(grid);
+}
+
+window.openModal = (user, type, day, month, cell, key) => {
+    currentContext = { user, type, day, month, cell, key };
+    const opts = document.getElementById('modal-options');
+    opts.innerHTML = '';
+    document.getElementById('modal-title').textContent = `${day} de ${monthsFull[month]}`;
+
+    const config = CONFIG[type];
+    Object.entries(config.options).forEach(([label, cls]) => {
+        const b = document.createElement('button');
+        b.textContent = label;
+        b.onclick = () => saveData(label, cls);
+        opts.appendChild(b);
+    });
+
+    // Opción de vaciar
+    const btnClear = document.createElement('button');
+    btnClear.className = 'blank';
+    btnClear.textContent = 'Vaciar';
+    btnClear.onclick = () => saveData(null, null);
+    opts.appendChild(btnClear);
+
+    document.getElementById('modal').classList.add('active');
+};
+
+async function saveData(label, cls) {
+    const { user, type, day, month, cell, key } = currentContext;
+    
+    if (!label) {
+        cell.textContent = '';
+        cell.className = 'calendar-cell';
+        await deleteDoc(doc(db, 'metas', key));
+    } else {
+        const icon = CONFIG[type].icons ? CONFIG[type].icons[cls] : (CONFIG[type].defaultIcon || label);
+        cell.textContent = icon;
+        cell.className = 'calendar-cell ' + cls;
+        await setDoc(doc(db, 'metas', key), { 
+            user, type, day, month, label, class: cls, icon, year: 2026 
+        });
+    }
+    closeModal();
+}
+
+// Inicializadores globales
+window.selectUser = (user) => {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(user === 'Izhar' ? 'screen-izhar' : 'screen-camila').classList.add('active');
+    const firstTab = user === 'Izhar' ? 'biblia' : 'emocional';
+    renderCalendar(user, firstTab, document.getElementById(`${user.toLowerCase()}-${firstTab}`));
+};
+
+window.showSection = (user, section) => {
+    const containers = user === 'Izhar' ? ['biblia', 'ejercicio'] : ['emocional', 'agua', 'skincare', 'lectura'];
+    containers.forEach(c => {
+        const el = document.getElementById(`${user.toLowerCase()}-${c}`);
+        el.style.display = c === section ? 'block' : 'none';
+        if (c === section) renderCalendar(user, c, el);
+    });
+};
+
+window.closeModal = () => document.getElementById('modal').classList.remove('active');
+window.volverUsuario = () => {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-user').classList.add('active');
+};
+</script>
+</body>
+</html>
