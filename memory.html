@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE html><html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Memory · Migurl.com</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <style>
     body {
       margin: 0;
       padding-top: 56px;
@@ -43,15 +40,13 @@
       background: #ffffff;
       width: 100%;
       max-width: 420px;
-      padding: 20px;
+      padding: 16px;
       border-radius: 16px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       text-align: center;
     }
 
-    .screen.active {
-      display: block;
-    }
+    .screen.active { display: block; }
 
     h1 { margin-bottom: 15px; }
 
@@ -77,21 +72,21 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr); /* 🔑 SIEMPRE 4 COLUMNAS */
-      gap: 8px;
+      gap: 6px;
       justify-content: center;
       margin-top: 10px;
     }
 
     .card {
+      width: 100%;
       aspect-ratio: 1 / 1;
       background: #1565c0;
       color: transparent;
-      font-size: 28px;
+      font-size: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
       user-select: none;
     }
@@ -106,32 +101,18 @@
     .card.matched {
       background: #c8e6c9;
     }
-  </style>
-</head>
-<body>
-
-<header class="site-header">
+  </style></head>
+<body><header class="site-header">
   <a href="/">Migurl.com</a>
-</header>
-
-<!-- CONFIG -->
-<div id="config" class="screen active">
+</header><!-- CONFIG --><div id="config" class="screen active">
   <h1>🧠 Memory</h1>
-  <p>Selecciona dificultad</p>
+  <p>Selecciona dificultad</p><button class="blue" onclick="startGame(4)">Principiante (4×4)</button> <button class="blue" onclick="startGame(6)">Intermedio (6×6)</button> <button class="blue" onclick="startGame(8)">Experto (8×8)</button>
 
-  <button class="blue" onclick="startGame(16)">Principiante (4×4)</button>
-  <button class="blue" onclick="startGame(36)">Intermedio (4×9)</button>
-  <button class="blue" onclick="startGame(64)">Experto (4×16)</button>
-</div>
-
-<!-- GAME -->
-<div id="game" class="screen">
+</div><!-- GAME --><div id="game" class="screen">
   <div class="info" id="info"></div>
   <div id="grid" class="grid"></div>
   <button class="gray" onclick="volver()">Volver</button>
-</div>
-
-<script>
+</div><script>
 const emojis = [
   "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼",
   "🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔",
@@ -146,7 +127,7 @@ let matches = 0;
 let attempts = 0;
 let totalPairs = 0;
 
-function startGame(totalCards) {
+function startGame(size) {
   const grid = document.getElementById("grid");
   const info = document.getElementById("info");
 
@@ -155,7 +136,10 @@ function startGame(totalCards) {
   matches = 0;
   attempts = 0;
 
+  const totalCards = size * size;
   totalPairs = totalCards / 2;
+
+  grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
 
   const selected = emojis.slice(0, totalPairs);
   const cards = [...selected, ...selected]
@@ -220,7 +204,5 @@ function mostrar(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
-</script>
-
-</body>
+</script></body>
 </html>
