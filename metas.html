@@ -1,107 +1,257 @@
-<!-- FIXED VERSION restoring user selector buttons behavior --><!DOCTYPE html><html lang="es">
+<!DOCTYPE html><html lang="es">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Metas 2026 (fix usuarios)</title>
-<style>
-body{font-family:system-ui;background:#f4f6fb;margin:0;padding:0}
-header{padding:1rem;text-align:center}
-.user-switch{display:flex;justify-content:center;gap:.5rem;margin-bottom:1rem}
-.user-switch button{padding:.5rem 1rem;border-radius:999px;border:0;cursor:pointer;background:#dbe4ff}
-.user-switch button.active{background:#4c6ef5;color:#fff}
-.calendar{margin:1rem}
-.calendar h3{text-align:center}
-.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.calendar-cell{aspect-ratio:1;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer}
-.tick{background:#c3fae8}
-.cross{background:#ffe3e3}
-.water{background:#d0ebff}
-.emotion-good{background:#e6fcf5}
-.emotion-bad{background:#fff5f5}
-.exercise{background:#f1f3f5}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center}
-.modal-content{background:#fff;padding:1rem;border-radius:12px;display:flex;flex-direction:column;gap:.5rem}
-.modal-content button{padding:.5rem;border-radius:8px;border:0;cursor:pointer}
-</style>
-</head>
-<body>
-<header>
-  <div class="user-switch">
-    <button id="btn-izhar" class="active">Izhar</button>
-    <button id="btn-camila">Camila</button>
+<title>Metas 2026</title><style>
+:root {
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --primary: #4f46e5;
+  --primary-light: #a5b4fc;
+  --water-2: #dbeafe;
+  --water-4: #bfdbfe;
+  --water-6: #60a5fa;
+  --water-8: #4f46e5;
+  --exercise-strength: #fecaca;
+  --exercise-cardio: #fde68a;
+  --exercise-rest: #bbf7d0;
+  --tick-green: #bbf7d0;
+  --cross-red: #fecaca;
+  --emotional-bad: #f87171;
+  --emotional-normal: #86efac;
+  --emotional-good: #4ade80;
+  --emotional-great: #16a34a;
+  --skincare-journal: #bbf7d0;
+  --skincare-skin: #16a34a;
+  --skincare-both: #93c5fd;
+  --reading-0: #f87171;
+  --reading-10: #86efac;
+  --reading-20: #4ade80;
+  --reading-30: #16a34a;
+  --blank-gray: #e5e7eb;
+  --text: #1f2937;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+.screen { display: none; padding: 16px; }
+.screen.active { display: block; }
+h2 { margin-top: 0; text-align: center; }
+button { border: none; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 600; background: var(--primary-light); color: #111; }
+button.active { background: var(--primary); color: #fff; }
+button.secondary { background: #e5e7eb; color: #111; }
+.user-select { display: grid; gap: 16px; margin-top: 40px; }
+.menu { display: flex; justify-content: center; margin-bottom: 16px; }
+.menu select { width: 100%; max-width: 320px; padding: 14px; border-radius: 14px; border: none; font-size: 16px; font-weight: 600; background: var(--primary-light); color: #111; appearance: none; text-align: center; }
+.calendar-grid { display: grid; grid-template-columns: 28px repeat(12, 1fr); gap: 4px; font-size: 11px; margin-top: 12px; }
+.calendar-cell { background: #ffffff; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; user-select: none; }
+.calendar-cell.header { font-weight: 700; background: #eef2ff; cursor: default; }
+.calendar-cell.day { font-weight: 700; background: #f1f5f9; cursor: default; }
+.calendar-cell.blank { background: var(--blank-gray); }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 10; }
+.modal.active { display: flex; }
+.modal-box { background: white; width: 90%; max-width: 320px; padding: 20px; border-radius: 16px; }
+.modal-box h3 { margin-top: 0; }
+.modal-box button { width: 100%; margin-top: 10px; }
+.modal-box button.blank { background: var(--blank-gray); color: #111; }
+</style></head>
+<body><div id="screen-user" class="screen active">
+  <h2>¿Quién hace el seguimiento?</h2>
+  <div class="user-select">
+    <button onclick="selectUser('Izhar')">Izhar</button>
+    <button onclick="selectUser('Camila')">Camila</button>
   </div>
-</header>
-<div id="app"></div>
-<div class="modal" id="modal"><div class="modal-content" id="modalContent"></div></div>
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
-import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
-const firebaseConfig={apiKey:"demo",authDomain:"demo",projectId:"demo"};
-const app=initializeApp(firebaseConfig);const db=getFirestore(app);
-let currentUser='izhar';
-const USERS={izhar:['biblia','ejercicio'],camila:['emocional','agua','skincare']};
-const CALENDARS={
-  biblia:{title:'Lectura Biblia',options:[{label:'Leído',class:'tick',emoji:'✅'},{label:'No',class:'cross',emoji:'❌'}]},
-  ejercicio:{title:'Ejercicio',options:[{label:'Hecho',class:'exercise',emoji:'💪'}]},
-  emocional:{title:'Año emocional',options:[{label:'Bien',class:'emotion-good',emoji:'😊'},{label:'Mal',class:'emotion-bad',emoji:'😞'}]},
-  agua:{title:'Beber agua',options:[{label:'Agua',class:'water',emoji:'💧'}]},
-  skincare:{title:'Skincare',options:[{label:'Rutina',class:'water',emoji:'🧴'}]}
+</div><div id="screen-izhar" class="screen">
+  <button class="secondary" onclick="volverUsuario()">Volver</button>
+  <h2>Izhar · Metas 2026</h2>
+  <div class="menu">
+    <select id="select-izhar" onchange="showIzharSection(this.value)">
+      <option value="biblia">📖 Lectura de la Biblia</option>
+      <option value="ejercicio">💪 Ejercicio</option>
+    </select>
+  </div>
+  <div id="izhar-biblia"></div>
+  <div id="izhar-ejercicio" style="display:none"></div>
+</div><div id="screen-camila" class="screen">
+  <button class="secondary" onclick="volverUsuario()">Volver</button>
+  <h2>Camila · Metas 2026</h2>
+  <div class="menu">
+    <select id="select-camila" onchange="showSection(this.value)">
+      <option value="emocional">💭 Año emocional</option>
+      <option value="agua">💧 Beber agua</option>
+      <option value="skincare">🧴 Skincare</option>
+      <option value="lectura">📚 Lectura</option>
+    </select>
+  </div>
+  <div id="camila-emocional"></div>
+  <div id="camila-agua" style="display:none"></div>
+  <div id="camila-skincare" style="display:none"></div>
+  <div id="camila-lectura" style="display:none"></div>
+</div><div id="modal" class="modal">
+  <div class="modal-box">
+    <h3 id="modal-title">Selecciona</h3>
+    <div id="modal-options"></div>
+    <button class="secondary" onclick="closeModal()">Cancelar</button>
+  </div>
+</div><script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+const firebaseConfig = { apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro", authDomain: "migurl-metas.firebaseapp.com", projectId: "migurl-metas" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const monthsFull = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const monthsShort = monthsFull.map(m => m.slice(0,3).toUpperCase());
+let currentContext = null;
+const cellLocks = {};
+
+const CALENDARS = {
+  biblia: {
+    options: [
+      { label: '✅ Leído', class: 'tick', emoji: '✅' },
+      { label: '❌ No leído', class: 'cross', emoji: '❌' }
+    ]
+  },
+  ejercicio: {
+    options: [
+      { label: '🏋️ Fuerza', class: 'exercise-strength', emoji: '🏋️' },
+      { label: '🏃 Cardio', class: 'exercise-cardio', emoji: '🏃' },
+      { label: '🛌 Descanso', class: 'exercise-rest', emoji: '🛌' }
+    ]
+  },
+  emocional: {
+    options: [
+      { label: '😞', class: 'bad', emoji: '😞' },
+      { label: '😐', class: 'normal', emoji: '😐' },
+      { label: '🙂', class: 'good', emoji: '🙂' },
+      { label: '🤩', class: 'great', emoji: '🤩' }
+    ]
+  },
+  agua: {
+    options: [
+      { label: '2 Vasos 💧', class: 'water-2', emoji: '💧' },
+      { label: '4 Vasos 💧', class: 'water-4', emoji: '💧' },
+      { label: '6 Vasos 💧', class: 'water-6', emoji: '💧' },
+      { label: '8 Vasos 💧', class: 'water-8', emoji: '💧' }
+    ]
+  },
+  skincare: {
+    options: [
+      { label: '📓 Journal', class: 'skincare-journal', emoji: '📓' },
+      { label: '🧴 Skincare', class: 'skincare-skin', emoji: '🧴' },
+      { label: '⭐ Ambas', class: 'skincare-both', emoji: '⭐' }
+    ]
+  },
+  lectura: {
+    options: [
+      { label: 'No he leído', class: 'reading-0', emoji: '❌' },
+      { label: '0-10 páginas', class: 'reading-10', emoji: '📖' },
+      { label: '10-20 páginas', class: 'reading-20', emoji: '📖' },
+      { label: 'Más de 20 páginas', class: 'reading-30', emoji: '📖' }
+    ]
+  }
 };
-const appDiv=document.getElementById('app');
-const modal=document.getElementById('modal');const modalContent=document.getElementById('modalContent');
-function render(){
-  appDiv.innerHTML='';
-  USERS[currentUser].forEach(type=>renderCalendar(type));
-}
-function renderCalendar(type){
-  const cal=CALENDARS[type];
-  const wrap=document.createElement('div');wrap.className='calendar';
-  wrap.innerHTML=`<h3>${cal.title}</h3><div class="grid"></div>`;
-  const grid=wrap.querySelector('.grid');
-  for(let d=1;d<=30;d++){
-    const cell=document.createElement('div');cell.className='calendar-cell';cell.textContent='';
-    cell.onclick=()=>openModal(cell,type,d);
-    grid.appendChild(cell);
-    loadCell(cell,type,d);
+
+window.volverUsuario = () => {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-user').classList.add('active');
+};
+
+window.selectUser = (user) => {
+  document.getElementById('screen-user').classList.remove('active');
+  document.getElementById(user==='Izhar'?'screen-izhar':'screen-camila').classList.add('active');
+  if(user==='Izhar'){
+    renderCalendar('Izhar','biblia',document.getElementById('izhar-biblia'));
+    renderCalendar('Izhar','ejercicio',document.getElementById('izhar-ejercicio'));
+  } else {
+    renderCalendar('Camila','emocional',document.getElementById('camila-emocional'));
+    renderCalendar('Camila','agua',document.getElementById('camila-agua'));
+    renderCalendar('Camila','skincare',document.getElementById('camila-skincare'));
+    renderCalendar('Camila','lectura',document.getElementById('camila-lectura'));
   }
-  appDiv.appendChild(wrap);
-}
-function openModal(cell,type,day){
-  modalContent.innerHTML='';
-  CALENDARS[type].options.forEach(o=>{
-    const b=document.createElement('button');b.textContent=o.label+' '+o.emoji;
-    b.onclick=()=>addOpt(cell,type,day,o);
-    modalContent.appendChild(b);
+};
+
+window.showIzharSection = (section) => {
+  document.getElementById('izhar-biblia').style.display = section==='biblia'?'block':'none';
+  document.getElementById('izhar-ejercicio').style.display = section==='ejercicio'?'block':'none';
+};
+
+window.showSection = (section) => {
+  ['emocional','agua','skincare','lectura'].forEach(s=>{
+    const el=document.getElementById('camila-'+s);
+    if(el) el.style.display=s===section?'block':'none';
   });
-  modal.style.display='flex';
-}
-function addOpt(cell,type,day,opt){
-  cell.className='calendar-cell';
-  if(opt.class)cell.classList.add(opt.class);
-  cell.textContent=opt.emoji||'';
-  const key=`${currentUser}_${type}_${day}`;
-  setDoc(doc(db,'metas2',key),{class:opt.class||'',emoji:opt.emoji||''});
-  modal.style.display='none';
-}
-async function loadCell(cell,type,day){
-  const key=`${currentUser}_${type}_${day}`;
-  const snap=await getDoc(doc(db,'metas2',key));
-  if(snap.exists()){
-    const v=snap.data();
-    cell.className='calendar-cell';
-    if(v.class)cell.classList.add(v.class);
-    cell.textContent=v.emoji||'';
+};
+
+function renderCalendar(user,type,container){
+  container.innerHTML='';
+  const grid = document.createElement('div');
+  grid.className='calendar-grid';
+  grid.appendChild(document.createElement('div'));
+  monthsShort.forEach(m=>{ const c=document.createElement('div'); c.className='calendar-cell header'; c.textContent=m; grid.appendChild(c); });
+  for(let d=1; d<=31; d++){
+    const day=document.createElement('div'); day.className='calendar-cell day'; day.textContent=d; grid.appendChild(day);
+    monthsFull.forEach((_,mi)=>{
+      const cell=document.createElement('div'); cell.className='calendar-cell'; cell.onclick=()=>openModal(user,type,d,mi,cell); grid.appendChild(cell); loadCell(user,type,d,mi,cell);
+    });
   }
+  container.appendChild(grid);
 }
-document.getElementById('btn-izhar').onclick=()=>switchUser('izhar');
-document.getElementById('btn-camila').onclick=()=>switchUser('camila');
-function switchUser(u){
-  currentUser=u;
-  document.getElementById('btn-izhar').classList.toggle('active',u==='izhar');
-  document.getElementById('btn-camila').classList.toggle('active',u==='camila');
-  render();
+
+async function loadCell(user,type,day,month,cell){
+  const key=`${user}_${type}_${day}_${month}`;
+  if(cellLocks[key]) return;
+  cellLocks[key]=true;
+  const snap = await getDoc(doc(db,'metas',key));
+  if(snap.exists()){
+    const v = snap.data();
+    cell.textContent = '';
+    cell.className = 'calendar-cell';
+    if(v.class) cell.classList.add(v.class);
+    if(v.emoji) cell.textContent = v.emoji;
+  }
+  cellLocks[key]=false;
 }
-render();
-</script>
-</body>
+
+window.openModal=(user,type,day,month,cell)=>{
+  currentContext={user,type,day,month,cell};
+  const opts=document.getElementById('modal-options');
+  opts.innerHTML='';
+  document.getElementById('modal-title').textContent=`${day} de ${monthsFull[month]}`;
+
+  const config = CALENDARS[type];
+  config.options.forEach(opt => addOpt(opt.label, opt.class, opt.emoji));
+  addOpt('', 'blank');
+
+  document.getElementById('modal').classList.add('active');
+};
+
+function addOpt(label,cls,emoji){
+  const b=document.createElement('button');
+  if(cls==='blank') b.className='blank';
+  b.textContent = label || 'Vaciar';
+
+  b.onclick=async()=>{
+    const {user,type,day,month,cell} = currentContext;
+    const key = `${user}_${type}_${day}_${month}`;
+
+    if(cls==='blank'){
+      cell.textContent='';
+      cell.className='calendar-cell';
+      await deleteDoc(doc(db,'metas',key));
+      closeModal();
+      return;
+    }
+
+    cell.textContent = emoji;
+    cell.className = 'calendar-cell '+cls;
+    await setDoc(doc(db,'metas',key),{ class: cls, emoji });
+    closeModal();
+  };
+
+  document.getElementById('modal-options').appendChild(b);
+}
+
+window.closeModal=()=>document.getElementById('modal').classList.remove('active');
+</script></body>
 </html>
