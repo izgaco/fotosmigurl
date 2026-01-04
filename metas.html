@@ -80,7 +80,165 @@ button.secondary { background: #e5e7eb; color: #111; }
 </head>
 <body>
 
-<!-- CONTENIDO HTML Y SCRIPT EXACTAMENTE IGUAL AL QUE HAS ENVIADO -->
+
+<div id="screen-user" class="screen active">
+  <h2>¿Quién hace el seguimiento?</h2>
+  <div class="user-select">
+    <button onclick="selectUser('Izhar')">Izhar</button>
+    <button onclick="selectUser('Camila')">Camila</button>
+  </div>
+</div>
+
+<div id="screen-izhar" class="screen">
+  <button class="secondary" onclick="volverUsuario()">Volver</button>
+  <h2>Izhar · Metas 2026</h2>
+  <div class="menu">
+    <select id="select-izhar" onchange="showIzharSection(this.value)">
+      <option value="biblia">📖 Lectura de la Biblia</option>
+      <option value="ejercicio">💪 Ejercicio</option>
+    </select>
+  </div>
+  <div id="izhar-biblia"></div>
+  <div id="izhar-ejercicio" style="display:none"></div>
+</div>
+
+<div id="screen-camila" class="screen">
+  <button class="secondary" onclick="volverUsuario()">Volver</button>
+  <h2>Camila · Metas 2026</h2>
+  <div class="menu">
+    <select id="select-camila" onchange="showSection(this.value)">
+      <option value="emocional">💭 Año emocional</option>
+      <option value="agua">💧 Beber agua</option>
+      <option value="skincare">🧴 Skincare</option>
+      <option value="lectura">📚 Lectura</option>
+    </select>
+  </div>
+  <div id="camila-emocional"></div>
+  <div id="camila-agua" style="display:none"></div>
+  <div id="camila-skincare" style="display:none"></div>
+  <div id="camila-lectura" style="display:none"></div>
+</div>
+
+<div id="modal" class="modal">
+  <div class="modal-box">
+    <h3 id="modal-title">Selecciona</h3>
+    <div id="modal-options"></div>
+    <button class="secondary" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+const firebaseConfig = { apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro", authDomain: "migurl-metas.firebaseapp.com", projectId: "migurl-metas" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const monthsFull = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const monthsShort = monthsFull.map(m => m.slice(0,3).toUpperCase());
+let currentContext = null;
+const cellLocks = {};
+
+window.volverUsuario = () => {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-user').classList.add('active');
+};
+
+window.selectUser = (user) => {
+  document.getElementById('screen-user').classList.remove('active');
+  document.getElementById(user==='Izhar'?'screen-izhar':'screen-camila').classList.add('active');
+  if(user==='Izhar'){
+    renderCalendar('Izhar','biblia',document.getElementById('izhar-biblia'));
+    renderCalendar('Izhar','ejercicio',document.getElementById('izhar-ejercicio'));
+  } else {
+    renderCalendar('Camila','emocional',document.getElementById('camila-emocional'));
+    renderCalendar('Camila','agua',document.getElementById('camila-agua'));
+    renderCalendar('Camila','skincare',document.getElementById('camila-skincare'));
+    renderCalendar('Camila','lectura',document.getElementById('camila-lectura'));
+  }
+};
+
+window.showIzharSection = (section) => {
+  document.getElementById('izhar-biblia').style.display = section==='biblia'?'block':'none';
+  document.getElementById('izhar-ejercicio').style.display = section==='ejercicio'?'block':'none';
+};
+
+window.showSection = (section) => {
+  ['emocional','agua','skincare','lectura'].forEach(s=>{
+    const el=document.getElementById('camila-'+s);
+    if(el) el.style.display=s===section?'block':'none';
+  });
+};
+
+function renderCalendar(user,type,container){
+  container.innerHTML='';
+  const grid = document.createElement('div');
+  grid.className='calendar-grid';
+  grid.appendChild(document.createElement('div'));
+  monthsShort.forEach(m=>{ const c=document.createElement('div'); c.className='calendar-cell header'; c.textContent=m; grid.appendChild(c); });
+  for(let d=1; d<=31; d++){
+    const day=document.createElement('div'); day.className='calendar-cell day'; day.textContent=d; grid.appendChild(day);
+    monthsFull.forEach((_,mi)=>{
+      const cell=document.createElement('div'); cell.className='calendar-cell'; cell.onclick=()=>openModal(user,type,d,mi,cell); grid.appendChild(cell); loadCell(user,type,d,mi,cell);
+    });
+  }
+  container.appendChild(grid);
+}
+
+async function loadCell(user,type,day,month,cell){
+  const key=`${user}_${type}_${day}_${month}`;
+  if(cellLocks[key]) return;
+  cellLocks[key]=true;
+  const snap = await getDoc(doc(db,'metas',key));
+  if(snap.exists()){
+    const v=snap.data();
+    if(type==='biblia'){
+      cell.textContent = v.class==='tick' ? '✅' : v.class==='cross' ? '❌' : '';
+    } else if(type==='lectura'){
+      cell.textContent = v.class==='reading-0' ? '❌' : '📖';
+    }
+    cell.className='calendar-cell '+(v.class||'');
+  }
+  cellLocks[key]=false;
+}
+
+window.openModal=(user,type,day,month,cell)=>{
+  currentContext={user,type,day,month,cell};
+  const opts=document.getElementById('modal-options'); opts.innerHTML='';
+  document.getElementById('modal-title').textContent=`${day} de ${monthsFull[month]}`;
+
+  if(type==='biblia'){
+    addOpt('✅ Leído','tick');
+    addOpt('❌ No leído','cross');
+    addOpt('','blank');
+  }
+  document.getElementById('modal').classList.add('active');
+};
+
+function addOpt(label,cls){
+  const b=document.createElement('button');
+  b.textContent = label || 'Vaciar';
+  b.onclick=async()=>{
+    const {user,type,day,month,cell} = currentContext;
+    if(cls==='blank'){
+      cell.textContent='';
+      cell.className='calendar-cell';
+      await deleteDoc(doc(db,'metas',`${user}_${type}_${day}_${month}`));
+      closeModal();
+      return;
+    }
+    const emoji = cls==='tick' ? '✅' : '❌';
+    cell.textContent=emoji;
+    cell.className='calendar-cell '+cls;
+    await setDoc(doc(db,'metas',`${user}_${type}_${day}_${month}`),{class:cls});
+    closeModal();
+  };
+  document.getElementById('modal-options').appendChild(b);
+}
+
+window.closeModal=()=>document.getElementById('modal').classList.remove('active');
+</script>
 
 </body>
 </html>
