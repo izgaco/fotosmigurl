@@ -177,14 +177,20 @@ async function loadCell(user,type,day,month,cell){
   cellLocks[key]=true;
   const snap = await getDoc(doc(db,'metas',key));
   if(snap.exists()){
-    const v=snap.data();
-    if(type==='biblia'){
-      cell.textContent = v.class==='tick' ? '✅' : v.class==='cross' ? '❌' : '';
-    } else if(type==='lectura'){
-      cell.textContent = v.class==='reading-0' ? '❌' : '📖';
-    }
-    cell.className='calendar-cell '+(v.class||'');
+  const v = snap.data();
+
+  // reset limpio
+  cell.textContent = '';
+  cell.className = 'calendar-cell';
+
+  if(v.class){
+    cell.classList.add(v.class);
   }
+
+  if(v.emoji){
+    cell.textContent = v.emoji;
+  }
+}
   cellLocks[key]=false;
 }
 
