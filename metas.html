@@ -263,7 +263,10 @@ function addOpt(label,cls){
 
     cell.textContent=emoji;
     cell.className='calendar-cell '+cls;
-    await setDoc(doc(db,'metas',key),{class:cls});
+    await setDoc(doc(db,'metas',key),{
+      class: cls,
+      emoji: emoji
+    });
     closeModal();
   };
 
