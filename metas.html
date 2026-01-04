@@ -11,10 +11,10 @@
   --card: #ffffff;
   --primary: #4f46e5;
   --primary-light: #a5b4fc;
-  --water-2: #dbeafe;
-  --water-4: #bfdbfe;
-  --water-6: #60a5fa;
-  --water-8: #4f46e5;
+  --water-2: #dbeafe;   /* azul muy claro */
+  --water-4: #bfdbfe;   /* azul claro */
+  --water-6: #60a5fa;   /* azul normal */
+  --water-8: #4f46e5;   /* azul oscuro */
   --exercise-strength: #fecaca;
   --exercise-cardio: #fde68a;
   --exercise-rest: #bbf7d0;
@@ -45,10 +45,32 @@ button.secondary { background: #e5e7eb; color: #111; }
 .user-select { display: grid; gap: 16px; margin-top: 40px; }
 .menu { display: flex; justify-content: center; margin-bottom: 16px; }
 .menu select { width: 100%; max-width: 320px; padding: 14px; border-radius: 14px; border: none; font-size: 16px; font-weight: 600; background: var(--primary-light); color: #111; appearance: none; text-align: center; }
-.calendar-grid { display: grid; grid-template-columns: 20px repeat(12, 1fr); gap: 2px; font-size: 10px; margin-top: 8px; }
-.calendar-cell { background: #ffffff; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; user-select: none; }
+.calendar-grid { display: grid; grid-template-columns: 28px repeat(12, 1fr); gap: 4px; font-size: 11px; margin-top: 12px; }
+.calendar-cell { background: #ffffff; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; user-select: none; }
 .calendar-cell.header { font-weight: 700; background: #eef2ff; cursor: default; }
 .calendar-cell.day { font-weight: 700; background: #f1f5f9; cursor: default; }
+.calendar-cell.water-2 { background: var(--water-2); }
+.calendar-cell.water-4 { background: var(--water-4); }
+.calendar-cell.water-6 { background: var(--water-6); }
+.calendar-cell.water-8 { background: var(--water-8); color: #fff; }
+.calendar-cell.water-8 { background: var(--water-8); color:#fff; }
+.calendar-cell.exercise-strength { background: var(--exercise-strength); }
+.calendar-cell.exercise-cardio { background: var(--exercise-cardio); }
+.calendar-cell.exercise-rest { background: var(--exercise-rest); }
+.calendar-cell.tick { background: var(--tick-green); }
+.calendar-cell.cross { background: var(--cross-red); }
+.calendar-cell.bad { background: var(--emotional-bad); }
+.calendar-cell.normal { background: var(--emotional-normal); }
+.calendar-cell.good { background: var(--emotional-good); }
+.calendar-cell.great { background: var(--emotional-great); }
+.calendar-cell.skincare-journal { background: var(--skincare-journal); }
+.calendar-cell.skincare-skin { background: var(--skincare-skin); color:#fff; }
+.calendar-cell.skincare-both { background: var(--skincare-both); }
+.calendar-cell.reading-0 { background: var(--reading-0); }
+.calendar-cell.reading-10 { background: var(--reading-10); }
+.calendar-cell.reading-20 { background: var(--reading-20); }
+.calendar-cell.reading-30 { background: var(--reading-30); color:#fff; }
+.calendar-cell.blank { background: var(--blank-gray); }
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 10; }
 .modal.active { display: flex; }
 .modal-box { background: white; width: 90%; max-width: 320px; padding: 20px; border-radius: 16px; }
@@ -115,6 +137,10 @@ const monthsFull = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Ag
 const monthsShort = monthsFull.map(m => m.slice(0,3).toUpperCase());
 let currentContext = null;
 const cellLocks = {};
+const CAMILA_READING_EMOJIS = {
+  no: "❌",
+  yes: "📖"
+};
 
 window.volverUsuario = () => { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById('screen-user').classList.add('active'); };
 window.selectUser = (user) => {
@@ -149,78 +175,80 @@ function renderCalendar(user,type,container){
 }
 
 async function loadCell(user,type,day,month,cell){
-  const key=`${user}_${type}_${day}_${month}`;
-  if(cellLocks[key]) return; cellLocks[key]=true;
   try{
-    const snap = await getDoc(doc(db,'metas',key));
-    if(snap.exists()){
-      const v = snap.data();
-      // Mostrar emojis correctamente según el tipo
-      if(type==='biblia') cell.textContent = v.class==='tick'?'✔':v.class==='cross'?'✖':'';
-      else cell.textContent = v.label || '';
-      cell.className = 'calendar-cell ' + (v.class || '');
+    const key=`${user}_${type}_${day}_${month}`; if(cellLocks[key]) return; cellLocks[key]=true;
+    const ref=doc(db,'metas',key); const snap=await getDoc(ref);
+    if(snap.exists()){ const v=snap.data();
+      if(type==='lectura') cell.textContent = v.class==='reading-0' ? '✖' : v.class==='tick' ? '✔' : '';
+      else if(type==='skincare'){ cell.textContent = v.class==='skincare-journal' ? '📓' : v.class==='skincare-skin' ? '🧴' : v.class==='skincare-both' ? '⭐' : ''; }
+      else if(type==='ejercicio'){ cell.textContent = v.class==='exercise-strength' ? '🏋️' : v.class==='exercise-cardio' ? '🏃' : v.class==='exercise-rest' ? '🛌' : ''; }
+      else if(type==='agua'){ cell.textContent = v.class==='water-2' ? '💧' : v.class==='water-4' ? '💧' : v.class==='water-6' ? '💧' : v.class==='water-8' ? '💧' : ''; }
+      else if(type==='emocional'){ cell.textContent = v.class==='bad' ? '😞' : v.class==='normal' ? '😐' : v.class==='good' ? '🙂' : v.class==='great' ? '🤩' : ''; }
+      else cell.textContent='';
+      cell.className='calendar-cell '+(v.class||'');
     }
-  } catch(e){ console.warn(e); }
-  cellLocks[key]=false;
+    cellLocks[key]=false;
+  } catch(e){ console.warn('No se pudo cargar la celda:',e); cellLocks[`${user}_${type}_${day}_${month}`]=false; }
 }
 
-window.openModal = (user,type,day,month,cell) => {
-  currentContext = {user,type,day,month,cell};
-  const opts = document.getElementById('modal-options'); opts.innerHTML='';
-  document.getElementById('modal-title').textContent = `${day} de ${monthsFull[month]}`;
-  const optionsMap = {
-    'biblia': ['✔','✖'],
-    'emocional': ['😞','😐','🙂','🤩'],
-    'agua': ['2 Vasos 💧','4 Vasos 💧','6 Vasos 💧','8 Vasos 💧'],
-    'ejercicio': ['🏋️ Fuerza','🏃 Cardio','🛌 Descanso'],
-    'skincare': ['📓 Journal','🧴 Skincare','⭐ Ambas'],
-    'lectura': ['No he leído','0-10 páginas','10-20 páginas','Más de 20 páginas']
-  };
-  optionsMap[type]?.forEach(o=>addOpt(o,clsFromLabel(type,o)));
-  addOpt('','blank');
+window.openModal=(user,type,day,month,cell)=>{
+  currentContext={user,type,day,month,cell};
+  const opts=document.getElementById('modal-options'); opts.innerHTML='';
+  document.getElementById('modal-title').textContent=`${day} de ${monthsFull[month]}`;
+  if(type==='biblia'){ addOpt('✔','tick'); addOpt('✖','cross'); addOpt('','blank'); }
+  else if(type==='emocional'){ addOpt('😞','bad'); addOpt('😐','normal'); addOpt('🙂','good'); addOpt('🤩','great'); addOpt('','blank'); }
+  else if(type==='agua'){
+    addOpt('2 Vasos 💧','water-2');
+    addOpt('4 Vasos 💧','water-4');
+    addOpt('6 Vasos 💧','water-6');
+    addOpt('8 Vasos 💧','water-8');
+    addOpt('','blank');
+}
+  else if(type==='ejercicio'){ addOpt('🏋️ Fuerza','exercise-strength'); addOpt('🏃 Cardio','exercise-cardio'); addOpt('🛌 Descanso','exercise-rest'); addOpt('','blank'); }
+  else if(type==='skincare'){ addOpt('📓 Journal','skincare-journal'); addOpt('🧴 Skincare','skincare-skin'); addOpt('⭐ Ambas','skincare-both'); addOpt('','blank'); }
+  else if(type==='lectura'){
+    addOpt('No he leído','reading-0');
+    addOpt('0-10 páginas','reading-10');
+    addOpt('10-20 páginas','reading-20');
+    addOpt('Más de 20 páginas','reading-30');
+    addOpt('','blank');
+  }
   document.getElementById('modal').classList.add('active');
 };
 
-function clsFromLabel(type,label){
-  const map = {
-    'biblia': {'✔':'tick','✖':'cross'},
-    'emocional': {'😞':'bad','😐':'normal','🙂':'good','🤩':'great'},
-    'agua': {'2 Vasos 💧':'water-2','4 Vasos 💧':'water-4','6 Vasos 💧':'water-6','8 Vasos 💧':'water-8'},
-    'ejercicio': {'🏋️ Fuerza':'exercise-strength','🏃 Cardio':'exercise-cardio','🛌 Descanso':'exercise-rest'},
-    'skincare': {'📓 Journal':'skincare-journal','🧴 Skincare':'skincare-skin','⭐ Ambas':'skincare-both'},
-    'lectura': {'No he leído':'reading-0','0-10 páginas':'reading-10','10-20 páginas':'reading-20','Más de 20 páginas':'reading-30'}
-  };
-  return map[type][label] || '';
-}
-
-function addOpt(label,cls){
-  const b=document.createElement('button');
-  b.className = cls==='blank'?'blank':'';
-  b.textContent = label === '' ? 'Vaciar' : label;
-  b.onclick = async()=>{
-    const {user,type,day,month,cell} = currentContext;
-    if(cls==='blank'){
-      cell.textContent=''; cell.className='calendar-cell';
-      try{ await deleteDoc(doc(db,'metas',`${user}_${type}_${day}_${month}`)); } catch(e){ console.warn(e); }
-      closeModal(); return;
-    }
-    // Asignar emoji según tipo
-    let emoji = label;
-    if(type==='biblia') emoji = cls==='tick'?'✔':cls==='cross'?'✖':'';
-    else if(type==='lectura') emoji = cls==='reading-0'?'❌':'📖';
-    else if(type==='skincare') emoji = cls==='skincare-journal'?'📓':cls==='skincare-skin'?'🧴':'⭐';
-    else if(type==='ejercicio') emoji = cls==='exercise-strength'?'🏋️':cls==='exercise-cardio'?'🏃':'🛌';
-    else if(type==='agua') emoji = '💧';
-    else if(type==='emocional') emoji = cls==='bad'?'😞':cls==='normal'?'😐':cls==='good'?'🙂':'🤩';
-    cell.textContent = emoji;
-    cell.className = 'calendar-cell ' + cls;
-    try{ await setDoc(doc(db,'metas',`${user}_${type}_${day}_${month}`),{label,class:cls}); } catch(e){ console.warn(e); }
+function addOpt(label,cls){ const b=document.createElement('button'); b.className = cls==='blank'?'blank':''; b.textContent = label === '' ? 'Vaciar' : label; b.onclick=async()=>{
+  const {user,type,day,month,cell} = currentContext;
+  if(cls==='blank'){
+    cell.textContent='';
+    cell.className='calendar-cell';
+    const key=`${user}_${type}_${day}_${month}`;
+    if(cellLocks[key]) return; cellLocks[key]=true;
+    try{ await deleteDoc(doc(db,'metas',key)); } catch(e){ console.warn('No se pudo borrar la celda:',e); }
+    cellLocks[key]=false;
     closeModal();
-  };
-  document.getElementById('modal-options').appendChild(b);
+    return;
+  }
+  let emoji='';
+  if(type==='lectura') emoji = cls==='reading-0' ? '❌' : '📖';
+  else if(type==='skincare') emoji = cls==='skincare-journal' ? '📓' : cls==='skincare-skin' ? '🧴' : cls==='skincare-both' ? '⭐' : '';
+  else if(type==='ejercicio') emoji = cls==='exercise-strength' ? '🏋️' : cls==='exercise-cardio' ? '🏃' : cls==='exercise-rest' ? '🛌' : '';
+  else if(type==='agua') emoji = '💧';
+  else if(type==='emocional') emoji = cls==='bad' ? '😞' : cls==='normal' ? '😐' : cls==='good' ? '🙂' : cls==='great' ? '🤩' : '';
+  applyLocallyAndSave(emoji,cls);
+}; document.getElementById('modal-options').appendChild(b); }
+
+async function applyLocallyAndSave(label,cls){
+  const {user,type,day,month,cell}=currentContext;
+  cell.textContent=label||'';
+  cell.className='calendar-cell '+(cls||'');
+  closeModal();
+  const key=`${user}_${type}_${day}_${month}`;
+  if(cellLocks[key]) return; cellLocks[key]=true;
+  try{ const ref=doc(db,'metas',key); await setDoc(ref,{label,class:cls}); } catch(e){ console.warn('No se pudo guardar la celda:',e); }
+  cellLocks[key]=false;
 }
 
-window.closeModal = ()=>{ document.getElementById('modal').classList.remove('active'); };
+window.closeModal=()=>{ document.getElementById('modal').classList.remove('active'); };
 </script>
 </body>
 </html>
