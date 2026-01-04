@@ -5,9 +5,8 @@
 <title>Metas 2026</title><style>
 :root {
   --bg: #f4f6fb;
-  --card: #ffffff;
-  --primary: #4f46e5;
   --primary-light: #a5b4fc;
+  --primary: #4f46e5;
   --water-2: #dbeafe;
   --water-4: #bfdbfe;
   --water-6: #60a5fa;
@@ -29,170 +28,155 @@
   --reading-20: #4ade80;
   --reading-30: #16a34a;
   --blank-gray: #e5e7eb;
-  --text: #1f2937;
 }
-* { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
-.screen { display: none; padding: 16px; }
-.screen.active { display: block; }
-h2 { margin-top: 0; text-align: center; }
-button { border: none; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 600; background: var(--primary-light); color: #111; }
-button.active { background: var(--primary); color: #fff; }
-button.secondary { background: #e5e7eb; color: #111; }
-.user-select { display: grid; gap: 16px; margin-top: 40px; }
-.menu { display: flex; justify-content: center; margin-bottom: 16px; }
-.menu select { width: 100%; max-width: 320px; padding: 14px; border-radius: 14px; border: none; font-size: 16px; font-weight: 600; background: var(--primary-light); color: #111; appearance: none; text-align: center; }
-.calendar-grid { display: grid; grid-template-columns: 28px repeat(12, 1fr); gap: 4px; font-size: 11px; margin-top: 12px; }
-.calendar-cell { background: #ffffff; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; user-select: none; }
-.calendar-cell.header { font-weight: 700; background: #eef2ff; cursor: default; }
-.calendar-cell.day { font-weight: 700; background: #f1f5f9; cursor: default; }
-.calendar-cell.blank { background: var(--blank-gray); }
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 10; }
-.modal.active { display: flex; }
-.modal-box { background: white; width: 90%; max-width: 320px; padding: 20px; border-radius: 16px; }
-.modal-box h3 { margin-top: 0; }
-.modal-box button { width: 100%; margin-top: 10px; }
-.modal-box button.blank { background: var(--blank-gray); color: #111; }
+
+body { margin:0; font-family:system-ui,sans-serif; background:var(--bg); }
+.screen { display:none; padding:16px; }
+.screen.active { display:block; }
+h2 { text-align:center; margin-top:0; }
+button { border:none; padding:14px; border-radius:12px; font-weight:600; background:var(--primary-light); }
+button.secondary { background:#e5e7eb; }
+button.blank { background:var(--blank-gray); }
+.menu { display:flex; justify-content:center; margin-bottom:16px; }
+.menu select { width:100%; max-width:320px; padding:14px; border-radius:14px; border:none; background:var(--primary-light); font-weight:600; }
+.calendar-grid { display:grid; grid-template-columns:28px repeat(12,1fr); gap:4px; font-size:11px; }
+.calendar-cell { height:28px; background:#fff; display:flex; align-items:center; justify-content:center; border-radius:6px; cursor:pointer; }
+.calendar-cell.header { background:#eef2ff; font-weight:700; cursor:default; }
+.calendar-cell.day { background:#f1f5f9; font-weight:700; cursor:default; }
+.calendar-cell.water-2 { background:var(--water-2); }
+.calendar-cell.water-4 { background:var(--water-4); }
+.calendar-cell.water-6 { background:var(--water-6); }
+.calendar-cell.water-8 { background:var(--water-8); color:#fff; }
+.calendar-cell.exercise-strength { background:var(--exercise-strength); }
+.calendar-cell.exercise-cardio { background:var(--exercise-cardio); }
+.calendar-cell.exercise-rest { background:var(--exercise-rest); }
+.calendar-cell.tick { background:var(--tick-green); }
+.calendar-cell.cross { background:var(--cross-red); }
+.calendar-cell.bad { background:var(--emotional-bad); }
+.calendar-cell.normal { background:var(--emotional-normal); }
+.calendar-cell.good { background:var(--emotional-good); }
+.calendar-cell.great { background:var(--emotional-great); }
+.calendar-cell.skincare-journal { background:var(--skincare-journal); }
+.calendar-cell.skincare-skin { background:var(--skincare-skin); color:#fff; }
+.calendar-cell.skincare-both { background:var(--skincare-both); }
+.calendar-cell.reading-0 { background:var(--reading-0); }
+.calendar-cell.reading-10 { background:var(--reading-10); }
+.calendar-cell.reading-20 { background:var(--reading-20); }
+.calendar-cell.reading-30 { background:var(--reading-30); color:#fff; }
+
+.modal { position:fixed; inset:0; display:none; background:rgba(0,0,0,.5); align-items:center; justify-content:center; }
+.modal.active { display:flex; }
+.modal-box { background:#fff; padding:20px; width:90%; max-width:320px; border-radius:16px; }
+.modal-box button { width:100%; margin-top:10px; }
 </style></head>
 <body><div id="screen-user" class="screen active">
   <h2>¿Quién hace el seguimiento?</h2>
-  <div class="user-select">
-    <button onclick="selectUser('Izhar')">Izhar</button>
-    <button onclick="selectUser('Camila')">Camila</button>
-  </div>
+  <button onclick="selectUser('Izhar')">Izhar</button>
+  <button onclick="selectUser('Camila')">Camila</button>
 </div><div id="screen-izhar" class="screen">
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Izhar · Metas 2026</h2>
-  <div class="menu">
-    <select id="select-izhar" onchange="showIzharSection(this.value)">
-      <option value="biblia">📖 Lectura de la Biblia</option>
-      <option value="ejercicio">💪 Ejercicio</option>
-    </select>
-  </div>
   <div id="izhar-biblia"></div>
-  <div id="izhar-ejercicio" style="display:none"></div>
+  <div id="izhar-ejercicio"></div>
 </div><div id="screen-camila" class="screen">
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Camila · Metas 2026</h2>
-  <div class="menu">
-    <select id="select-camila" onchange="showSection(this.value)">
-      <option value="emocional">💭 Año emocional</option>
-      <option value="agua">💧 Beber agua</option>
-      <option value="skincare">🧴 Skincare</option>
-      <option value="lectura">📚 Lectura</option>
-    </select>
-  </div>
   <div id="camila-emocional"></div>
-  <div id="camila-agua" style="display:none"></div>
-  <div id="camila-skincare" style="display:none"></div>
-  <div id="camila-lectura" style="display:none"></div>
+  <div id="camila-agua"></div>
+  <div id="camila-skincare"></div>
+  <div id="camila-lectura"></div>
 </div><div id="modal" class="modal">
   <div class="modal-box">
-    <h3 id="modal-title">Selecciona</h3>
+    <h3 id="modal-title"></h3>
     <div id="modal-options"></div>
     <button class="secondary" onclick="closeModal()">Cancelar</button>
   </div>
 </div><script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 
-const firebaseConfig = { apiKey: "AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro", authDomain: "migurl-metas.firebaseapp.com", projectId: "migurl-metas" };
-const app = initializeApp(firebaseConfig);
+const app = initializeApp({ apiKey:'AIzaSyCBSbcwyQCz7p5tYHhv0yQT-Q_Mn4M8dro', projectId:'migurl-metas' });
 const db = getFirestore(app);
 
-const monthsFull = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-const monthsShort = monthsFull.map(m => m.slice(0,3).toUpperCase());
-let currentContext = null;
-const cellLocks = {};
+const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 const CALENDARS = {
   biblia: {
     options: [
-      { label: '✅ Leído', class: 'tick', emoji: '✅' },
-      { label: '❌ No leído', class: 'cross', emoji: '❌' }
+      { label:'✅ Leído', class:'tick', emoji:'✅' },
+      { label:'❌ No leído', class:'cross', emoji:'❌' }
     ]
   },
   ejercicio: {
     options: [
-      { label: '🏋️ Fuerza', class: 'exercise-strength', emoji: '🏋️' },
-      { label: '🏃 Cardio', class: 'exercise-cardio', emoji: '🏃' },
-      { label: '🛌 Descanso', class: 'exercise-rest', emoji: '🛌' }
+      { label:'🏋️ Fuerza', class:'exercise-strength', emoji:'🏋️' },
+      { label:'🏃 Cardio', class:'exercise-cardio', emoji:'🏃' },
+      { label:'🛌 Descanso', class:'exercise-rest', emoji:'🛌' }
     ]
   },
   emocional: {
     options: [
-      { label: '😞', class: 'bad', emoji: '😞' },
-      { label: '😐', class: 'normal', emoji: '😐' },
-      { label: '🙂', class: 'good', emoji: '🙂' },
-      { label: '🤩', class: 'great', emoji: '🤩' }
+      { label:'😞', class:'bad', emoji:'😞' },
+      { label:'😐', class:'normal', emoji:'😐' },
+      { label:'🙂', class:'good', emoji:'🙂' },
+      { label:'🤩', class:'great', emoji:'🤩' }
     ]
   },
   agua: {
     options: [
-      { label: '2 Vasos 💧', class: 'water-2', emoji: '💧' },
-      { label: '4 Vasos 💧', class: 'water-4', emoji: '💧' },
-      { label: '6 Vasos 💧', class: 'water-6', emoji: '💧' },
-      { label: '8 Vasos 💧', class: 'water-8', emoji: '💧' }
+      { label:'2 💧', class:'water-2', emoji:'💧' },
+      { label:'4 💧', class:'water-4', emoji:'💧' },
+      { label:'6 💧', class:'water-6', emoji:'💧' },
+      { label:'8 💧', class:'water-8', emoji:'💧' }
     ]
   },
   skincare: {
     options: [
-      { label: '📓 Journal', class: 'skincare-journal', emoji: '📓' },
-      { label: '🧴 Skincare', class: 'skincare-skin', emoji: '🧴' },
-      { label: '⭐ Ambas', class: 'skincare-both', emoji: '⭐' }
+      { label:'📓', class:'skincare-journal', emoji:'📓' },
+      { label:'🧴', class:'skincare-skin', emoji:'🧴' },
+      { label:'⭐', class:'skincare-both', emoji:'⭐' }
     ]
   },
   lectura: {
     options: [
-      { label: 'No he leído', class: 'reading-0', emoji: '❌' },
-      { label: '0-10 páginas', class: 'reading-10', emoji: '📖' },
-      { label: '10-20 páginas', class: 'reading-20', emoji: '📖' },
-      { label: 'Más de 20 páginas', class: 'reading-30', emoji: '📖' }
+      { label:'❌', class:'reading-0', emoji:'❌' },
+      { label:'📖', class:'reading-10', emoji:'📖' },
+      { label:'📖', class:'reading-20', emoji:'📖' },
+      { label:'📖', class:'reading-30', emoji:'📖' }
     ]
   }
 };
 
-window.volverUsuario = () => {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('screen-user').classList.add('active');
-};
+let current = null;
 
-window.selectUser = (user) => {
-  document.getElementById('screen-user').classList.remove('active');
-  document.getElementById(user==='Izhar'?'screen-izhar':'screen-camila').classList.add('active');
-  if(user==='Izhar'){
-    renderCalendar('Izhar','biblia',document.getElementById('izhar-biblia'));
-    renderCalendar('Izhar','ejercicio',document.getElementById('izhar-ejercicio'));
+window.selectUser = u => {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(u==='Izhar'?'screen-izhar':'screen-camila').classList.add('active');
+  if(u==='Izhar'){
+    render('Izhar','biblia',izhar-biblia);
+    render('Izhar','ejercicio',izhar-ejercicio);
   } else {
-    renderCalendar('Camila','emocional',document.getElementById('camila-emocional'));
-    renderCalendar('Camila','agua',document.getElementById('camila-agua'));
-    renderCalendar('Camila','skincare',document.getElementById('camila-skincare'));
-    renderCalendar('Camila','lectura',document.getElementById('camila-lectura'));
+    render('Camila','emocional',camila-emocional);
+    render('Camila','agua',camila-agua);
+    render('Camila','skincare',camila-skincare);
+    render('Camila','lectura',camila-lectura);
   }
 };
 
-window.showIzharSection = (section) => {
-  document.getElementById('izhar-biblia').style.display = section==='biblia'?'block':'none';
-  document.getElementById('izhar-ejercicio').style.display = section==='ejercicio'?'block':'none';
-};
+window.volverUsuario = () => location.reload();
 
-window.showSection = (section) => {
-  ['emocional','agua','skincare','lectura'].forEach(s=>{
-    const el=document.getElementById('camila-'+s);
-    if(el) el.style.display=s===section?'block':'none';
-  });
-};
-
-function renderCalendar(user,type,container){
+function render(user,type,container){
   container.innerHTML='';
-  const grid = document.createElement('div');
-  grid.className='calendar-grid';
+  const grid=document.createElement('div'); grid.className='calendar-grid';
   grid.appendChild(document.createElement('div'));
-  monthsShort.forEach(m=>{ const c=document.createElement('div'); c.className='calendar-cell header'; c.textContent=m; grid.appendChild(c); });
-  for(let d=1; d<=31; d++){
-    const day=document.createElement('div'); day.className='calendar-cell day'; day.textContent=d; grid.appendChild(day);
-    monthsFull.forEach((_,mi)=>{
-      const cell=document.createElement('div'); cell.className='calendar-cell'; cell.onclick=()=>openModal(user,type,d,mi,cell); grid.appendChild(cell); loadCell(user,type,d,mi,cell);
+  months.forEach(m=>{ const h=document.createElement('div'); h.textContent=m.slice(0,3); h.className='calendar-cell header'; grid.appendChild(h); });
+  for(let d=1;d<=31;d++){
+    const day=document.createElement('div'); day.textContent=d; day.className='calendar-cell day'; grid.appendChild(day);
+    months.forEach((_,m)=>{
+      const cell=document.createElement('div'); cell.className='calendar-cell';
+      cell.onclick=()=>openModal(user,type,d,m,cell);
+      grid.appendChild(cell);
+      loadCell(user,type,d,m,cell);
     });
   }
   container.appendChild(grid);
@@ -200,58 +184,43 @@ function renderCalendar(user,type,container){
 
 async function loadCell(user,type,day,month,cell){
   const key=`${user}_${type}_${day}_${month}`;
-  if(cellLocks[key]) return;
-  cellLocks[key]=true;
-  const snap = await getDoc(doc(db,'metas',key));
-  if(snap.exists()){
-    const v = snap.data();
-    cell.textContent = '';
-    cell.className = 'calendar-cell';
-    if(v.class) cell.classList.add(v.class);
-    if(v.emoji) cell.textContent = v.emoji;
-  }
-  cellLocks[key]=false;
+  const snap=await getDoc(doc(db,'metas',key));
+  if(!snap.exists()) return;
+  const v=snap.data();
+  cell.className='calendar-cell';
+  if(v.class) cell.classList.add(v.class);
+  if(v.emoji) cell.textContent=v.emoji;
 }
 
-window.openModal=(user,type,day,month,cell)=>{
-  currentContext={user,type,day,month,cell};
-  const opts=document.getElementById('modal-options');
-  opts.innerHTML='';
-  document.getElementById('modal-title').textContent=`${day} de ${monthsFull[month]}`;
+function openModal(user,type,day,month,cell){
+  current={user,type,day,month,cell};
+  modal-options.innerHTML='';
+  modal-title.textContent=`${day} de ${months[month]}`;
+  CALENDARS[type].options.forEach(o=>addOpt(o));
+  addOpt({label:'Vaciar',class:'blank'});
+  modal.classList.add('active');
+}
 
-  const config = CALENDARS[type];
-  config.options.forEach(opt => addOpt(opt.label, opt.class, opt.emoji));
-  addOpt('', 'blank');
-
-  document.getElementById('modal').classList.add('active');
-};
-
-function addOpt(label,cls,emoji){
+function addOpt(opt){
   const b=document.createElement('button');
-  if(cls==='blank') b.className='blank';
-  b.textContent = label || 'Vaciar';
-
+  b.textContent=opt.label;
+  if(opt.class==='blank') b.className='blank';
   b.onclick=async()=>{
-    const {user,type,day,month,cell} = currentContext;
-    const key = `${user}_${type}_${day}_${month}`;
-
-    if(cls==='blank'){
-      cell.textContent='';
-      cell.className='calendar-cell';
-      await deleteDoc(doc(db,'metas',key));
-      closeModal();
-      return;
+    const {user,type,day,month,cell}=current;
+    const key=`${user}_${type}_${day}_${month}`;
+    if(opt.class==='blank'){
+      cell.textContent=''; cell.className='calendar-cell';
+      await deleteDoc(doc(db,'metas',key)); closeModal(); return;
     }
-
-    cell.textContent = emoji;
-    cell.className = 'calendar-cell '+cls;
-    await setDoc(doc(db,'metas',key),{ class: cls, emoji });
+    cell.className='calendar-cell';
+    cell.classList.add(opt.class);
+    cell.textContent=opt.emoji;
+    await setDoc(doc(db,'metas',key),{class:opt.class,emoji:opt.emoji});
     closeModal();
   };
-
-  document.getElementById('modal-options').appendChild(b);
+  modal-options.appendChild(b);
 }
 
-window.closeModal=()=>document.getElementById('modal').classList.remove('active');
+window.closeModal=()=>modal.classList.remove('active');
 </script></body>
 </html>
