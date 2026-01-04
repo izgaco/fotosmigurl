@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE html><html lang="es">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Metas 2026</title>
-
-<style>
+<title>Metas 2026</title><style>
 :root {
   --bg: #f4f6fb;
   --card: #ffffff;
@@ -76,20 +73,14 @@ button.secondary { background: #e5e7eb; color: #111; }
 .modal-box h3 { margin-top: 0; }
 .modal-box button { width: 100%; margin-top: 10px; }
 .modal-box button.blank { background: var(--blank-gray); color: #111; }
-</style>
-</head>
-<body>
-
-
-<div id="screen-user" class="screen active">
+</style></head>
+<body><div id="screen-user" class="screen active">
   <h2>¿Quién hace el seguimiento?</h2>
   <div class="user-select">
     <button onclick="selectUser('Izhar')">Izhar</button>
     <button onclick="selectUser('Camila')">Camila</button>
   </div>
-</div>
-
-<div id="screen-izhar" class="screen">
+</div><div id="screen-izhar" class="screen">
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Izhar · Metas 2026</h2>
   <div class="menu">
@@ -100,9 +91,7 @@ button.secondary { background: #e5e7eb; color: #111; }
   </div>
   <div id="izhar-biblia"></div>
   <div id="izhar-ejercicio" style="display:none"></div>
-</div>
-
-<div id="screen-camila" class="screen">
+</div><div id="screen-camila" class="screen">
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Camila · Metas 2026</h2>
   <div class="menu">
@@ -117,17 +106,13 @@ button.secondary { background: #e5e7eb; color: #111; }
   <div id="camila-agua" style="display:none"></div>
   <div id="camila-skincare" style="display:none"></div>
   <div id="camila-lectura" style="display:none"></div>
-</div>
-
-<div id="modal" class="modal">
+</div><div id="modal" class="modal">
   <div class="modal-box">
     <h3 id="modal-title">Selecciona</h3>
     <div id="modal-options"></div>
     <button class="secondary" onclick="closeModal()">Cancelar</button>
   </div>
-</div>
-
-<script type="module">
+</div><script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
@@ -238,7 +223,5 @@ function addOpt(label,cls){
 }
 
 window.closeModal=()=>document.getElementById('modal').classList.remove('active');
-</script>
-
-</body>
+</script></body>
 </html>
