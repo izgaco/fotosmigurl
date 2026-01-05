@@ -373,10 +373,18 @@ window.openPesoModal=(user,type,label,cell)=>{
   opts.innerHTML='';
   document.getElementById('modal-title').textContent=label;
 
-  const input=document.createElement('input');
-  input.type='number';
-  input.style.width='100%';
-  input.placeholder= type==='peso'?'kg':'cm';
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.placeholder = type === 'peso' ? 'kg' : 'cm';
+  input.style.width = '100%';
+  input.style.padding = '14px';
+  input.style.borderRadius = '12px';
+  input.style.border = 'none';
+  input.style.marginTop = '10px';
+  input.style.fontSize = '16px';
+  input.style.fontWeight = '600';
+  input.style.textAlign = 'center';
+  input.style.background = '#e5e7eb'; // mismo color que botones blank
   opts.appendChild(input);
 
   const save=document.createElement('button');
