@@ -2,7 +2,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Metas 2026</title><style>
+<title>Metas 2026</title>
+<style>
 :root {
   --bg: #f4f6fb;
   --card: #ffffff;
@@ -47,20 +48,50 @@ button.secondary { background: #e5e7eb; color: #111; }
 .calendar-cell.header { font-weight: 700; background: #eef2ff; cursor: default; }
 .calendar-cell.day { font-weight: 700; background: #f1f5f9; cursor: default; }
 .calendar-cell.blank { background: var(--blank-gray); }
+
+/* === COLORES DE CASILLAS SEGÚN CLASE === */
+.calendar-cell.tick { background: var(--tick-green); }
+.calendar-cell.cross { background: var(--cross-red); }
+
+.calendar-cell.exercise-strength { background: var(--exercise-strength); }
+.calendar-cell.exercise-cardio { background: var(--exercise-cardio); }
+.calendar-cell.exercise-rest { background: var(--exercise-rest); }
+
+.calendar-cell.bad { background: var(--emotional-bad); }
+.calendar-cell.normal { background: var(--emotional-normal); }
+.calendar-cell.good { background: var(--emotional-good); }
+.calendar-cell.great { background: var(--emotional-great); }
+
+.calendar-cell.water-2 { background: var(--water-2); }
+.calendar-cell.water-4 { background: var(--water-4); }
+.calendar-cell.water-6 { background: var(--water-6); }
+.calendar-cell.water-8 { background: var(--water-8); }
+
+.calendar-cell.skincare-journal { background: var(--skincare-journal); }
+.calendar-cell.skincare-skin { background: var(--skincare-skin); }
+.calendar-cell.skincare-both { background: var(--skincare-both); }
+
+.calendar-cell.reading-0 { background: var(--reading-0); }
+.calendar-cell.reading-10 { background: var(--reading-10); }
+.calendar-cell.reading-20 { background: var(--reading-20); }
+.calendar-cell.reading-30 { background: var(--reading-30); }
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 10; }
 .modal.active { display: flex; }
 .modal-box { background: white; width: 90%; max-width: 320px; padding: 20px; border-radius: 16px; }
 .modal-box h3 { margin-top: 0; }
 .modal-box button { width: 100%; margin-top: 10px; }
 .modal-box button.blank { background: var(--blank-gray); color: #111; }
-</style></head>
-<body><div id="screen-user" class="screen active">
+</style>
+</head>
+<body>
+<div id="screen-user" class="screen active">
   <h2>¿Quién hace el seguimiento?</h2>
   <div class="user-select">
     <button onclick="selectUser('Izhar')">Izhar</button>
     <button onclick="selectUser('Camila')">Camila</button>
   </div>
-</div><div id="screen-izhar" class="screen">
+</div>
+<div id="screen-izhar" class="screen">
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Izhar · Metas 2026</h2>
   <div class="menu">
@@ -71,7 +102,8 @@ button.secondary { background: #e5e7eb; color: #111; }
   </div>
   <div id="izhar-biblia"></div>
   <div id="izhar-ejercicio" style="display:none"></div>
-</div><div id="screen-camila" class="screen">
+</div>
+<div id="screen-camila" class="screen">
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Camila · Metas 2026</h2>
   <div class="menu">
@@ -86,13 +118,15 @@ button.secondary { background: #e5e7eb; color: #111; }
   <div id="camila-agua" style="display:none"></div>
   <div id="camila-skincare" style="display:none"></div>
   <div id="camila-lectura" style="display:none"></div>
-</div><div id="modal" class="modal">
+</div>
+<div id="modal" class="modal">
   <div class="modal-box">
     <h3 id="modal-title">Selecciona</h3>
     <div id="modal-options"></div>
     <button class="secondary" onclick="closeModal()">Cancelar</button>
   </div>
-</div><script type="module">
+</div>
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
@@ -106,50 +140,12 @@ let currentContext = null;
 const cellLocks = {};
 
 const CALENDARS = {
-  biblia: {
-    options: [
-      { label: '✅ Leído', class: 'tick', emoji: '✅' },
-      { label: '❌ No leído', class: 'cross', emoji: '❌' }
-    ]
-  },
-  ejercicio: {
-    options: [
-      { label: '🏋️ Fuerza', class: 'exercise-strength', emoji: '🏋️' },
-      { label: '🏃 Cardio', class: 'exercise-cardio', emoji: '🏃' },
-      { label: '🛌 Descanso', class: 'exercise-rest', emoji: '🛌' }
-    ]
-  },
-  emocional: {
-    options: [
-      { label: '😞', class: 'bad', emoji: '😞' },
-      { label: '😐', class: 'normal', emoji: '😐' },
-      { label: '🙂', class: 'good', emoji: '🙂' },
-      { label: '🤩', class: 'great', emoji: '🤩' }
-    ]
-  },
-  agua: {
-    options: [
-      { label: '2 Vasos 💧', class: 'water-2', emoji: '💧' },
-      { label: '4 Vasos 💧', class: 'water-4', emoji: '💧' },
-      { label: '6 Vasos 💧', class: 'water-6', emoji: '💧' },
-      { label: '8 Vasos 💧', class: 'water-8', emoji: '💧' }
-    ]
-  },
-  skincare: {
-    options: [
-      { label: '📓 Journal', class: 'skincare-journal', emoji: '📓' },
-      { label: '🧴 Skincare', class: 'skincare-skin', emoji: '🧴' },
-      { label: '⭐ Ambas', class: 'skincare-both', emoji: '⭐' }
-    ]
-  },
-  lectura: {
-    options: [
-      { label: 'No he leído', class: 'reading-0', emoji: '❌' },
-      { label: '0-10 páginas', class: 'reading-10', emoji: '📖' },
-      { label: '10-20 páginas', class: 'reading-20', emoji: '📖' },
-      { label: 'Más de 20 páginas', class: 'reading-30', emoji: '📖' }
-    ]
-  }
+  biblia: { options: [ { label: '✅ Leído', class: 'tick', emoji: '✅' }, { label: '❌ No leído', class: 'cross', emoji: '❌' } ] },
+  ejercicio: { options: [ { label: '🏋️ Fuerza', class: 'exercise-strength', emoji: '🏋️' }, { label: '🏃 Cardio', class: 'exercise-cardio', emoji: '🏃' }, { label: '🛌 Descanso', class: 'exercise-rest', emoji: '🛌' } ] },
+  emocional: { options: [ { label: '😞', class: 'bad', emoji: '😞' }, { label: '😐', class: 'normal', emoji: '😐' }, { label: '🙂', class: 'good', emoji: '🙂' }, { label: '🤩', class: 'great', emoji: '🤩' } ] },
+  agua: { options: [ { label: '2 Vasos 💧', class: 'water-2', emoji: '💧' }, { label: '4 Vasos 💧', class: 'water-4', emoji: '💧' }, { label: '6 Vasos 💧', class: 'water-6', emoji: '💧' }, { label: '8 Vasos 💧', class: 'water-8', emoji: '💧' } ] },
+  skincare: { options: [ { label: '📓 Journal', class: 'skincare-journal', emoji: '📓' }, { label: '🧴 Skincare', class: 'skincare-skin', emoji: '🧴' }, { label: '⭐ Ambas', class: 'skincare-both', emoji: '⭐' } ] },
+  lectura: { options: [ { label: 'No he leído', class: 'reading-0', emoji: '❌' }, { label: '0-10 páginas', class: 'reading-10', emoji: '📖' }, { label: '10-20 páginas', class: 'reading-20', emoji: '📖' }, { label: 'Más de 20 páginas', class: 'reading-30', emoji: '📖' } ] }
 };
 
 window.volverUsuario = () => {
@@ -253,5 +249,6 @@ function addOpt(label,cls,emoji){
 }
 
 window.closeModal=()=>document.getElementById('modal').classList.remove('active');
-</script></body>
+</script>
+</body>
 </html>
