@@ -276,7 +276,7 @@ function renderPesoCalendar(user, container){
   grid.style.gridTemplateColumns='80px repeat(3,1fr)';
   grid.style.gap='4px';
 
-  ['Fecha','Peso (kg)','Espalda (cm)','Barriga (cm)'].forEach(h=>{
+  ['Fecha','Peso','Espalda','Barriga'].forEach(h=>{
     const c=document.createElement('div');
     c.className='calendar-cell header';
     c.textContent=h;
