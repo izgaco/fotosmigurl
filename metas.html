@@ -295,8 +295,9 @@ function renderPesoCalendar(user, container) {
   weeks.forEach(date => {
     const day = date.getDate();
     const monthNum = date.getMonth() + 1;
-    const keyLabel = `${day}/${monthNum}`; // clave Firestore
+    const keyLabel = `${day}-${monthNum}`; // clave válida para Firestore
     const modalLabel = `${day} de ${monthsFull[date.getMonth()]}`; // título del modal
+
 
     // Celda de fecha
     const dayCell = document.createElement('div');
@@ -411,7 +412,7 @@ window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
     // Cerramos el modal primero
     closeModal();
 
-    const key = `${user}_peso_${type}_${keyLabel}`; // clave Firestore correcta
+    const key = `${user}_peso_${type}_${keyLabel}`; // ahora keyLabel tiene "-" y es válido
     cell.textContent = input.value;
 
     // Guardamos en Firestore
