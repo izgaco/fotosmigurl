@@ -404,10 +404,13 @@ window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
   input.style.textAlign = 'center';
   input.style.background = '#ffffff';
   input.value = cell.textContent || ''; // muestra el valor actual si existe
+  
   opts.appendChild(input);
-
-  input.focus(); // enfoca el input y abre teclado en móvil
-
+  
+  // focus con pequeño delay
+  setTimeout(() => {
+    input.focus();
+  }, 100);
 
   // Botón Guardar
   const save = document.createElement('button');
