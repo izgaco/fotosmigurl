@@ -393,7 +393,6 @@ window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
   // Input grande y estilizado
   const input = document.createElement('input');
   input.type = 'number';
-  input.focus(); // enfoca el input y abre teclado en móvil
   input.placeholder = type === 'peso' ? 'Peso en kg' : 'Medidas en cm';
   input.style.width = '100%';
   input.style.padding = '14px';
@@ -404,7 +403,11 @@ window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
   input.style.fontWeight = '600';
   input.style.textAlign = 'center';
   input.style.background = '#ffffff';
+  input.value = cell.textContent || ''; // muestra el valor actual si existe
   opts.appendChild(input);
+
+  input.focus(); // enfoca el input y abre teclado en móvil
+
 
   // Botón Guardar
   const save = document.createElement('button');
