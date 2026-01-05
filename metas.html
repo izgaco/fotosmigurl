@@ -408,34 +408,33 @@ window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
   input.style.fontWeight = '600';
   input.style.textAlign = 'center';
   input.style.background = '#ffffff';
-  
+
   // Mostrar valor actual si existe (sin la unidad)
-  let currentValue = cell.textContent;
-  if (currentValue) {
-    currentValue = currentValue.replace(/\s*(kg|cm)/, '');
-    input.value = currentValue;
-  }  
+  if (cell.textContent) {
+    input.value = cell.textContent.replace(/\s*(kg|cm)/, '');
+  }
+
   opts.appendChild(input);
-  
-  // focus con pequeño delay
-  setTimeout(() => {
-    input.focus();
-  }, 100);
+
+  // Focus automático para abrir teclado en móviles
+  setTimeout(() => input.focus(), 100);
 
   // Botón Guardar
   const save = document.createElement('button');
   save.textContent = 'Guardar';
-  save.onclick = () => {
-    // Cerramos el modal primero
-    closeModal();
+  save.onclick = async () => {
+    const value = input.value;
+    if (!value) return; // no guardar si está vacío
 
-    const key = `${user}_peso_${type}_${keyLabel}`; // ahora keyLabel tiene "-" y es válido
+    // Mostrar en la celda con unidad
     const displayValue = type === 'peso' ? `${value} kg` : `${value} cm`;
     cell.textContent = displayValue;
 
-    // Guardamos en Firestore
-    setDoc(doc(db, 'metas', key), { value: input.value })
-      .catch(e => console.error('Error guardando Peso:', e));
+    // Guardar solo el número en Firebase
+    const key = `${user}_peso_${type}_${keyLabel}`;
+    await setDoc(doc(db, 'metas', key), { value });
+
+    closeModal();
   };
   opts.appendChild(save);
 
@@ -444,7 +443,6 @@ window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
 
   document.getElementById('modal').classList.add('active');
 };
-
 
 window.openModal=(user,type,day,month,cell)=>{
   currentContext={user,type,day,month,cell};
