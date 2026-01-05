@@ -117,6 +117,7 @@ button.secondary { background: #e5e7eb; color: #111; }
       <option value="skincare">🧴 Skincare</option>
       <option value="lectura">📚 Lectura</option>
       <option value="ejercicio">💪 Ejercicio</option>
+      <option value="peso">⚖️ Peso y medidas</option>
     </select>
   </div>
   <div id="camila-emocional"></div>
@@ -124,6 +125,7 @@ button.secondary { background: #e5e7eb; color: #111; }
   <div id="camila-skincare" style="display:none"></div>
   <div id="camila-lectura" style="display:none"></div>
   <div id="camila-ejercicio" style="display:none"></div>
+  <div id="camila-peso" style="display:none"></div>
 </div>
 <div id="modal" class="modal">
   <div class="modal-box">
@@ -216,7 +218,8 @@ const camilaRendered = {
   agua: false,
   skincare: false,
   lectura: false,
-  ejercicio: false
+  ejercicio: false,
+  peso: false
 };
 
 window.showCamilaSection = (section) => {
@@ -225,10 +228,11 @@ window.showCamilaSection = (section) => {
   const skincare = document.getElementById('camila-skincare');
   const lectura = document.getElementById('camila-lectura');
   const ejercicio = document.getElementById('camila-ejercicio');
+  const peso = document.getElementById('camila-peso');
 
   // Si no se ha seleccionado nada, ocultamos todo
   if(section === "") {
-    [emocional, agua, skincare, lectura, ejercicio].forEach(el => el.style.display='none');
+    [emocional, agua, skincare, lectura, ejercicio, peso].forEach(el => el.style.display='none');
     return;
   }
 
@@ -238,6 +242,7 @@ window.showCamilaSection = (section) => {
   skincare.style.display = section==='skincare'?'block':'none';
   lectura.style.display = section==='lectura'?'block':'none';
   ejercicio.style.display = section==='ejercicio'?'block':'none';
+  peso.style.display = section === 'peso' ? 'block' : 'none';
 
   // Renderizar solo si no se ha renderizado todavía
   if(section==='emocional' && !camilaRendered.emocional) {
@@ -260,6 +265,11 @@ window.showCamilaSection = (section) => {
     renderCalendar('Camila','camila_ejercicio',ejercicio);
     camilaRendered.ejercicio = true;
   }
+  if(section === 'peso' && !camilaRendered.peso) {
+    renderPesoCalendar('Camila', peso);
+    camilaRendered.peso = true;
+  }
+
 };
 
 window.showSection = (section) => {
@@ -273,11 +283,16 @@ function renderPesoCalendar(user, container) {
   container.innerHTML = '';
   const grid = document.createElement('div');
   grid.style.display = 'grid';
-  grid.style.gridTemplateColumns = '80px repeat(3,1fr)';
+  const colCount = user === 'Camila' ? 5 : 3;
+  grid.style.gridTemplateColumns = `80px repeat(${colCount},1fr)`;
   grid.style.gap = '4px';
 
   // Encabezados
-  ['Fecha','Peso','Espalda','Barriga'].forEach(h => {
+  const columns = user === 'Camila'
+    ? ['Fecha','Peso','Pecho','Cintura','Barriga','Culo']
+    : ['Fecha','Peso','Espalda','Barriga'];
+  
+  columns.forEach(h => {
     const c = document.createElement('div');
     c.className = 'calendar-cell header';
     c.textContent = h;
@@ -306,7 +321,11 @@ function renderPesoCalendar(user, container) {
     grid.appendChild(dayCell);
 
     // Celdas de Peso, Espalda, Barriga
-    ['peso','espalda','barriga'].forEach(type => {
+    const types = user === 'Camila'
+      ? ['peso','pecho','cintura','barriga','culo']
+      : ['peso','espalda','barriga'];
+    
+    types.forEach(type => {
       const cell = document.createElement('div');
       cell.className = 'calendar-cell';
       cell.onclick = () => openPesoModal(user, type, keyLabel, modalLabel, cell);
