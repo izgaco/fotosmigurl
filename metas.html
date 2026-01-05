@@ -378,11 +378,14 @@ async function loadPesoCell(user,type,label,cell){
 }
 
 window.openPesoModal = (user, type, label, modalLabel, cell) => {
+  // label = "1/1" → clave Firestore
+  // modalLabel = "1 de Enero" → título del modal
   currentContext = { user, type, label, cell, isPeso: true };
+
   const opts = document.getElementById('modal-options');
   opts.innerHTML = '';
 
-  // Título del modal: usa el formato largo
+  // Título del modal: formato largo
   document.getElementById('modal-title').textContent = modalLabel;
 
   // Input grande y estilizado
@@ -403,13 +406,12 @@ window.openPesoModal = (user, type, label, modalLabel, cell) => {
   // Botón Guardar
   const save = document.createElement('button');
   save.textContent = 'Guardar';
-  save.onclick = () => {
-    closeModal();
-    const key = `${user}_peso_${type}_${label}`;
+  save.onclick = async () => {
+    const key = `${user}_peso_${type}_${label}`; // <-- usar "label" para Firestore
     cell.textContent = input.value;
-    setDoc(doc(db, 'metas', key), { value: input.value }).catch(e => console.error(e));
+    await setDoc(doc(db, 'metas', key), { value: input.value });
+    closeModal();
   };
-
   opts.appendChild(save);
 
   // Botón Vaciar
@@ -417,6 +419,7 @@ window.openPesoModal = (user, type, label, modalLabel, cell) => {
 
   document.getElementById('modal').classList.add('active');
 };
+
 
 window.openModal=(user,type,day,month,cell)=>{
   currentContext={user,type,day,month,cell};
