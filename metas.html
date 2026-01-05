@@ -375,10 +375,15 @@ async function loadCell(user,type,day,month,cell){
   cellLocks[key]=false;
 }
 
-async function loadPesoCell(user,type,label,cell){
-  const key=`${user}_peso_${type}_${label}`;
-  const snap=await getDoc(doc(db,'metas',key));
-  if(snap.exists()) cell.textContent=snap.data().value;
+async function loadPesoCell(user, type, label, cell) {
+  const key = `${user}_peso_${type}_${label}`;
+  const snap = await getDoc(doc(db, 'metas', key));
+  if (snap.exists()) {
+    const value = snap.data().value;
+    cell.textContent = type === 'peso' ? `${value} kg` : `${value} cm`;
+  } else {
+    cell.textContent = '';
+  }
 }
 
 window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
@@ -403,8 +408,13 @@ window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
   input.style.fontWeight = '600';
   input.style.textAlign = 'center';
   input.style.background = '#ffffff';
-  input.value = cell.textContent || ''; // muestra el valor actual si existe
   
+  // Mostrar valor actual si existe (sin la unidad)
+  let currentValue = cell.textContent;
+  if (currentValue) {
+    currentValue = currentValue.replace(/\s*(kg|cm)/, '');
+    input.value = currentValue;
+  }  
   opts.appendChild(input);
   
   // focus con pequeño delay
