@@ -276,6 +276,7 @@ function renderPesoCalendar(user, container) {
   grid.style.gridTemplateColumns = '80px repeat(3,1fr)';
   grid.style.gap = '4px';
 
+  // Encabezados
   ['Fecha','Peso','Espalda','Barriga'].forEach(h => {
     const c = document.createElement('div');
     c.className = 'calendar-cell header';
@@ -283,6 +284,7 @@ function renderPesoCalendar(user, container) {
     grid.appendChild(c);
   });
 
+  // Generar semanas
   const weeks = [];
   let d = new Date(2026, 0, 1);
   while (d.getFullYear() === 2026) {
@@ -294,14 +296,15 @@ function renderPesoCalendar(user, container) {
     const day = date.getDate();
     const monthNum = date.getMonth() + 1;
     const keyLabel = `${day}/${monthNum}`; // clave Firestore
-    const modalLabel = `${day} de ${monthsFull[date.getMonth()]}`; // solo título
+    const modalLabel = `${day} de ${monthsFull[date.getMonth()]}`; // título del modal
 
-    // Celda de fecha en la cuadrícula
+    // Celda de fecha
     const dayCell = document.createElement('div');
     dayCell.className = 'calendar-cell day';
     dayCell.textContent = keyLabel;
     grid.appendChild(dayCell);
 
+    // Celdas de Peso, Espalda, Barriga
     ['peso','espalda','barriga'].forEach(type => {
       const cell = document.createElement('div');
       cell.className = 'calendar-cell';
@@ -383,7 +386,7 @@ window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
   const opts = document.getElementById('modal-options');
   opts.innerHTML = '';
 
-  // Título del modal: formato largo
+  // Título del modal
   document.getElementById('modal-title').textContent = modalLabel;
 
   // Input grande y estilizado
@@ -408,10 +411,10 @@ window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
     // Cerramos el modal primero
     closeModal();
 
-    const key = `${user}_peso_${type}_${keyLabel}`; // usamos la clave Firestore correcta
+    const key = `${user}_peso_${type}_${keyLabel}`; // clave Firestore correcta
     cell.textContent = input.value;
 
-    // Guardamos en Firestore sin bloquear la UI
+    // Guardamos en Firestore
     setDoc(doc(db, 'metas', key), { value: input.value })
       .catch(e => console.error('Error guardando Peso:', e));
   };
@@ -422,6 +425,7 @@ window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
 
   document.getElementById('modal').classList.add('active');
 };
+
 
 window.openModal=(user,type,day,month,cell)=>{
   currentContext={user,type,day,month,cell};
