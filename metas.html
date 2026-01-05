@@ -430,7 +430,8 @@ window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
     closeModal();
 
     const key = `${user}_peso_${type}_${keyLabel}`; // ahora keyLabel tiene "-" y es válido
-    cell.textContent = input.value;
+    const displayValue = type === 'peso' ? `${value} kg` : `${value} cm`;
+    cell.textContent = displayValue;
 
     // Guardamos en Firestore
     setDoc(doc(db, 'metas', key), { value: input.value })
