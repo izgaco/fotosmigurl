@@ -162,16 +162,16 @@ window.selectUser = (user) => {
   document.getElementById('screen-user').classList.remove('active');
   document.getElementById(user==='Izhar'?'screen-izhar':'screen-camila').classList.add('active');
   if(user==='Izhar'){
-    renderCalendar('Izhar','biblia',document.getElementById('izhar-biblia'));
-    renderCalendar('Izhar','ejercicio',document.getElementById('izhar-ejercicio'));
-    renderPesoCalendar('Izhar', document.getElementById('izhar-peso'));
-  } else {
-    renderCalendar('Camila','emocional',document.getElementById('camila-emocional'));
-    renderCalendar('Camila','agua',document.getElementById('camila-agua'));
-    renderCalendar('Camila','skincare',document.getElementById('camila-skincare'));
-    renderCalendar('Camila','lectura',document.getElementById('camila-lectura'));
-    renderCalendar('Camila','camila_ejercicio',document.getElementById('camila-ejercicio'));
-  }
+      // Solo renderizamos el calendario que se ve por defecto: Peso y medidas
+      renderPesoCalendar('Izhar', document.getElementById('izhar-peso'));
+    } else {
+      renderCalendar('Camila','emocional',document.getElementById('camila-emocional'));
+      renderCalendar('Camila','agua',document.getElementById('camila-agua'));
+      renderCalendar('Camila','skincare',document.getElementById('camila-skincare'));
+      renderCalendar('Camila','lectura',document.getElementById('camila-lectura'));
+      renderCalendar('Camila','camila_ejercicio',document.getElementById('camila-ejercicio'));
+    }
+
 };
 
 window.showIzharSection = (section) => {
