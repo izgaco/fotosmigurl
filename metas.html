@@ -276,7 +276,6 @@ function renderPesoCalendar(user, container) {
   grid.style.gridTemplateColumns = '80px repeat(3,1fr)';
   grid.style.gap = '4px';
 
-  // Cabeceras
   ['Fecha','Peso','Espalda','Barriga'].forEach(h => {
     const c = document.createElement('div');
     c.className = 'calendar-cell header';
@@ -292,22 +291,23 @@ function renderPesoCalendar(user, container) {
   }
 
   weeks.forEach(date => {
-    // Celda de la cuadrícula (día/mes)
-    const dayLabel = `${date.getDate()}/${date.getMonth() + 1}`;
+    const day = date.getDate();
+    const monthNum = date.getMonth() + 1;
+    const keyLabel = `${day}/${monthNum}`; // clave Firestore
+    const modalLabel = `${day} de ${monthsFull[date.getMonth()]}`; // solo título
+
+    // Celda de fecha en la cuadrícula
     const dayCell = document.createElement('div');
     dayCell.className = 'calendar-cell day';
-    dayCell.textContent = dayLabel;
+    dayCell.textContent = keyLabel;
     grid.appendChild(dayCell);
-
-    // Label largo para el modal: "1 de Enero"
-    const modalLabel = `${date.getDate()} de ${monthsFull[date.getMonth()]}`;
 
     ['peso','espalda','barriga'].forEach(type => {
       const cell = document.createElement('div');
       cell.className = 'calendar-cell';
-      cell.onclick = () => openPesoModal(user, type, dayLabel, modalLabel, cell);
+      cell.onclick = () => openPesoModal(user, type, keyLabel, modalLabel, cell);
       grid.appendChild(cell);
-      loadPesoCell(user, type, dayLabel, cell);
+      loadPesoCell(user, type, keyLabel, cell);
     });
   });
 
@@ -377,10 +377,8 @@ async function loadPesoCell(user,type,label,cell){
   if(snap.exists()) cell.textContent=snap.data().value;
 }
 
-window.openPesoModal = (user, type, label, modalLabel, cell) => {
-  // label = "1/1" → clave Firestore
-  // modalLabel = "1 de Enero" → título del modal
-  currentContext = { user, type, label, cell, isPeso: true };
+window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
+  currentContext = { user, type, label: keyLabel, cell, isPeso: true };
 
   const opts = document.getElementById('modal-options');
   opts.innerHTML = '';
@@ -406,11 +404,16 @@ window.openPesoModal = (user, type, label, modalLabel, cell) => {
   // Botón Guardar
   const save = document.createElement('button');
   save.textContent = 'Guardar';
-  save.onclick = async () => {
-    const key = `${user}_peso_${type}_${label}`; // <-- usar "label" para Firestore
-    cell.textContent = input.value;
-    await setDoc(doc(db, 'metas', key), { value: input.value });
+  save.onclick = () => {
+    // Cerramos el modal primero
     closeModal();
+
+    const key = `${user}_peso_${type}_${keyLabel}`; // usamos la clave Firestore correcta
+    cell.textContent = input.value;
+
+    // Guardamos en Firestore sin bloquear la UI
+    setDoc(doc(db, 'metas', key), { value: input.value })
+      .catch(e => console.error('Error guardando Peso:', e));
   };
   opts.appendChild(save);
 
@@ -419,7 +422,6 @@ window.openPesoModal = (user, type, label, modalLabel, cell) => {
 
   document.getElementById('modal').classList.add('active');
 };
-
 
 window.openModal=(user,type,day,month,cell)=>{
   currentContext={user,type,day,month,cell};
