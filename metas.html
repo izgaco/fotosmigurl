@@ -406,8 +406,12 @@ window.openPesoModal = (user, type, label, modalLabel, cell) => {
   save.onclick = async () => {
     const key = `${user}_peso_${type}_${label}`;
     cell.textContent = input.value;
-    await setDoc(doc(db, 'metas', key), { value: input.value });
-    closeModal();
+    try {
+      await setDoc(doc(db, 'metas', key), { value: input.value });
+    } catch (e) {
+      console.error(e);
+    }
+    closeModal(); // cerramos el modal después de guardar
   };
   opts.appendChild(save);
 
