@@ -304,38 +304,48 @@ function renderPesoCalendar(user, container){
   container.appendChild(grid);
 }
 
-function renderCalendar(user,type,container){
-  container.innerHTML='';
-  const grid = document.createElement('div');
-  grid.className='calendar-grid';
-  grid.appendChild(document.createElement('div'));
-  monthsShort.forEach(m=>{ const c=document.createElement('div'); c.className='calendar-cell header'; c.textContent=m; grid.appendChild(c); });
-  monthsFull.forEach((_, mi) => {
-      const daysInMonth = new Date(2026, mi + 1, 0).getDate(); // último día válido del mes
-      for(let d=1; d<=31; d++){
-          const day = document.createElement('div');
-          day.className = 'calendar-cell day';
-          day.textContent = d;
-          grid.appendChild(day);
-        
-          monthsFull.forEach((_, mi) => {
-            const daysInMonth = new Date(2026, mi + 1, 0).getDate(); // último día válido del mes
-            const cell = document.createElement('div');
-            if(d <= daysInMonth){
-              cell.className = 'calendar-cell';
-              cell.onclick = () => openModal(user, type, d, mi, cell);
-              loadCell(user, type, d, mi, cell);
-            } else {
-              cell.className = 'calendar-cell blank'; // día inválido en gris
-            }
-            grid.appendChild(cell);
-          });
-        }
-    });
+function renderCalendar(user, type, container) {
+  container.innerHTML = '';
 
+  const grid = document.createElement('div');
+  grid.className = 'calendar-grid';
+
+  // Celda vacía en la esquina superior izquierda
+  grid.appendChild(document.createElement('div'));
+
+  // Cabeceras de meses
+  monthsShort.forEach(m => {
+    const c = document.createElement('div');
+    c.className = 'calendar-cell header';
+    c.textContent = m;
+    grid.appendChild(c);
+  });
+
+  // Crear filas por día
+  for (let d = 1; d <= 31; d++) {
+    // Celda del número del día
+    const dayCell = document.createElement('div');
+    dayCell.className = 'calendar-cell day';
+    dayCell.textContent = d;
+    grid.appendChild(dayCell);
+
+    // Celdas de cada mes
+    for (let mi = 0; mi < 12; mi++) {
+      const daysInMonth = new Date(2026, mi + 1, 0).getDate(); // último día válido
+      const cell = document.createElement('div');
+
+      if (d <= daysInMonth) {
+        cell.className = 'calendar-cell';
+        cell.onclick = () => openModal(user, type, d, mi, cell);
+        loadCell(user, type, d, mi, cell);
+      } else {
+        cell.className = 'calendar-cell blank'; // día inválido en gris
+      }
+      grid.appendChild(cell);
+    }
+  }
   container.appendChild(grid);
 }
-
 async function loadCell(user,type,day,month,cell){
   const key=`${user}_${type}_${day}_${month}`;
   if(cellLocks[key]) return;
