@@ -174,6 +174,13 @@ window.selectUser = (user) => {
 
 };
 
+// Guardamos qué calendarios ya se han renderizado
+const izharRendered = {
+  peso: false,
+  biblia: false,
+  ejercicio: false
+};
+
 window.showIzharSection = (section) => {
   const biblia = document.getElementById('izhar-biblia');
   const ejercicio = document.getElementById('izhar-ejercicio');
@@ -193,9 +200,18 @@ window.showIzharSection = (section) => {
   peso.style.display = section==='peso'?'block':'none';
 
   // Renderizar solo si no se ha renderizado todavía
-  if(section==='biblia' && biblia.innerHTML.trim()==='') renderCalendar('Izhar','biblia',biblia);
-  if(section==='ejercicio' && ejercicio.innerHTML.trim()==='') renderCalendar('Izhar','ejercicio',ejercicio);
-  if(section==='peso' && peso.innerHTML.trim()==='') renderPesoCalendar('Izhar', peso);
+  if(section === 'biblia' && !izharRendered.biblia) {
+    renderCalendar('Izhar','biblia',biblia);
+    izharRendered.biblia = true;
+  }
+  if(section === 'ejercicio' && !izharRendered.ejercicio) {
+    renderCalendar('Izhar','ejercicio',ejercicio);
+    izharRendered.ejercicio = true;
+  }
+  if(section === 'peso' && !izharRendered.peso) {
+    renderPesoCalendar('Izhar', peso);
+    izharRendered.peso = true;
+  }
 };
 
 window.showSection = (section) => {
