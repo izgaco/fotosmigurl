@@ -269,35 +269,45 @@ window.showSection = (section) => {
   });
 };
 
-function renderPesoCalendar(user, container){
-  container.innerHTML='';
-  const grid=document.createElement('div');
-  grid.style.display='grid';
-  grid.style.gridTemplateColumns='80px repeat(3,1fr)';
-  grid.style.gap='4px';
+function renderPesoCalendar(user, container) {
+  container.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = '80px repeat(3,1fr)';
+  grid.style.gap = '4px';
 
-  ['Fecha','Peso','Espalda','Barriga'].forEach(h=>{
-    const c=document.createElement('div');
-    c.className='calendar-cell header';
-    c.textContent=h;
+  // Cabeceras
+  ['Fecha','Peso','Espalda','Barriga'].forEach(h => {
+    const c = document.createElement('div');
+    c.className = 'calendar-cell header';
+    c.textContent = h;
     grid.appendChild(c);
   });
 
-  const weeks=[];
-  let d=new Date(2026,0,1);
-  while(d.getFullYear()===2026){
+  const weeks = [];
+  let d = new Date(2026, 0, 1);
+  while (d.getFullYear() === 2026) {
     weeks.push(new Date(d));
-    d.setDate(d.getDate()+7);
+    d.setDate(d.getDate() + 7);
   }
 
-  weeks.forEach(date=>{
-    const label = `${date.getDate()}/${date.getMonth() + 1}`;
-    const day=document.createElement('div'); day.className='calendar-cell day'; day.textContent=label; grid.appendChild(day);
-    ['peso','espalda','barriga'].forEach(type=>{
-      const cell=document.createElement('div'); cell.className='calendar-cell';
-      cell.onclick=()=>openPesoModal(user,type,label,cell);
+  weeks.forEach(date => {
+    // Celda de la cuadrícula (día/mes)
+    const dayLabel = `${date.getDate()}/${date.getMonth() + 1}`;
+    const dayCell = document.createElement('div');
+    dayCell.className = 'calendar-cell day';
+    dayCell.textContent = dayLabel;
+    grid.appendChild(dayCell);
+
+    // Label largo para el modal: "1 de Enero"
+    const modalLabel = `${date.getDate()} de ${monthsFull[date.getMonth()]}`;
+
+    ['peso','espalda','barriga'].forEach(type => {
+      const cell = document.createElement('div');
+      cell.className = 'calendar-cell';
+      cell.onclick = () => openPesoModal(user, type, dayLabel, modalLabel, cell);
       grid.appendChild(cell);
-      loadPesoCell(user,type,label,cell);
+      loadPesoCell(user, type, dayLabel, cell);
     });
   });
 
@@ -367,12 +377,15 @@ async function loadPesoCell(user,type,label,cell){
   if(snap.exists()) cell.textContent=snap.data().value;
 }
 
-window.openPesoModal=(user,type,label,cell)=>{
-  currentContext={user,type,label,cell,isPeso:true};
-  const opts=document.getElementById('modal-options');
-  opts.innerHTML='';
-  document.getElementById('modal-title').textContent=label;
+window.openPesoModal = (user, type, label, modalLabel, cell) => {
+  currentContext = { user, type, label, cell, isPeso: true };
+  const opts = document.getElementById('modal-options');
+  opts.innerHTML = '';
 
+  // Título del modal: usa el formato largo
+  document.getElementById('modal-title').textContent = modalLabel;
+
+  // Input grande y estilizado
   const input = document.createElement('input');
   input.type = 'number';
   input.placeholder = type === 'peso' ? 'Peso en kg' : 'Medidas en cm';
@@ -387,17 +400,20 @@ window.openPesoModal=(user,type,label,cell)=>{
   input.style.background = '#ffffff';
   opts.appendChild(input);
 
-  const save=document.createElement('button');
-  save.textContent='Guardar';
-  save.onclick=async()=>{
-    const key=`${user}_peso_${type}_${label}`;
-    cell.textContent=input.value;
-    await setDoc(doc(db,'metas',key),{value:input.value});
+  // Botón Guardar
+  const save = document.createElement('button');
+  save.textContent = 'Guardar';
+  save.onclick = async () => {
+    const key = `${user}_peso_${type}_${label}`;
+    cell.textContent = input.value;
+    await setDoc(doc(db, 'metas', key), { value: input.value });
     closeModal();
   };
   opts.appendChild(save);
 
+  // Botón Vaciar
   addOpt('', 'blank');
+
   document.getElementById('modal').classList.add('active');
 };
 
