@@ -375,7 +375,7 @@ window.openPesoModal=(user,type,label,cell)=>{
 
   const input = document.createElement('input');
   input.type = 'number';
-  input.placeholder = type === 'peso' ? 'kg' : 'cm';
+  input.placeholder = type === 'peso' ? 'peso en kg' : 'medida en cm';
   input.style.width = '100%';
   input.style.padding = '14px';
   input.style.borderRadius = '12px';
@@ -384,7 +384,7 @@ window.openPesoModal=(user,type,label,cell)=>{
   input.style.fontSize = '16px';
   input.style.fontWeight = '600';
   input.style.textAlign = 'center';
-  input.style.background = '#e5e7eb'; // mismo color que botones blank
+  input.style.background = '#ffffff';
   opts.appendChild(input);
 
   const save=document.createElement('button');
