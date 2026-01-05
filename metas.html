@@ -457,26 +457,42 @@ window.openModal=(user,type,day,month,cell)=>{
   document.getElementById('modal').classList.add('active');
 };
 
-function addOpt(label,cls,emoji){
-  const b=document.createElement('button');
-  if(cls==='blank') b.className='blank';
+function addOpt(label, cls, emoji) {
+  const b = document.createElement('button');
+  if (cls === 'blank') b.className = 'blank';
   b.textContent = label || 'Vaciar';
 
-  b.onclick=async()=>{
-    const {user,type,day,month,cell} = currentContext;
-    const key = `${user}_${type}_${day}_${month}`;
+  b.onclick = async () => {
+    const { user, type, day, month, cell, isPeso, label: keyLabel } = currentContext;
 
-    if(cls==='blank'){
-      cell.textContent='';
-      cell.className='calendar-cell';
-      await deleteDoc(doc(db,'metas',key));
+    // Construir la key según tipo de calendario
+    let key;
+    if (cls === 'blank') {
+      if (isPeso) {
+        key = `${user}_peso_${type}_${keyLabel}`;
+      } else {
+        key = `${user}_${type}_${day}_${month}`;
+      }
+      // Borrar contenido visual y en Firebase
+      cell.textContent = '';
+      cell.className = 'calendar-cell';
+      await deleteDoc(doc(db, 'metas', key));
       closeModal();
       return;
     }
 
+    // Guardar opción normal
     cell.textContent = emoji;
-    cell.className = 'calendar-cell '+cls;
-    await setDoc(doc(db,'metas',key),{ class: cls, emoji });
+    cell.className = 'calendar-cell ' + cls;
+
+    if (isPeso) {
+      key = `${user}_peso_${type}_${keyLabel}`;
+      await setDoc(doc(db, 'metas', key), { value: cell.textContent.replace(/\s*(kg|cm)/, '') });
+    } else {
+      key = `${user}_${type}_${day}_${month}`;
+      await setDoc(doc(db, 'metas', key), { class: cls, emoji });
+    }
+
     closeModal();
   };
 
