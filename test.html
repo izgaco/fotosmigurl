@@ -96,34 +96,51 @@ button.secondary { background: #e5e7eb; color: #111; }
   <h2>Izhar · Metas 2026</h2>
   <div class="menu">
     <select id="select-izhar" onchange="showIzharSection(this.value)">
+      <option value="" selected>- Seleccionar -</option>
+      <option value="peso">⚖️ Peso y medidas</option>
       <option value="biblia">📖 Lectura de la Biblia</option>
       <option value="ejercicio">💪 Ejercicio</option>
     </select>
   </div>
   <div id="izhar-biblia"></div>
   <div id="izhar-ejercicio" style="display:none"></div>
+  <div id="izhar-peso" style="display:none"></div>
 </div>
 <div id="screen-camila" class="screen">
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Camila · Metas 2026</h2>
   <div class="menu">
-    <select id="select-camila" onchange="showSection(this.value)">
+    <select id="select-camila" onchange="showCamilaSection(this.value)">
+      <option value="" selected>- Seleccionar -</option>
       <option value="emocional">💭 Año emocional</option>
       <option value="agua">💧 Beber agua</option>
       <option value="skincare">🧴 Skincare</option>
       <option value="lectura">📚 Lectura</option>
+      <option value="ejercicio">💪 Ejercicio</option>
+      <option value="peso">⚖️ Peso y medidas</option>
     </select>
   </div>
   <div id="camila-emocional"></div>
   <div id="camila-agua" style="display:none"></div>
   <div id="camila-skincare" style="display:none"></div>
   <div id="camila-lectura" style="display:none"></div>
+  <div id="camila-ejercicio" style="display:none"></div>
+  <div id="camila-peso" style="display:none"></div>
 </div>
 <div id="modal" class="modal">
   <div class="modal-box">
     <h3 id="modal-title">Selecciona</h3>
     <div id="modal-options"></div>
     <button class="secondary" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+<div id="clear-all-modal" class="modal">
+  <div class="modal-content">
+    <h3>Se borrarán todos los registros.</h3>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button id="confirm-clear-all" style="background:#dc2626;">Borrar</button>
+      <button id="cancel-clear-all" style="background:#e5e7eb; color:#000;">Cancelar</button>
+    </div>
   </div>
 </div>
 <script type="module">
@@ -140,6 +157,7 @@ let currentContext = null;
 const cellLocks = {};
 
 const CALENDARS = {
+  camila_ejercicio: { options: [ { label: '🛌 Descanso', class: 'exercise-rest', emoji: '🛌' }, { label: '🏋️ 20 minutos', class: 'exercise-strength', emoji: '🏋️' }, { label: '🚶 Paseo', class: 'exercise-cardio', emoji: '🚶' } ] },
   biblia: { options: [ { label: '✅ Leído', class: 'tick', emoji: '✅' }, { label: '❌ No leído', class: 'cross', emoji: '❌' } ] },
   ejercicio: { options: [ { label: '🏋️ Fuerza', class: 'exercise-strength', emoji: '🏋️' }, { label: '🏃 Cardio', class: 'exercise-cardio', emoji: '🏃' }, { label: '🛌 Descanso', class: 'exercise-rest', emoji: '🛌' } ] },
   emocional: { options: [ { label: '😞', class: 'bad', emoji: '😞' }, { label: '😐', class: 'normal', emoji: '😐' }, { label: '🙂', class: 'good', emoji: '🙂' }, { label: '🤩', class: 'great', emoji: '🤩' } ] },
@@ -157,43 +175,243 @@ window.selectUser = (user) => {
   document.getElementById('screen-user').classList.remove('active');
   document.getElementById(user==='Izhar'?'screen-izhar':'screen-camila').classList.add('active');
   if(user==='Izhar'){
-    renderCalendar('Izhar','biblia',document.getElementById('izhar-biblia'));
-    renderCalendar('Izhar','ejercicio',document.getElementById('izhar-ejercicio'));
-  } else {
-    renderCalendar('Camila','emocional',document.getElementById('camila-emocional'));
-    renderCalendar('Camila','agua',document.getElementById('camila-agua'));
-    renderCalendar('Camila','skincare',document.getElementById('camila-skincare'));
-    renderCalendar('Camila','lectura',document.getElementById('camila-lectura'));
-  }
+  // No renderizamos ningún calendario al inicio
+    } else {
+    //Me dice chatGPT que borre lo que había aquí
+    }
+};
+
+// Guardamos qué calendarios ya se han renderizado
+const izharRendered = {
+  peso: false,
+  biblia: false,
+  ejercicio: false
 };
 
 window.showIzharSection = (section) => {
-  document.getElementById('izhar-biblia').style.display = section==='biblia'?'block':'none';
-  document.getElementById('izhar-ejercicio').style.display = section==='ejercicio'?'block':'none';
+  const biblia = document.getElementById('izhar-biblia');
+  const ejercicio = document.getElementById('izhar-ejercicio');
+  const peso = document.getElementById('izhar-peso');
+
+  // Si no se ha seleccionado nada, ocultamos todo
+  if(section === "") {
+    biblia.style.display = 'none';
+    ejercicio.style.display = 'none';
+    peso.style.display = 'none';
+    return;
+  }
+
+  // Mostrar/ocultar según selección
+  biblia.style.display = section==='biblia'?'block':'none';
+  ejercicio.style.display = section==='ejercicio'?'block':'none';
+  peso.style.display = section==='peso'?'block':'none';
+
+  // Renderizar solo si no se ha renderizado todavía
+  if(section === 'biblia' && !izharRendered.biblia) {
+    renderCalendar('Izhar','biblia',biblia);
+    izharRendered.biblia = true;
+  }
+  if(section === 'ejercicio' && !izharRendered.ejercicio) {
+    renderCalendar('Izhar','ejercicio',ejercicio);
+    izharRendered.ejercicio = true;
+  }
+  if(section === 'peso' && !izharRendered.peso) {
+    renderPesoCalendar('Izhar', peso);
+    izharRendered.peso = true;
+  }
+};
+
+// Guardamos qué calendarios ya se han renderizado para Camila
+const camilaRendered = {
+  emocional: false,
+  agua: false,
+  skincare: false,
+  lectura: false,
+  ejercicio: false,
+  peso: false
+};
+
+window.showCamilaSection = (section) => {
+  const emocional = document.getElementById('camila-emocional');
+  const agua = document.getElementById('camila-agua');
+  const skincare = document.getElementById('camila-skincare');
+  const lectura = document.getElementById('camila-lectura');
+  const ejercicio = document.getElementById('camila-ejercicio');
+  const peso = document.getElementById('camila-peso');
+
+  // Si no se ha seleccionado nada, ocultamos todo
+  if(section === "") {
+    [emocional, agua, skincare, lectura, ejercicio, peso].forEach(el => el.style.display='none');
+    return;
+  }
+
+  // Mostrar/ocultar según selección
+  emocional.style.display = section==='emocional'?'block':'none';
+  agua.style.display = section==='agua'?'block':'none';
+  skincare.style.display = section==='skincare'?'block':'none';
+  lectura.style.display = section==='lectura'?'block':'none';
+  ejercicio.style.display = section==='ejercicio'?'block':'none';
+  peso.style.display = section === 'peso' ? 'block' : 'none';
+
+  // Renderizar solo si no se ha renderizado todavía
+  if(section==='emocional' && !camilaRendered.emocional) {
+    renderCalendar('Camila','emocional',emocional);
+    camilaRendered.emocional = true;
+  }
+  if(section==='agua' && !camilaRendered.agua) {
+    renderCalendar('Camila','agua',agua);
+    camilaRendered.agua = true;
+  }
+  if(section==='skincare' && !camilaRendered.skincare) {
+    renderCalendar('Camila','skincare',skincare);
+    camilaRendered.skincare = true;
+  }
+  if(section==='lectura' && !camilaRendered.lectura) {
+    renderCalendar('Camila','lectura',lectura);
+    camilaRendered.lectura = true;
+  }
+  if(section==='ejercicio' && !camilaRendered.ejercicio) {
+    renderCalendar('Camila','camila_ejercicio',ejercicio);
+    camilaRendered.ejercicio = true;
+  }
+  if(section === 'peso' && !camilaRendered.peso) {
+    renderPesoCalendar('Camila', peso);
+    camilaRendered.peso = true;
+  }
+
 };
 
 window.showSection = (section) => {
-  ['emocional','agua','skincare','lectura'].forEach(s=>{
+  ['emocional','agua','skincare','lectura','ejercicio'].forEach(s=>{
     const el=document.getElementById('camila-'+s);
     if(el) el.style.display=s===section?'block':'none';
   });
 };
 
-function renderCalendar(user,type,container){
-  container.innerHTML='';
+function renderPesoCalendar(user, container) {
+  container.innerHTML = '';
   const grid = document.createElement('div');
-  grid.className='calendar-grid';
-  grid.appendChild(document.createElement('div'));
-  monthsShort.forEach(m=>{ const c=document.createElement('div'); c.className='calendar-cell header'; c.textContent=m; grid.appendChild(c); });
-  for(let d=1; d<=31; d++){
-    const day=document.createElement('div'); day.className='calendar-cell day'; day.textContent=d; grid.appendChild(day);
-    monthsFull.forEach((_,mi)=>{
-      const cell=document.createElement('div'); cell.className='calendar-cell'; cell.onclick=()=>openModal(user,type,d,mi,cell); grid.appendChild(cell); loadCell(user,type,d,mi,cell);
-    });
+  grid.style.display = 'grid';
+  const colCount = user === 'Camila' ? 5 : 3;
+  grid.style.gridTemplateColumns = `80px repeat(${colCount},1fr)`;
+  grid.style.gap = '4px';
+
+  // Encabezados
+  const columns = user === 'Camila'
+    ? ['Fecha','Peso','Pecho','Cintura','Barriga','Culo']
+    : ['Fecha','Peso','Espalda','Barriga'];
+  
+  columns.forEach(h => {
+    const c = document.createElement('div');
+    c.className = 'calendar-cell header';
+    c.textContent = h;
+    grid.appendChild(c);
+  });
+
+  // Generar semanas
+  const weeks = [];
+  let d = new Date(2026, 0, 1);
+  while (d.getFullYear() === 2026) {
+    weeks.push(new Date(d));
+    d.setDate(d.getDate() + 7);
   }
+
+  weeks.forEach(date => {
+    const day = date.getDate();
+    const monthNum = date.getMonth() + 1;
+    const keyLabel = `${day}-${monthNum}`; // clave válida para Firestore
+    const modalLabel = `${day} de ${monthsFull[date.getMonth()]}`; // título del modal
+
+
+    // Celda de fecha
+    const dayCell = document.createElement('div');
+    dayCell.className = 'calendar-cell day';
+    dayCell.textContent = keyLabel;
+    grid.appendChild(dayCell);
+
+    // Celdas de Peso, Espalda, Barriga
+    const types = user === 'Camila'
+      ? ['peso','pecho','cintura','barriga','culo']
+      : ['peso','espalda','barriga'];
+    
+    types.forEach(type => {
+      const cell = document.createElement('div');
+      cell.className = 'calendar-cell';
+      cell.onclick = () => openPesoModal(user, type, keyLabel, modalLabel, cell);
+      grid.appendChild(cell);
+      loadPesoCell(user, type, keyLabel, cell);
+    });
+  });
+
   container.appendChild(grid);
+  const clearAllBtn = document.createElement('button');
+  clearAllBtn.textContent = 'Borrar todo';
+  clearAllBtn.style.marginTop = '12px';
+  clearAllBtn.style.background = 'transparent';
+  clearAllBtn.style.color = '#9ca3af';
+  clearAllBtn.style.border = 'none';
+  clearAllBtn.style.cursor = 'pointer';
+  clearAllBtn.style.fontSize = '14px';
+  
+  clearAllBtn.onclick = () => openClearAllModal(user, container);
+  
+  container.appendChild(clearAllBtn);
 }
 
+function renderCalendar(user, type, container) {
+  container.innerHTML = '';
+
+  const grid = document.createElement('div');
+  grid.className = 'calendar-grid';
+
+  // Celda vacía en la esquina superior izquierda
+  grid.appendChild(document.createElement('div'));
+
+  // Cabeceras de meses
+  monthsShort.forEach(m => {
+    const c = document.createElement('div');
+    c.className = 'calendar-cell header';
+    c.textContent = m;
+    grid.appendChild(c);
+  });
+
+  // Crear filas por día
+  for (let d = 1; d <= 31; d++) {
+    // Celda del número del día
+    const dayCell = document.createElement('div');
+    dayCell.className = 'calendar-cell day';
+    dayCell.textContent = d;
+    grid.appendChild(dayCell);
+
+    // Celdas de cada mes
+    for (let mi = 0; mi < 12; mi++) {
+      const daysInMonth = new Date(2026, mi + 1, 0).getDate(); // último día válido
+      const cell = document.createElement('div');
+
+      if (d <= daysInMonth) {
+        cell.className = 'calendar-cell';
+        cell.onclick = () => openModal(user, type, d, mi, cell);
+        loadCell(user, type, d, mi, cell);
+      } else {
+        cell.className = 'calendar-cell blank'; // día inválido en gris
+      }
+      grid.appendChild(cell);
+    }
+  }
+  container.appendChild(grid);
+  const clearAllBtn = document.createElement('button');
+  clearAllBtn.textContent = 'Borrar todo';
+  clearAllBtn.style.marginTop = '12px';
+  clearAllBtn.style.background = 'transparent';
+  clearAllBtn.style.color = '#9ca3af';
+  clearAllBtn.style.border = 'none';
+  clearAllBtn.style.cursor = 'pointer';
+  clearAllBtn.style.fontSize = '14px';
+  
+  clearAllBtn.onclick = () => openClearAllModal(user, container);
+  
+  container.appendChild(clearAllBtn);
+}
 async function loadCell(user,type,day,month,cell){
   const key=`${user}_${type}_${day}_${month}`;
   if(cellLocks[key]) return;
@@ -209,6 +427,75 @@ async function loadCell(user,type,day,month,cell){
   cellLocks[key]=false;
 }
 
+async function loadPesoCell(user, type, label, cell) {
+  const key = `${user}_peso_${type}_${label}`;
+  const snap = await getDoc(doc(db, 'metas', key));
+  if (snap.exists()) {
+    const value = snap.data().value;
+    cell.textContent = type === 'peso' ? `${value} kg` : `${value} cm`;
+  } else {
+    cell.textContent = '';
+  }
+}
+
+window.openPesoModal = (user, type, keyLabel, modalLabel, cell) => {
+  currentContext = { user, type, label: keyLabel, cell, isPeso: true };
+
+  const opts = document.getElementById('modal-options');
+  opts.innerHTML = '';
+
+  // Título del modal
+  document.getElementById('modal-title').textContent = modalLabel;
+
+  // Input grande y estilizado
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.placeholder = type === 'peso' ? 'Peso en kg' : 'Medidas en cm';
+  input.style.width = '100%';
+  input.style.padding = '14px';
+  input.style.borderRadius = '12px';
+  input.style.border = '1px solid #d1d5db';
+  input.style.marginTop = '10px';
+  input.style.fontSize = '16px';
+  input.style.fontWeight = '600';
+  input.style.textAlign = 'center';
+  input.style.background = '#ffffff';
+
+  // Mostrar valor actual si existe (sin la unidad)
+  if (cell.textContent) {
+    input.value = cell.textContent.replace(/\s*(kg|cm)/, '');
+  }
+
+  opts.appendChild(input);
+
+  // Focus automático para abrir teclado en móviles
+  setTimeout(() => input.focus(), 100);
+
+  // Botón Guardar
+  const save = document.createElement('button');
+  save.textContent = 'Guardar';
+  save.onclick = async () => {
+    const value = input.value;
+    if (!value) return; // no guardar si está vacío
+
+    // Mostrar en la celda con unidad
+    const displayValue = type === 'peso' ? `${value} kg` : `${value} cm`;
+    cell.textContent = displayValue;
+
+    // Guardar solo el número en Firebase
+    const key = `${user}_peso_${type}_${keyLabel}`;
+    await setDoc(doc(db, 'metas', key), { value });
+
+    closeModal();
+  };
+  opts.appendChild(save);
+
+  // Botón Vaciar
+  addOpt('', 'blank');
+
+  document.getElementById('modal').classList.add('active');
+};
+
 window.openModal=(user,type,day,month,cell)=>{
   currentContext={user,type,day,month,cell};
   const opts=document.getElementById('modal-options');
@@ -222,26 +509,78 @@ window.openModal=(user,type,day,month,cell)=>{
   document.getElementById('modal').classList.add('active');
 };
 
-function addOpt(label,cls,emoji){
-  const b=document.createElement('button');
-  if(cls==='blank') b.className='blank';
+let clearAllContext = null;
+
+window.openClearAllModal = (user, container) => {
+  clearAllContext = { user, container };
+  document.getElementById('clear-all-modal').classList.add('active');
+};
+
+document.getElementById('cancel-clear-all').onclick = () => {
+  document.getElementById('clear-all-modal').classList.remove('active');
+  clearAllContext = null;
+};
+
+document.getElementById('confirm-clear-all').onclick = async () => {
+  if (!clearAllContext) return;
+
+  const { user, container } = clearAllContext;
+  const cells = container.querySelectorAll('.calendar-cell');
+
+  for (const cell of cells) {
+    if (!cell.dataset || !cell.dataset.key) continue;
+    if (!cell.textContent.trim()) continue;
+
+    try {
+      await deleteDoc(doc(db, 'metas', cell.dataset.key));
+      cell.textContent = '';
+      delete cell.dataset.value;
+    } catch (e) {
+      console.error('Error borrando', e);
+    }
+  }
+
+  document.getElementById('clear-all-modal').classList.remove('active');
+  clearAllContext = null;
+};
+
+
+function addOpt(label, cls, emoji) {
+  const b = document.createElement('button');
+  if (cls === 'blank') b.className = 'blank';
   b.textContent = label || 'Vaciar';
 
-  b.onclick=async()=>{
-    const {user,type,day,month,cell} = currentContext;
-    const key = `${user}_${type}_${day}_${month}`;
+  b.onclick = async () => {
+    const { user, type, day, month, cell, isPeso, label: keyLabel } = currentContext;
 
-    if(cls==='blank'){
-      cell.textContent='';
-      cell.className='calendar-cell';
-      await deleteDoc(doc(db,'metas',key));
+    // Construir la key según tipo de calendario
+    let key;
+    if (cls === 'blank') {
+      if (isPeso) {
+        key = `${user}_peso_${type}_${keyLabel}`;
+      } else {
+        key = `${user}_${type}_${day}_${month}`;
+      }
+      // Borrar contenido visual y en Firebase
+      cell.textContent = '';
+      cell.className = 'calendar-cell';
+      await deleteDoc(doc(db, 'metas', key));
       closeModal();
       return;
     }
 
+    // Guardar opción normal
     cell.textContent = emoji;
-    cell.className = 'calendar-cell '+cls;
-    await setDoc(doc(db,'metas',key),{ class: cls, emoji });
+    cell.className = 'calendar-cell ' + cls;
+
+    if (isPeso) {
+      key = `${user}_peso_${type}_${keyLabel}`;
+      await setDoc(doc(db, 'metas', key), { value: cell.textContent.replace(/\s*(kg|cm)/, '') });
+    } else {
+      key = `${user}_${type}_${day}_${month}`;
+      await setDoc(doc(db, 'metas', key), { class: cls, emoji });
+    }
+
     closeModal();
   };
 
