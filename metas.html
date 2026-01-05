@@ -313,25 +313,24 @@ function renderCalendar(user,type,container){
   monthsFull.forEach((_, mi) => {
       const daysInMonth = new Date(2026, mi + 1, 0).getDate(); // último día válido del mes
       for(let d=1; d<=31; d++){
-        // Crear casilla de día
-        const day=document.createElement('div'); 
-        day.className='calendar-cell day'; 
-        day.textContent = d <= daysInMonth ? d : ''; // mostrar número solo si es válido
-        grid.appendChild(day);
-    
-        // Crear celda para seleccionar opción
-        const cell=document.createElement('div'); 
-        cell.className='calendar-cell'; 
-    
-        if(d <= daysInMonth){
-          cell.onclick=()=>openModal(user,type,d,mi,cell); 
-          loadCell(user,type,d,mi,cell);
-        } else {
-          cell.classList.add('blank'); // marcar como no válido
+          const day = document.createElement('div');
+          day.className = 'calendar-cell day';
+          day.textContent = d;
+          grid.appendChild(day);
+        
+          monthsFull.forEach((_, mi) => {
+            const daysInMonth = new Date(2026, mi + 1, 0).getDate(); // último día válido del mes
+            const cell = document.createElement('div');
+            if(d <= daysInMonth){
+              cell.className = 'calendar-cell';
+              cell.onclick = () => openModal(user, type, d, mi, cell);
+              loadCell(user, type, d, mi, cell);
+            } else {
+              cell.className = 'calendar-cell blank'; // día inválido en gris
+            }
+            grid.appendChild(cell);
+          });
         }
-    
-        grid.appendChild(cell);
-      }
     });
 
   container.appendChild(grid);
