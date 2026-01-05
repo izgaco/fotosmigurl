@@ -179,7 +179,15 @@ window.showIzharSection = (section) => {
   const ejercicio = document.getElementById('izhar-ejercicio');
   const peso = document.getElementById('izhar-peso');
 
-  // Mostrar/ocultar
+  // Si no se ha seleccionado nada, ocultamos todo
+  if(section === "") {
+    biblia.style.display = 'none';
+    ejercicio.style.display = 'none';
+    peso.style.display = 'none';
+    return;
+  }
+
+  // Mostrar/ocultar según selección
   biblia.style.display = section==='biblia'?'block':'none';
   ejercicio.style.display = section==='ejercicio'?'block':'none';
   peso.style.display = section==='peso'?'block':'none';
@@ -187,6 +195,7 @@ window.showIzharSection = (section) => {
   // Renderizar solo si no se ha renderizado todavía
   if(section==='biblia' && biblia.innerHTML.trim()==='') renderCalendar('Izhar','biblia',biblia);
   if(section==='ejercicio' && ejercicio.innerHTML.trim()==='') renderCalendar('Izhar','ejercicio',ejercicio);
+  if(section==='peso' && peso.innerHTML.trim()==='') renderPesoCalendar('Izhar', peso);
 };
 
 window.showSection = (section) => {
