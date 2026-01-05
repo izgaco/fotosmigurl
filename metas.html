@@ -110,7 +110,8 @@ button.secondary { background: #e5e7eb; color: #111; }
   <button class="secondary" onclick="volverUsuario()">Volver</button>
   <h2>Camila · Metas 2026</h2>
   <div class="menu">
-    <select id="select-camila" onchange="showSection(this.value)">
+    <select id="select-camila" onchange="showCamilaSection(this.value)">
+      <option value="" selected>- Seleccionar -</option>
       <option value="emocional">💭 Año emocional</option>
       <option value="agua">💧 Beber agua</option>
       <option value="skincare">🧴 Skincare</option>
@@ -165,13 +166,8 @@ window.selectUser = (user) => {
   if(user==='Izhar'){
   // No renderizamos ningún calendario al inicio
     } else {
-      renderCalendar('Camila','emocional',document.getElementById('camila-emocional'));
-      renderCalendar('Camila','agua',document.getElementById('camila-agua'));
-      renderCalendar('Camila','skincare',document.getElementById('camila-skincare'));
-      renderCalendar('Camila','lectura',document.getElementById('camila-lectura'));
-      renderCalendar('Camila','camila_ejercicio',document.getElementById('camila-ejercicio'));
+    //Me dice chatGPT que borre lo que había aquí
     }
-
 };
 
 // Guardamos qué calendarios ya se han renderizado
@@ -211,6 +207,58 @@ window.showIzharSection = (section) => {
   if(section === 'peso' && !izharRendered.peso) {
     renderPesoCalendar('Izhar', peso);
     izharRendered.peso = true;
+  }
+};
+
+// Guardamos qué calendarios ya se han renderizado para Camila
+const camilaRendered = {
+  emocional: false,
+  agua: false,
+  skincare: false,
+  lectura: false,
+  ejercicio: false
+};
+
+window.showCamilaSection = (section) => {
+  const emocional = document.getElementById('camila-emocional');
+  const agua = document.getElementById('camila-agua');
+  const skincare = document.getElementById('camila-skincare');
+  const lectura = document.getElementById('camila-lectura');
+  const ejercicio = document.getElementById('camila-ejercicio');
+
+  // Si no se ha seleccionado nada, ocultamos todo
+  if(section === "") {
+    [emocional, agua, skincare, lectura, ejercicio].forEach(el => el.style.display='none');
+    return;
+  }
+
+  // Mostrar/ocultar según selección
+  emocional.style.display = section==='emocional'?'block':'none';
+  agua.style.display = section==='agua'?'block':'none';
+  skincare.style.display = section==='skincare'?'block':'none';
+  lectura.style.display = section==='lectura'?'block':'none';
+  ejercicio.style.display = section==='ejercicio'?'block':'none';
+
+  // Renderizar solo si no se ha renderizado todavía
+  if(section==='emocional' && !camilaRendered.emocional) {
+    renderCalendar('Camila','emocional',emocional);
+    camilaRendered.emocional = true;
+  }
+  if(section==='agua' && !camilaRendered.agua) {
+    renderCalendar('Camila','agua',agua);
+    camilaRendered.agua = true;
+  }
+  if(section==='skincare' && !camilaRendered.skincare) {
+    renderCalendar('Camila','skincare',skincare);
+    camilaRendered.skincare = true;
+  }
+  if(section==='lectura' && !camilaRendered.lectura) {
+    renderCalendar('Camila','lectura',lectura);
+    camilaRendered.lectura = true;
+  }
+  if(section==='ejercicio' && !camilaRendered.ejercicio) {
+    renderCalendar('Camila','camila_ejercicio',ejercicio);
+    camilaRendered.ejercicio = true;
   }
 };
 
