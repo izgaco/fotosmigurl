@@ -96,6 +96,7 @@ button.secondary { background: #e5e7eb; color: #111; }
   <h2>Izhar · Metas 2026</h2>
   <div class="menu">
     <select id="select-izhar" onchange="showIzharSection(this.value)">
+      <option value="" selected>- Seleccionar -</option>
       <option value="peso">⚖️ Peso y medidas</option>
       <option value="biblia">📖 Lectura de la Biblia</option>
       <option value="ejercicio">💪 Ejercicio</option>
@@ -162,8 +163,7 @@ window.selectUser = (user) => {
   document.getElementById('screen-user').classList.remove('active');
   document.getElementById(user==='Izhar'?'screen-izhar':'screen-camila').classList.add('active');
   if(user==='Izhar'){
-      // Solo renderizamos el calendario que se ve por defecto: Peso y medidas
-      renderPesoCalendar('Izhar', document.getElementById('izhar-peso'));
+  // No renderizamos ningún calendario al inicio
     } else {
       renderCalendar('Camila','emocional',document.getElementById('camila-emocional'));
       renderCalendar('Camila','agua',document.getElementById('camila-agua'));
