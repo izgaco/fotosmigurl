@@ -96,12 +96,14 @@ button.secondary { background: #e5e7eb; color: #111; }
   <h2>Izhar · Metas 2026</h2>
   <div class="menu">
     <select id="select-izhar" onchange="showIzharSection(this.value)">
+      <option value="peso">⚖️ Peso y medidas</option>
       <option value="biblia">📖 Lectura de la Biblia</option>
       <option value="ejercicio">💪 Ejercicio</option>
     </select>
   </div>
   <div id="izhar-biblia"></div>
   <div id="izhar-ejercicio" style="display:none"></div>
+  <div id="izhar-peso" style="display:none"></div>
 </div>
 <div id="screen-camila" class="screen">
   <button class="secondary" onclick="volverUsuario()">Volver</button>
@@ -162,6 +164,7 @@ window.selectUser = (user) => {
   if(user==='Izhar'){
     renderCalendar('Izhar','biblia',document.getElementById('izhar-biblia'));
     renderCalendar('Izhar','ejercicio',document.getElementById('izhar-ejercicio'));
+    renderPesoCalendar('Izhar', document.getElementById('izhar-peso'));
   } else {
     renderCalendar('Camila','emocional',document.getElementById('camila-emocional'));
     renderCalendar('Camila','agua',document.getElementById('camila-agua'));
@@ -174,6 +177,7 @@ window.selectUser = (user) => {
 window.showIzharSection = (section) => {
   document.getElementById('izhar-biblia').style.display = section==='biblia'?'block':'none';
   document.getElementById('izhar-ejercicio').style.display = section==='ejercicio'?'block':'none';
+  document.getElementById('izhar-peso').style.display = section==='peso'?'block':'none';
 };
 
 window.showSection = (section) => {
@@ -182,6 +186,41 @@ window.showSection = (section) => {
     if(el) el.style.display=s===section?'block':'none';
   });
 };
+
+function renderPesoCalendar(user, container){
+  container.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.display='grid';
+  grid.style.gridTemplateColumns='80px repeat(3,1fr)';
+  grid.style.gap='4px';
+
+  ['Fecha','Peso (kg)','Espalda (cm)','Barriga (cm)'].forEach(h=>{
+    const c=document.createElement('div');
+    c.className='calendar-cell header';
+    c.textContent=h;
+    grid.appendChild(c);
+  });
+
+  const weeks=[];
+  let d=new Date(2026,0,1);
+  while(d.getFullYear()===2026){
+    weeks.push(new Date(d));
+    d.setDate(d.getDate()+7);
+  }
+
+  weeks.forEach(date=>{
+    const label=`${date.getDate()} - ${monthsShort[date.getMonth()]}`;
+    const day=document.createElement('div'); day.className='calendar-cell day'; day.textContent=label; grid.appendChild(day);
+    ['peso','espalda','barriga'].forEach(type=>{
+      const cell=document.createElement('div'); cell.className='calendar-cell';
+      cell.onclick=()=>openPesoModal(user,type,label,cell);
+      grid.appendChild(cell);
+      loadPesoCell(user,type,label,cell);
+    });
+  });
+
+  container.appendChild(grid);
+}
 
 function renderCalendar(user,type,container){
   container.innerHTML='';
@@ -212,6 +251,38 @@ async function loadCell(user,type,day,month,cell){
   }
   cellLocks[key]=false;
 }
+
+async function loadPesoCell(user,type,label,cell){
+  const key=`${user}_peso_${type}_${label}`;
+  const snap=await getDoc(doc(db,'metas',key));
+  if(snap.exists()) cell.textContent=snap.data().value;
+}
+
+window.openPesoModal=(user,type,label,cell)=>{
+  currentContext={user,type,label,cell,isPeso:true};
+  const opts=document.getElementById('modal-options');
+  opts.innerHTML='';
+  document.getElementById('modal-title').textContent=label;
+
+  const input=document.createElement('input');
+  input.type='number';
+  input.style.width='100%';
+  input.placeholder= type==='peso'?'kg':'cm';
+  opts.appendChild(input);
+
+  const save=document.createElement('button');
+  save.textContent='Guardar';
+  save.onclick=async()=>{
+    const key=`${user}_peso_${type}_${label}`;
+    cell.textContent=input.value;
+    await setDoc(doc(db,'metas',key),{value:input.value});
+    closeModal();
+  };
+  opts.appendChild(save);
+
+  addOpt('', 'blank');
+  document.getElementById('modal').classList.add('active');
+};
 
 window.openModal=(user,type,day,month,cell)=>{
   currentContext={user,type,day,month,cell};
