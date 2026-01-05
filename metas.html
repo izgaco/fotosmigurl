@@ -310,12 +310,22 @@ function renderCalendar(user,type,container){
   grid.className='calendar-grid';
   grid.appendChild(document.createElement('div'));
   monthsShort.forEach(m=>{ const c=document.createElement('div'); c.className='calendar-cell header'; c.textContent=m; grid.appendChild(c); });
-  for(let d=1; d<=31; d++){
-    const day=document.createElement('div'); day.className='calendar-cell day'; day.textContent=d; grid.appendChild(day);
-    monthsFull.forEach((_,mi)=>{
-      const cell=document.createElement('div'); cell.className='calendar-cell'; cell.onclick=()=>openModal(user,type,d,mi,cell); grid.appendChild(cell); loadCell(user,type,d,mi,cell);
+  monthsFull.forEach((_, mi) => {
+      // Primero ponemos la casilla del día número
+      const daysInMonth = new Date(2026, mi + 1, 0).getDate(); // Último día del mes
+      for(let d=1; d<=daysInMonth; d++){
+        const day=document.createElement('div'); 
+        day.className='calendar-cell day'; 
+        day.textContent=d; 
+        grid.appendChild(day);
+    
+        const cell=document.createElement('div'); 
+        cell.className='calendar-cell'; 
+        cell.onclick=()=>openModal(user,type,d,mi,cell); 
+        grid.appendChild(cell); 
+        loadCell(user,type,d,mi,cell);
+      }
     });
-  }
   container.appendChild(grid);
 }
 
