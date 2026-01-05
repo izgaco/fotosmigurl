@@ -112,12 +112,14 @@ button.secondary { background: #e5e7eb; color: #111; }
       <option value="agua">💧 Beber agua</option>
       <option value="skincare">🧴 Skincare</option>
       <option value="lectura">📚 Lectura</option>
+      <option value="ejercicio">💪 Ejercicio</option>
     </select>
   </div>
   <div id="camila-emocional"></div>
   <div id="camila-agua" style="display:none"></div>
   <div id="camila-skincare" style="display:none"></div>
   <div id="camila-lectura" style="display:none"></div>
+  <div id="camila-ejercicio" style="display:none"></div>
 </div>
 <div id="modal" class="modal">
   <div class="modal-box">
@@ -140,6 +142,7 @@ let currentContext = null;
 const cellLocks = {};
 
 const CALENDARS = {
+  camila_ejercicio: { options: [ { label: '🛌 Descanso', class: 'exercise-rest', emoji: '🛌' }, { label: '🏋️ 20 minutos', class: 'exercise-strength', emoji: '🏋️' }, { label: '🚶 Paseo', class: 'exercise-cardio', emoji: '🚶' } ] },
   biblia: { options: [ { label: '✅ Leído', class: 'tick', emoji: '✅' }, { label: '❌ No leído', class: 'cross', emoji: '❌' } ] },
   ejercicio: { options: [ { label: '🏋️ Fuerza', class: 'exercise-strength', emoji: '🏋️' }, { label: '🏃 Cardio', class: 'exercise-cardio', emoji: '🏃' }, { label: '🛌 Descanso', class: 'exercise-rest', emoji: '🛌' } ] },
   emocional: { options: [ { label: '😞', class: 'bad', emoji: '😞' }, { label: '😐', class: 'normal', emoji: '😐' }, { label: '🙂', class: 'good', emoji: '🙂' }, { label: '🤩', class: 'great', emoji: '🤩' } ] },
@@ -164,6 +167,7 @@ window.selectUser = (user) => {
     renderCalendar('Camila','agua',document.getElementById('camila-agua'));
     renderCalendar('Camila','skincare',document.getElementById('camila-skincare'));
     renderCalendar('Camila','lectura',document.getElementById('camila-lectura'));
+    renderCalendar('Camila','camila_ejercicio',document.getElementById('camila-ejercicio'));
   }
 };
 
@@ -173,7 +177,7 @@ window.showIzharSection = (section) => {
 };
 
 window.showSection = (section) => {
-  ['emocional','agua','skincare','lectura'].forEach(s=>{
+  ['emocional','agua','skincare','lectura','ejercicio'].forEach(s=>{
     const el=document.getElementById('camila-'+s);
     if(el) el.style.display=s===section?'block':'none';
   });
