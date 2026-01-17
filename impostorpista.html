@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juego del Impostor.</title>
+
+<style>
+/* ... (Se mantienen tus estilos anteriores) ... */
+* { box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; background: #ccc; margin: 0; padding: 20px; display: flex; justify-content: center; }
+.container { width: 100%; max-width: 420px; text-align: center; }
+h1 { font-size: 2rem; margin-bottom: 20px; }
+h2 { font-size: 1.5rem; margin-bottom: 20px; }
+input { width: 100%; padding: 14px; margin: 10px 0; font-size: 1.1rem; border-radius: 10px; border: none; }
+button { width: 100%; padding: 16px; margin: 12px 0; font-size: 1.2rem; font-weight: bold; border-radius: 14px; border: none; cursor: pointer; background-color: #1e90ff; color: white; }
+.hidden { display: none; }
+#roleDisplay { margin-top: 20px; padding: 25px; border-radius: 16px; }
+.citizen { background-color: #1b5e20; color: white; }
+.impostor { background-color: #b71c1c; color: white; }
+.pass-screen { background: #333; color: white; padding: 30px; border-radius: 16px; }
+.danger { background-color: #b71c1c; }
+
+.starter-info {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 2px dashed #1e90ff;
+    color: #333;
+}
+
+/* Estilo para la pista sutil */
+.hint-text {
+    font-size: 1.4rem;
+    letter-spacing: 4px;
+    font-family: monospace;
+    background: rgba(0,0,0,0.2);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>🕵️ Juego del Impostor</h1>
+
+    <div id="setup">
+        <input id="numPlayers" type="number" min="2" placeholder="Número de jugadores">
+        <input id="numImpostors" type="number" min="1" placeholder="Número de impostores">
+        <button id="setPlayersBtn">Siguiente</button>
+    </div>
+
+    <div id="playerNames" class="hidden"></div>
+
+    <div id="passScreen" class="hidden pass-screen">
+        <h2 id="passText"></h2>
+        <button id="revealFromPassBtn">Revelar rol</button>
+    </div>
+
+    <div id="roleReveal" class="hidden">
+        <div id="roleDisplay" class="hidden"></div>
+        <button id="nextBtn" class="hidden">Siguiente jugador</button>
+    </div>
+
+    <div id="endScreen" class="hidden">
+        <h2>✅ Roles repartidos</h2>
+        <div id="starterPlayerDisplay" class="starter-info"></div>
+        <button id="revealImpostorsBtn" class="danger">Revelar impostor</button>
+        <div id="impostorsResult" class="hidden"></div>
+        <button id="repeatBtn">Repetir partida</button>
+        <button onclick="location.reload()">Nueva partida</button>
+    </div>
+</div>
+
+<script>
+const words = ["gato","perro","caballo","elefante","león","tigre","oso","lobo","zorro","conejo","vaca","oveja","cerdo","gallina","pato","águila","paloma","pez","tiburón","ballena","playa","montaña","bosque","desierto","río","lago","mar","isla","valle","cueva","avión","tren","barco","coche","bicicleta","moto","camión","metro","helicóptero","tranvía","pizza","hamburguesa","paella","pasta","arroz","sopa","ensalada","tortilla","pan","pastel","balón","raqueta","patines","tabla","casco","guantes","red","portería","canasta","película","libro","cuadro","escultura","fotografía","cartel","revista","periódico","cómic","novela","ordenador","móvil","tablet","teclado","ratón","pantalla","altavoz","cámara","impresora","router","casa","edificio","castillo","palacio","iglesia","escuela","hospital","biblioteca","museo","teatro","ciudad","pueblo","barrio","plaza","calle","avenida","parque","puente","carretera","túnel","profesor","médico","ingeniero","arquitecto","abogado","policía","bombero","científico","artista","cocinero","reloj","anillo","collar","pulsera","pendiente","sombrero","camiseta","pantalón","zapatos","chaqueta","árbol","flor","planta","hoja","raíz","semilla","fruta","césped","jardín","huerto","sol","luna","estrella","planeta","cohete","satélite","telescopio","astronauta","nave","cometa","mesa","silla","sofá","cama","armario","espejo","lámpara","alfombra","puerta","ventana","cuchara","tenedor","cuchillo","plato","vaso","taza","sartén","olla","horno","nevera","maleta","mochila","bolso","cartera","llave","candado","mapa","brújula","linterna","tienda","pelota","dados","cartas","tablero","rompecabezas","fichas","cronómetro","trofeo","medalla","puerto","faro","ancla","vela","remo","chaleco","boya","timón","tractor","granja","establo","espantapájaros","molino","campo","cosecha","sembrado","granero","avellana","manzana","pera","plátano","naranja","limón","fresa","melón","sandía","cereza","zapato","bota","sandalia","zapatilla","cordón","calcetín","suela","tacón","plantilla","hebilla","objetivo","trípode","flash","batería","memoria","carrete","visor","botón"];
+
+let secretWord = words[Math.floor(Math.random() * words.length)];
+let players = [];
+let impostors = [];
+let currentPlayer = 0;
+let numImpostors = 1;
+
+const revealFromPassBtn = document.getElementById("revealFromPassBtn");
+const setup = document.getElementById("setup");
+const namesDiv = document.getElementById("playerNames");
+const passScreen = document.getElementById("passScreen");
+const passText = document.getElementById("passText");
+const revealDiv = document.getElementById("roleReveal");
+const roleDisplay = document.getElementById("roleDisplay");
+const nextBtn = document.getElementById("nextBtn");
+const endScreen = document.getElementById("endScreen");
+const revealImpostorsBtn = document.getElementById("revealImpostorsBtn");
+const impostorsResult = document.getElementById("impostorsResult");
+const numPlayersInput = document.getElementById("numPlayers");
+const numImpostorsInput = document.getElementById("numImpostors");
+const starterPlayerDisplay = document.getElementById("starterPlayerDisplay");
+
+/* FUNCIÓN DE PISTA SUTIL */
+function getHint(word) {
+    // Muestra aproximadamente el 30% de las letras, mínimo 1
+    return word.split('').map((char, index) => {
+        return (index === 0 || index % 3 === 0) ? char.toUpperCase() : ".";
+    }).join(" ");
+}
+
+function chooseWhoStarts() {
+    const randomIndex = Math.floor(Math.random() * players.length);
+    const starterName = players[randomIndex];
+    starterPlayerDisplay.innerHTML = `📢 Empieza diciendo una palabra:<br><strong>${starterName}</strong>`;
+}
+
+document.getElementById("setPlayersBtn").onclick = () => {
+    const n = Number(numPlayersInput.value);
+    numImpostors = Number(numImpostorsInput.value);
+    if (n < 2 || numImpostors < 1 || numImpostors >= n) {
+        alert("Datos incorrectos");
+        return;
+    }
+    setup.classList.add("hidden");
+    createNameInputs(n);
+};
+
+function createNameInputs(n) {
+    namesDiv.innerHTML = "<h2>Nombres</h2>";
+    for (let i = 0; i < n; i++) {
+        namesDiv.innerHTML += `<input id="p${i}" placeholder="Jugador ${i+1}">`;
+    }
+    namesDiv.innerHTML += `<button id="startBtn">Comenzar</button>`;
+    namesDiv.classList.remove("hidden");
+
+    document.getElementById("startBtn").onclick = () => {
+        players = [];
+        for (let i = 0; i < n; i++) {
+            const name = document.getElementById(`p${i}`).value.trim();
+            if (!name) return alert("Faltan nombres");
+            players.push(name);
+        }
+        assignImpostors();
+        namesDiv.classList.add("hidden");
+        showPassScreen();
+    };
+}
+
+function assignImpostors() {
+    impostors = [];
+    while (impostors.length < numImpostors) {
+        const r = Math.floor(Math.random() * players.length);
+        if (!impostors.includes(r)) impostors.push(r);
+    }
+}
+
+function showPassScreen() {
+    passText.textContent = `Pasa el móvil a ${players[currentPlayer]}`;
+    passScreen.classList.remove("hidden");
+    revealDiv.classList.add("hidden");
+}
+
+nextBtn.onclick = () => {
+    currentPlayer++;
+    if (currentPlayer >= players.length) {
+        revealDiv.classList.add("hidden");
+        endScreen.classList.remove("hidden");
+        chooseWhoStarts();
+    } else {
+        showPassScreen();
+    }
+};
+
+function resetGame() {
+    secretWord = words[Math.floor(Math.random() * words.length)];
+    assignImpostors();
+    currentPlayer = 0;
+    endScreen.classList.add("hidden");
+    impostorsResult.classList.add("hidden");
+    impostorsResult.innerHTML = "";
+    revealImpostorsBtn.disabled = false;
+    showPassScreen();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const repeatBtn = document.getElementById("repeatBtn");
+    if (repeatBtn) repeatBtn.onclick = resetGame;
+});
+
+/* REVELAR ROL CON PISTA */
+revealFromPassBtn.onclick = () => {
+    passScreen.classList.add("hidden");
+    revealDiv.classList.remove("hidden");
+    roleDisplay.classList.remove("hidden");
+    nextBtn.classList.remove("hidden");
+
+    if (impostors.includes(currentPlayer)) {
+        roleDisplay.className = "impostor";
+        const hint = getHint(secretWord);
+        roleDisplay.innerHTML = `
+            <h2>IMPOSTOR</h2>
+            <p>Pista de la palabra:</p>
+            <div class="hint-text">${hint}</div>
+            <small style="display:block; margin-top:10px; opacity:0.8;">(Los puntos son letras ocultas)</small>
+        `;
+    } else {
+        roleDisplay.className = "citizen";
+        roleDisplay.innerHTML = `
+            <h2>CIUDADANO</h2>
+            <p>Palabra secreta:</p>
+            <h2>${secretWord.toUpperCase()}</h2>
+        `;
+    }
+};
+
+revealImpostorsBtn.onclick = () => {
+    const names = impostors.map(i => players[i]);
+    const text = names.length === 1
+        ? `🕵️ El impostor era: <strong>${names[0]}</strong>`
+        : `🕵️ Los impostores eran: <strong>${names.join(", ")}</strong>`;
+    impostorsResult.innerHTML = text;
+    impostorsResult.classList.remove("hidden");
+    revealImpostorsBtn.disabled = true;
+};
+</script>
+</body>
+</html>
